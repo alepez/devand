@@ -39,8 +39,9 @@ FROM debian:stretch
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
   apt-get -y install \
+    libpq5 \
     ca-certificates \
     libssl-dev && \
   rm -rf /var/lib/apt/lists/*
-COPY --from=build-x86_64 /home/builder/project/target/release/devand-www /bin/devand-www
+COPY --from=build /home/builder/project/devand-www/target/release/devand-www /bin/devand-www
 ENTRYPOINT ["/bin/devand-www"]
