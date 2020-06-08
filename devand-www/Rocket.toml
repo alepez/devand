@@ -1,5 +1,2 @@
-[global]
-
 [development.databases]
 pg_devand = { url = "postgres://postgres:password@localhost/devand" }
-secret_key = "amlleW9vN2FodCdpN3ZvaCFDYS9zaWVwaG9vM2JvaFAK"

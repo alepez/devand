@@ -43,5 +43,8 @@ RUN apt-get update && \
     ca-certificates \
     libssl-dev && \
   rm -rf /var/lib/apt/lists/*
+RUN mkdir /app
+COPY --from=build /home/builder/project/devand-www/templates /app/templates
 COPY --from=build /home/builder/project/devand-www/target/release/devand-www /bin/devand-www
+ENV ROCKET_TEMPLATE_DIR=/app/templates
 ENTRYPOINT ["/bin/devand-www"]
