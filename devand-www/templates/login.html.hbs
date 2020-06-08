@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevAndDev - Sign In</title>
+  <link rel="stylesheet" href="/public/ui/grids-responsive.css">
+  <link rel="stylesheet" href="/public/ui/pure.css">
+  <link rel="stylesheet" href="/public/ui/app.css">
+</head>
+
+<body>
+  <div class="content">
+    <h1>Sign in to DevAndDev</h1>
+
+
+    {{#if flash}}
+    <div class="alert alert-danger">{{ flash }}</div>
+    {{/if}}
+
+    <form action="/login" method="post" accept-charset="utf-8" class="pure-form pure-form-stacked">
+      <fieldset>
+        <div class="pure-control-group">
+          <label for="username">Username or email address</label>
+          <input type="text" name="username" id="username" value="" placeholder="username" />
+        </div>
+
+        <div class="pure-control-group">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" value="" placeholder="password" />
+        </div>
+
+        <div class="pure-controls">
+          <button type="submit" class="pure-button pure-button-primary">Sign In</button>
+        </div>
+      </fieldset>
+    </form>
+
+    <p>New to DevAndDev? <a href="/join">Create an account</a></p>
+  </div>
+</body>
+
+</html>

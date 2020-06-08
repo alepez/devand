@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevAndDev - Sign Up</title>
+  <link rel="stylesheet" href="/public/ui/grids-responsive.css">
+  <link rel="stylesheet" href="/public/ui/pure.css">
+  <link rel="stylesheet" href="/public/ui/app.css">
+</head>
+
+<body>
+  <div class="content">
+    <h1>Create your account</h1>
+
+
+    {{#if flash}}
+    <div class="alert alert-danger">{{ flash }}</div>
+    {{/if}}
+
+    <form action="/join" method="post" accept-charset="utf-8" class="pure-form pure-form-stacked">
+      <fieldset>
+        <div class="pure-control-group">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" value="{{ username }}" placeholder="Username" />
+          <span class="pure-form-message-inline">Choose with care, you can't change it later. At least 3 characters, only lowercase and digits.</span>
+        </div>
+
+        <div class="pure-control-group">
+          <label for="email">Email:</label>
+          <input type="text" name="email" id="email" value="{{ email }}" placeholder="Email" />
+          <span class="pure-form-message-inline">Notifications will be sent here</span>
+        </div>
+
+        <div class="pure-control-group">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" value="{{ password }}" placeholder="Password" />
+          <span class="pure-form-message-inline">Make sure it's at least 15 characters OR at least 8 characters including a number and a lowercase letter.</span>
+        </div>
+
+        <div class="pure-controls">
+          <button type="submit" class="pure-button pure-button-primary">Create account</button>
+          <span class="pure-form-message">
+            By creating an account, you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Statement</a>.
+          </span>
+          <span class="pure-form-message">
+            We’ll occasionally send you account related emails.
+          </span>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</body>
+
+</html>

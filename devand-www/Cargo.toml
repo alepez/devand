@@ -1,0 +1,29 @@
+[package]
+name = "devand-www"
+version = "0.1.0"
+authors = ["Alessandro Pezzato <alessandro@pezzato.net>"]
+edition = "2018"
+
+[dependencies]
+devand-core = { path = "../devand-core" }
+devand-db = { path = "../devand-db" }
+serde = "1"
+serde_json = "1"
+validator = "0.10"
+validator_derive = "0.10"
+
+[dependencies.rocket]
+version = "0.4"
+features = [
+  "private-cookies"
+]
+
+[dependencies.rocket_contrib]
+version = "0.4"
+default_features = false
+features = [
+  "handlebars_templates",
+  "serve",
+  "json",
+  "diesel_postgres_pool"
+]
