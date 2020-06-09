@@ -10,13 +10,13 @@
       <fieldset>
         <div class="pure-control-group">
           <label for="username">Username:</label>
-          <input type="text" name="username" id="username" value="{{ username }}" placeholder="Username" />
+          <input type="text" name="username" id="username" value="{{ username }}" placeholder="Username" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
           <span class="pure-form-message-inline">Choose with care, you can't change it later. At least 3 characters, only lowercase and digits.</span>
         </div>
 
         <div class="pure-control-group">
           <label for="email">Email:</label>
-          <input type="text" name="email" id="email" value="{{ email }}" placeholder="Email" />
+          <input type="email" inputmode="email" name="email" id="email" value="{{ email }}" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
           <span class="pure-form-message-inline">Notifications will be sent here</span>
         </div>
 
