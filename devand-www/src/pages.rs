@@ -97,16 +97,14 @@ fn join_page(flash: Option<FlashMessage>, join_data: Option<auth::JoinData>) -> 
 
 // When user is authenticated, home page shows user's dashboard
 #[get("/")]
-fn dashboard(auth_data: AuthData) -> Template {
+fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
-        username: String,
     }
 
     let context = Context {
         title: "Your dashboard",
-        username: auth_data.username,
     };
 
     Template::render("dashboard", &context)

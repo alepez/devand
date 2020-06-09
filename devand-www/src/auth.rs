@@ -37,13 +37,12 @@ impl Into<db::auth::Credentials> for Credentials {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthData {
-    pub username: String,
     pub user_id: i32,
 }
 
 impl AuthData {
     pub fn matches_user(&self, user: &devand_core::User) -> bool {
-        user.username == self.username && user.id == self.user_id
+        user.id == self.user_id
     }
 }
 
@@ -82,8 +81,8 @@ pub(crate) fn login(
     let credentials = credentials.normalize().into();
 
     db::auth::login(credentials, &conn.0)
-        .map(|(user_id, username)| {
-            let auth_data = AuthData { user_id, username };
+        .map(|user_id| {
+            let auth_data = AuthData { user_id };
             cookies.add_private(auth_data.into());
         })
         .map_err(|_| ())

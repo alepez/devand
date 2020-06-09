@@ -78,7 +78,7 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<(i32, String), Error> {
+pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<i32, Error> {
     let Credentials { username, password } = credentials;
 
     let auth: models::Auth = schema::login::table
@@ -90,7 +90,7 @@ pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<(i32, Stri
         })?;
 
     if verify_password(&auth.enc_password, &password) {
-        Ok((auth.user_id, auth.username))
+        Ok(auth.user_id)
     } else {
         Err(Error::Unknown)
     }
