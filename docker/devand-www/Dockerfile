@@ -15,7 +15,7 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.lis
 RUN apt-get update
 RUN apt-get install -y \
       yarn
-RUN yarn global add wasm-pack
+RUN yarn global add wasm-pack --prefix /usr/local
 
 RUN useradd -m builder
 
