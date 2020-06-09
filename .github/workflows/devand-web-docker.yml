@@ -1,17 +1,17 @@
-name: "Build devand-web docker image for GitHub registry"
+name: "devand-web docker image"
 
 on: [push]
 
 jobs:
 
-  build-gh:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - uses: whoan/docker-build-with-cache-action@master
       with:
         username: alepez
-        password: "${{ secrets.GITHUB_TOKEN }}"  # you don't need to manually set this secret. GitHub does it on your behalf
+        password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
         image_name: devand-web
         dockerfile: docker/devand-www/Dockerfile
