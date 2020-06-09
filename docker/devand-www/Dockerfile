@@ -15,16 +15,16 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.lis
 RUN apt-get update
 RUN apt-get install -y \
       yarn
-RUN yarn global add wasm-pack --prefix /usr/local
 
 RUN useradd -m builder
 
 RUN mkdir /home/builder/project
 WORKDIR /home/builder/project
 
-ADD --chown=builder ./ ./
-
 USER builder
+RUN yarn global add wasm-pack
+
+ADD --chown=builder ./ ./
 
 WORKDIR /home/builder/project/devand-ui
 RUN bash setup.sh
