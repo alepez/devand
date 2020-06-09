@@ -15,6 +15,7 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.lis
 RUN apt-get update
 RUN apt-get install -y \
       yarn
+RUN yarn global add wasm-pack
 
 RUN useradd -m builder
 
@@ -28,7 +29,6 @@ USER builder
 WORKDIR /home/builder/project/devand-ui
 RUN bash setup.sh
 RUN yarn install
-RUN yarn global add wasm-pack
 RUN yarn run build
 
 WORKDIR /home/builder/project/devand-www
@@ -44,7 +44,9 @@ RUN apt-get update && \
     libssl-dev && \
   rm -rf /var/lib/apt/lists/*
 RUN mkdir /app
+COPY --from=build /home/builder/project/devand-www/static /app/static
 COPY --from=build /home/builder/project/devand-www/templates /app/templates
 COPY --from=build /home/builder/project/devand-www/target/release/devand-www /bin/devand-www
 ENV ROCKET_TEMPLATE_DIR=/app/templates
+ENV ROCKET_STATIC_DIR=/app/static
 ENTRYPOINT ["/bin/devand-www"]
