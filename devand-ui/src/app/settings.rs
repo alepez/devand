@@ -119,7 +119,7 @@ impl Component for SettingsPage {
                     self.view_loading()
                 }
                 }
-            </>
+            </div>
         }
     }
 }
