@@ -1,20 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+{{#*inline "body"}}
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DevAndDev - Sign In</title>
-  <link rel="stylesheet" href="/public/ui/grids-responsive.css">
-  <link rel="stylesheet" href="/public/ui/pure.css">
-  <link rel="stylesheet" href="/public/ui/app.css">
-</head>
-
-<body>
-  <div class="content">
-    <h1>Sign in to DevAndDev</h1>
-
+    <h1>{{ title }}</h1>
 
     {{#if flash}}
     <div class="alert alert-danger">{{ flash }}</div>
@@ -40,6 +26,6 @@
 
     <p>New to DevAndDev? <a href="/join">Create an account</a></p>
   </div>
-</body>
 
-</html>
+{{/inline}}
+{{>layout}}

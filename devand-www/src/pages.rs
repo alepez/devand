@@ -1,12 +1,11 @@
 use crate::auth::{self, AuthData};
-use crate::{PgDevandConn, StaticDir};
+use crate::PgDevandConn;
 use rocket::http::Cookies;
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{Flash, NamedFile, Redirect};
+use rocket::response::{Flash, Redirect};
 use rocket::Route;
-use rocket::State;
 use rocket_contrib::templates::Template;
-use std::collections::HashMap;
+use serde::Serialize;
 
 // Handle authentication request
 #[post("/login", data = "<credentials>")]
@@ -34,10 +33,16 @@ fn login_authenticated(_auth_data: auth::AuthData) -> Redirect {
 // When user is not authenticated, /login displays a form
 #[get("/login", rank = 2)]
 fn login_page(flash: Option<FlashMessage>) -> Template {
-    let mut context = HashMap::new();
-    if let Some(ref msg) = flash {
-        context.insert("flash", msg.msg());
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        flash: Option<String>,
     }
+
+    let context = Context {
+        title: "Sign in to DevAndDev",
+        flash: flash.map(|x| x.msg().to_string()),
+    };
 
     Template::render("login", &context)
 }
@@ -70,32 +75,53 @@ fn join_authenticated(_auth_data: AuthData) -> Redirect {
 // When user is not authenticated, /join displays a form
 #[get("/join", rank = 2)]
 fn join_page(flash: Option<FlashMessage>, join_data: Option<auth::JoinData>) -> Template {
-    let mut context = HashMap::new();
-
-    if let Some(ref msg) = flash {
-        context.insert("flash", msg.msg());
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        flash: Option<String>,
+        username: Option<String>,
+        email: Option<String>,
+        password: Option<String>,
     }
 
-    if let Some(ref join_data) = join_data {
-        context.insert("username", &join_data.username);
-        context.insert("email", &join_data.email);
-        context.insert("password", &join_data.password);
-    }
+    let context = Context {
+        title: "Create your DevAndDev account",
+        flash: flash.map(|x| x.msg().to_string()),
+        username: join_data.as_ref().map(|x| x.username.to_string()),
+        email: join_data.as_ref().map(|x| x.email.to_string()),
+        password: join_data.as_ref().map(|x| x.password.to_string()),
+    };
 
     Template::render("join", &context)
 }
 
-// When user is authenticated, home page shows user's settings
+// When user is authenticated, home page shows user's dashboard
 #[get("/")]
-fn settings(auth_data: AuthData) -> Template {
-    Template::render("settings", &auth_data)
+fn dashboard(auth_data: AuthData) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        username: String,
+    }
+
+    let context = Context {
+        title: "Your dashboard",
+        username: auth_data.username,
+    };
+
+    Template::render("dashboard", &context)
 }
 
 // When user is not authenticated, home page just serve a static file
 #[get("/", rank = 2)]
-fn index(static_dir: State<StaticDir>) -> NamedFile {
-    let path = std::path::Path::new(&static_dir.0).join("index.html");
-    NamedFile::open(&path).unwrap()
+fn index() -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+    }
+
+    let context = Context { title: "DevAndDev" };
+    Template::render("index", &context)
 }
 
 pub fn routes() -> Vec<Route> {
@@ -108,6 +134,6 @@ pub fn routes() -> Vec<Route> {
         login_authenticated,
         login_page,
         logout,
-        settings,
+        dashboard,
     ]
 }

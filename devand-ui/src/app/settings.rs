@@ -111,9 +111,7 @@ impl Component for SettingsPage {
 
     fn view(&self) -> Html {
         html! {
-            <>
-                <h1>{ "Dev & Dev - Settings" }</h1>
-                <p><a class="pure-button" href="/logout">{ "Sign Out" }</a></p>
+            <div class="dashboard">
                 {
                 if let Some(user) = &self.state.user {
                     self.view_settings_panel(user)
