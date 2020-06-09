@@ -8,6 +8,7 @@ mod auth;
 mod pages;
 
 use rocket::fairing::AdHoc;
+use rocket::Rocket;
 use rocket_contrib::database;
 use rocket_contrib::databases::diesel;
 use rocket_contrib::serve::StaticFiles;
@@ -18,7 +19,7 @@ struct PgDevandConn(diesel::PgConnection);
 
 struct StaticDir(String);
 
-fn static_files(rocket: rocket::Rocket) -> Result<rocket::Rocket, rocket::Rocket> {
+fn static_files(rocket: Rocket) -> Result<Rocket, Rocket> {
     const DEFAULT_DIR: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
 
     let dir = rocket
@@ -34,12 +35,21 @@ fn static_files(rocket: rocket::Rocket) -> Result<rocket::Rocket, rocket::Rocket
     Ok(rocket)
 }
 
+fn run_db_migrations(rocket: Rocket) -> Result<Rocket, Rocket> {
+    let conn = PgDevandConn::get_one(&rocket).expect("database connection");
+    match devand_db::run_migrations(&*conn) {
+        Ok(()) => Ok(rocket),
+        Err(_) => Err(rocket),
+    }
+}
+
 fn main() {
     rocket::ignite()
         .attach(Template::fairing())
         .attach(PgDevandConn::fairing())
+        .attach(AdHoc::on_attach("Database Migrations", run_db_migrations))
+        .attach(AdHoc::on_attach("Static files", static_files))
         .mount("/", pages::routes())
         .mount("/api", api::routes())
-        .attach(AdHoc::on_attach("static_files", static_files))
         .launch();
 }

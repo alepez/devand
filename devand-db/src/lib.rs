@@ -11,6 +11,10 @@ use diesel::prelude::*;
 use dotenv::dotenv;
 use std::convert::TryInto;
 use std::env;
+#[macro_use] extern crate diesel_migrations;
+
+embed_migrations!();
+
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -60,6 +64,10 @@ pub fn is_email_available(email: &str, conn: &PgConnection) -> bool {
         .expect("Checking for email availability");
 
     count == 0
+}
+
+pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError>{
+    embedded_migrations::run(&*conn)
 }
 
 #[cfg(test)]
