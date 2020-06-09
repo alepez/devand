@@ -1,10 +1,10 @@
-use super::STATIC_PATH;
 use crate::auth::{self, AuthData};
-use crate::PgDevandConn;
+use crate::{PgDevandConn, StaticDir};
 use rocket::http::Cookies;
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Route;
+use rocket::State;
 use rocket_contrib::templates::Template;
 use std::collections::HashMap;
 
@@ -93,8 +93,8 @@ fn settings(auth_data: AuthData) -> Template {
 
 // When user is not authenticated, home page just serve a static file
 #[get("/", rank = 2)]
-fn index() -> NamedFile {
-    let path = std::path::Path::new(STATIC_PATH).join("index.html");
+fn index(static_dir: State<StaticDir>) -> NamedFile {
+    let path = std::path::Path::new(&static_dir.0).join("index.html");
     NamedFile::open(&path).unwrap()
 }
 
