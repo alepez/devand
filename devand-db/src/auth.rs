@@ -48,6 +48,7 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
         username,
         email,
         settings,
+        visible_name: None,
     };
 
     let user: models::User = diesel::insert_into(users::table)

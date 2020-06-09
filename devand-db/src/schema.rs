@@ -11,6 +11,7 @@ table! {
         username -> Varchar,
         email -> Varchar,
         settings -> Jsonb,
+        visible_name -> Nullable<Varchar>,
     }
 }
 
