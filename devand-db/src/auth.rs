@@ -1,4 +1,4 @@
-use crate::{models, schema, Error};
+use crate::{models, schema, schema_view, Error};
 use argon2::{self, Config};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -81,8 +81,8 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
 pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<i32, Error> {
     let Credentials { username, password } = credentials;
 
-    let auth: models::Auth = schema::login::table
-        .filter(schema::login::dsl::username.like(username))
+    let auth: models::Auth = schema_view::login::table
+        .filter(schema_view::login::dsl::username.like(username))
         .first(conn)
         .map_err(|err| {
             dbg!(err);

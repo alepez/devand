@@ -18,11 +18,3 @@ allow_tables_to_appear_in_same_query!(
     auth,
     users,
 );
-
-table! {
-    login (user_id) {
-        user_id -> Int4,
-        username -> Varchar,
-        enc_password -> Varchar,
-    }
-}

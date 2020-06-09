@@ -5,6 +5,7 @@ extern crate dotenv;
 pub mod auth;
 mod models;
 mod schema;
+mod schema_view;
 
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
