@@ -1,0 +1,17 @@
+name: git-hub
+
+on: [push]
+
+jobs:
+
+  build-gh:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: whoan/docker-build-with-cache-action@master
+      with:
+        username: alepez
+        password: "${{ secrets.GITHUB_TOKEN }}"  # you don't need to manually set this secret. GitHub does it on your behalf
+        registry: docker.pkg.github.com
+        image_name: devand-web
+        dockerfile: docker/devand-www/Dockerfile
