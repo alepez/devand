@@ -4,9 +4,7 @@ use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 use super::FetchCallback;
 
-
-// TODO url from settings
-const API_URL: &'static str = "http://localhost:8000/api/settings";
+const API_URL: &'static str = "/api/settings";
 
 pub struct UserService {
     service: FetchService,
