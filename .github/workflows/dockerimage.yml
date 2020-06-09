@@ -1,4 +1,4 @@
-name: git-hub
+name: "Build devand-web docker image for GitHub registry"
 
 on: [push]
 

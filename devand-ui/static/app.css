@@ -1,0 +1,54 @@
+.content {
+    margin: 0 auto;
+    padding: 0 2em;
+    max-width: 800px;
+    margin-bottom: 50px;
+    line-height: 1.6em;
+}
+
+.alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.language-control-group {
+    margin-bottom: 1rem;
+}
+
+.language-control-group .pure-button {
+    margin-right: 0.5rem;
+}
+
+.language-tag {
+}
+
+.language-level-tag,
+.language-priority-tag {
+  margin-left: 0.5em;
+}
+
+.language-level-tag-expert {
+  color: #e5c100;
+}
+
+.language-level-tag-proficient {
+  color: #999999;
+}
+
+.language-level-tag-novice {
+  color: #cd7f32;
+}
+
+.schedule-table-wrapper {
+  overflow-x:auto;
+  width: 800px;
+}
