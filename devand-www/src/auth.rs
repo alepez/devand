@@ -17,6 +17,24 @@ pub struct Credentials {
     password: String,
 }
 
+impl Credentials {
+    fn normalize(self) -> Self {
+        Self {
+            username: trim(self.username).to_lowercase(),
+            password: self.password,
+        }
+    }
+}
+
+impl Into<db::auth::Credentials> for Credentials {
+    fn into(self) -> db::auth::Credentials {
+        db::auth::Credentials {
+            username: self.username,
+            password: self.password,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthData {
     pub username: String,
@@ -25,10 +43,6 @@ pub struct AuthData {
 
 impl AuthData {
     pub fn matches_user(&self, user: &devand_core::User) -> bool {
-        dbg!(&user.username);
-        dbg!(&self.username);
-        dbg!(&user.id);
-        dbg!(&self.user_id);
         user.username == self.username && user.id == self.user_id
     }
 }
@@ -65,10 +79,7 @@ pub(crate) fn login(
     credentials: Credentials,
     conn: &PgDevandConn,
 ) -> Result<(), ()> {
-    let credentials = db::auth::Credentials {
-        username: credentials.username,
-        password: credentials.password,
-    };
+    let credentials = credentials.normalize().into();
 
     db::auth::login(credentials, &conn.0)
         .map(|(user_id, username)| {
@@ -116,6 +127,16 @@ impl<'a, 'r> FromRequest<'a, 'r> for JoinData {
             .get_private(JOIN_COOKIE_KEY)
             .and_then(|cookie| JoinData::try_from(cookie).ok())
             .or_forward(())
+    }
+}
+
+impl JoinData {
+    fn normalize(self) -> Self {
+        Self {
+            username: trim(self.username).to_lowercase(),
+            email: trim(self.email).to_lowercase(),
+            password: self.password,
+        }
     }
 }
 
@@ -185,6 +206,8 @@ pub(crate) fn join(
     join_data: JoinData,
     conn: &PgDevandConn,
 ) -> Result<(), JoinError> {
+    let join_data = join_data.normalize();
+
     let valid = join_data.validate();
 
     // Remove old cookie
@@ -248,4 +271,11 @@ impl ToString for JoinError {
             JoinError::ValidationError(msg) => msg.into(),
         }
     }
+}
+
+fn trim(s: String) -> String {
+    // We help the user, trimming spaces and converting to lowercase
+    let s = s.to_lowercase();
+    // Note: this allocates a new string, in place trimming does not exist
+    s.trim().to_string()
 }
