@@ -12,10 +12,10 @@ use diesel::prelude::*;
 use dotenv::dotenv;
 use std::convert::TryInto;
 use std::env;
-#[macro_use] extern crate diesel_migrations;
+#[macro_use]
+extern crate diesel_migrations;
 
 embed_migrations!();
-
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -39,9 +39,21 @@ pub fn load_user_by_id(id: i32, conn: &PgConnection) -> Option<devand_core::User
 }
 
 pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_core::User> {
-    let settings = serde_json::to_value(user.settings).unwrap();
+    let devand_core::User {
+        settings,
+        visible_name,
+        email,
+        ..
+    } = user;
+
+    let settings = serde_json::to_value(settings).unwrap();
+
     diesel::update(schema::users::table.filter(schema::users::dsl::id.eq(user.id)))
-        .set(schema::users::dsl::settings.eq(settings))
+        .set((
+            schema::users::dsl::settings.eq(settings),
+            schema::users::dsl::visible_name.eq(visible_name),
+            schema::users::dsl::email.eq(email),
+        ))
         .get_result(conn)
         .ok()
         .and_then(|x: models::User| x.try_into().ok())
@@ -67,7 +79,7 @@ pub fn is_email_available(email: &str, conn: &PgConnection) -> bool {
     count == 0
 }
 
-pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError>{
+pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
     embedded_migrations::run(&*conn)
 }
 
