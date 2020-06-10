@@ -7,6 +7,7 @@ use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
+const DELAY_MS: u32 = 5_000;
 const API_URL: &'static str = "/api/settings";
 
 pub struct UserService {
@@ -77,7 +78,7 @@ impl UserService {
         let put_task = self.put_task.clone();
         let service = self.service.clone();
 
-        self.put_debouncer = Some(Timeout::new(1_000, move || {
+        self.put_debouncer = Some(Timeout::new(DELAY_MS, move || {
             let mut service = service.lock().unwrap();
             let mut put_task = put_task.lock().unwrap();
             *put_task.deref_mut() = put(&mut service, callback, user).ok();
