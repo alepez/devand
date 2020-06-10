@@ -85,10 +85,7 @@ pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<i32, Error
     let auth: models::Auth = schema_view::login::table
         .filter(schema_view::login::dsl::username.like(username))
         .first(conn)
-        .map_err(|err| {
-            dbg!(err);
-            Error::Unknown
-        })?;
+        .map_err(|_| Error::Unknown)?;
 
     if verify_password(&auth.enc_password, &password) {
         Ok(auth.user_id)

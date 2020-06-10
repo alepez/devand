@@ -6,17 +6,20 @@ use rocket::response::{Content, Flash, Redirect};
 use rocket::Route;
 use rocket_contrib::templates::Template;
 use serde::Serialize;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 // Handle authentication request
 #[post("/login", data = "<credentials>")]
 fn login(
     mut cookies: Cookies,
     credentials: Form<auth::Credentials>,
+    remote_addr: SocketAddr,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::login(&mut cookies, credentials.0, &conn)
         .map(|_| Redirect::to(uri!(index)))
         .map_err(|_| {
+            log_fail(remote_addr.ip());
             Flash::error(
                 Redirect::to(uri!(login_page)),
                 "Incorrect username or password",
@@ -62,11 +65,15 @@ fn join(
     join_data: Form<auth::JoinData>,
     expected_captcha: ExpectedCaptcha,
     mut cookies: Cookies,
+    remote_addr: SocketAddr,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::join(&mut cookies, join_data.0, expected_captcha, &conn)
         .map(|_| Redirect::to(uri!(index)))
-        .map_err(|err| Flash::error(Redirect::to(uri!(join_page)), err.to_string()))
+        .map_err(|err| {
+            log_fail(remote_addr.ip());
+            Flash::error(Redirect::to(uri!(join_page)), err.to_string())
+        })
 }
 
 // When user is authenticated, /join just redirect to index
@@ -146,4 +153,32 @@ pub fn routes() -> Vec<Route> {
         logout,
         dashboard,
     ]
+}
+
+fn format_fail(ip_addr: std::net::IpAddr) -> String {
+    format!("Fail: IpAddr({})", ip_addr)
+}
+
+// Used by fail2ban
+//
+// Filter:
+//
+//     [Definition]
+//     failregex = ^{"log":"Fail: IpAddr\(<HOST>\)
+//     ignoreregex =
+//
+fn log_fail(ip_addr: std::net::IpAddr) {
+    println!("{}", format_fail(ip_addr));
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::net::IpAddr;
+    use std::net::Ipv4Addr;
+
+    #[test]
+    fn log_fail_has_expected_format() {
+        assert!(format_fail(IpAddr::V4(Ipv4Addr::new(1, 2, 3, 4))) == "Fail: IpAddr(1.2.3.4)");
+    }
 }
