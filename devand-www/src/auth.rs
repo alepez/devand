@@ -1,5 +1,6 @@
 mod captcha;
 
+use self::captcha::CaptchaFile;
 use crate::PgDevandConn;
 use core::convert::TryFrom;
 use devand_db as db;
@@ -12,6 +13,7 @@ use validator_derive::Validate;
 
 const LOGIN_COOKIE_KEY: &'static str = "login";
 const JOIN_COOKIE_KEY: &'static str = "join";
+const JOIN_CAPTCHA_COOKIE_KEY: &'static str = "join_captcha";
 
 #[derive(FromForm)]
 pub struct Credentials {
@@ -236,6 +238,18 @@ pub(crate) fn join(
         .map_err(|_| JoinError::UnknownError)
 }
 
+pub(crate) fn captcha(cookies: &mut Cookies) -> Result<CaptchaFile, ()> {
+    let captcha = CaptchaFile::new();
+
+    let captcha_value = Captcha {
+        value: captcha.value(),
+    };
+
+    cookies.add_private(captcha_value.into());
+
+    Ok(captcha)
+}
+
 #[derive(Debug)]
 pub enum JoinError {
     UnknownError,
@@ -279,4 +293,36 @@ fn trim(s: String) -> String {
     let s = s.to_lowercase();
     // Note: this allocates a new string, in place trimming does not exist
     s.trim().to_string()
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Captcha {
+    pub value: String,
+}
+
+impl TryFrom<rocket::http::Cookie<'_>> for Captcha {
+    type Error = ();
+    fn try_from(cookie: rocket::http::Cookie<'_>) -> Result<Self, Self::Error> {
+        let json = cookie.value();
+        serde_json::from_str(json).or(Err(()))
+    }
+}
+
+impl<'a> Into<rocket::http::Cookie<'a>> for Captcha {
+    fn into(self) -> rocket::http::Cookie<'a> {
+        let json = serde_json::to_string(&self).unwrap();
+        Cookie::new(JOIN_CAPTCHA_COOKIE_KEY, json)
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for Captcha {
+    type Error = !;
+
+    fn from_request(request: &'a Request<'r>) -> Outcome<Captcha, !> {
+        request
+            .cookies()
+            .get_private(JOIN_CAPTCHA_COOKIE_KEY)
+            .and_then(|cookie| Captcha::try_from(cookie).ok())
+            .or_forward(())
+    }
 }

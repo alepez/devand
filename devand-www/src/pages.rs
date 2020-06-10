@@ -1,8 +1,8 @@
 use crate::auth::{self, AuthData};
 use crate::PgDevandConn;
-use rocket::http::Cookies;
+use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{Flash, Redirect};
+use rocket::response::{Flash, Content, Redirect};
 use rocket::Route;
 use rocket_contrib::templates::Template;
 use serde::Serialize;
@@ -95,6 +95,14 @@ fn join_page(flash: Option<FlashMessage>, join_data: Option<auth::JoinData>) -> 
     Template::render("join", &context)
 }
 
+// When user is not authenticated, /join displays a form
+#[get("/join/captcha.png")]
+fn join_captcha(mut cookies: Cookies) -> Option<Content<Vec<u8>>> {
+    let captcha = auth::captcha(&mut cookies).unwrap();
+    let data = captcha.into_data();
+    Some(Content(ContentType::PNG, data))
+}
+
 // When user is authenticated, home page shows user's dashboard
 #[get("/")]
 fn dashboard(_auth_data: AuthData) -> Template {
@@ -128,6 +136,7 @@ pub fn routes() -> Vec<Route> {
         join,
         join_authenticated,
         join_page,
+        join_captcha,
         login,
         login_authenticated,
         login_page,

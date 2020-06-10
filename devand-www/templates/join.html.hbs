@@ -26,6 +26,13 @@
           <span class="pure-form-message-inline">Make sure it's at least 15 characters OR at least 8 characters including a number and a lowercase letter.</span>
         </div>
 
+        <div class="pure-control-group">
+          <label for="captcha">Type the word in the image:</label>
+          <input type="captcha" name="captcha" id="captcha" value="{{ captcha }}" placeholder="" />
+          <div><img src="/join/captcha.png" /></div>
+          <span class="pure-form-message-inline">As a protection against automated spam, you need to type in the word that appear in this image to register an account.</span>
+        </div>
+
         <div class="pure-controls">
           <button type="submit" class="pure-button pure-button-primary">Create account</button>
           <span class="pure-form-message">

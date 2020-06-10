@@ -2,36 +2,42 @@ use captcha::{CaptchaName, Difficulty};
 use std::path::PathBuf;
 use uuid::Uuid;
 
-pub struct CaptchFile {
+pub struct CaptchaFile {
     path: Box<PathBuf>,
     value: String,
 }
 
-impl CaptchFile {
+impl CaptchaFile {
     pub fn value(&self) -> String {
         self.value.clone()
     }
+
+    pub fn into_data(self) -> Vec<u8> {
+        std::fs::read(self.path.as_ref()).unwrap()
+    }
 }
 
-impl Drop for CaptchFile {
+impl Drop for CaptchaFile {
     fn drop(&mut self) {
         std::fs::remove_file(self.path.as_ref()).unwrap();
     }
 }
 
-fn generate() -> CaptchFile {
-    let uuid = Uuid::new_v4();
-    let filename = uuid.to_string() + ".png";
-    let path = PathBuf::from("/tmp").join(filename);
-    let path = Box::new(path);
+impl CaptchaFile {
+    pub fn new() -> Self {
+        let uuid = Uuid::new_v4();
+        let filename = uuid.to_string() + ".png";
+        let path = PathBuf::from("/tmp").join(filename);
+        let path = Box::new(path);
 
-    let c = captcha::by_name(Difficulty::Medium, CaptchaName::Mila);
+        let c = captcha::by_name(Difficulty::Medium, CaptchaName::Mila);
 
-    c.save(&path).expect("save failed");
+        c.save(&path).expect("save failed");
 
-    let value = c.chars_as_string();
+        let value = c.chars_as_string();
 
-    CaptchFile { path, value }
+        CaptchaFile { path, value }
+    }
 }
 
 #[cfg(test)]
@@ -43,7 +49,7 @@ mod test {
         #[allow(unused_assignments)]
         let mut path = Box::new(PathBuf::default());
         {
-            let x = generate();
+            let x = CaptchaFile::new();
             path = x.path.clone();
             assert!(path.exists());
         }
@@ -52,7 +58,7 @@ mod test {
 
     #[test]
     fn captcha_value() {
-        let x = generate();
+        let x = CaptchaFile::new();
         let value = x.value();
         dbg!(value);
     }
