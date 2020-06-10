@@ -11,6 +11,7 @@ use schedule::ScheduleTable;
 #[derive(Serialize, Deserialize, Default)]
 pub struct State {
     user: Option<User>,
+    pending_save: bool,
 }
 
 pub enum Msg {
@@ -90,6 +91,7 @@ impl Component for SettingsPage {
             }
             Msg::UserFetchOk(user) => {
                 self.state.user = Some(user);
+                self.state.pending_save = false;
             }
             Msg::UserFetchErr => {
                 log::error!("User fetch error");
