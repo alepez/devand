@@ -47,19 +47,17 @@ impl Component for App {
 
     fn view(&self) -> VNode {
         html! {
-            <div class="content">
-                <Router<AppRoute>
-                    render = Router::render(|switch: AppRoute| {
-                        match switch {
-                            AppRoute::Settings=> html!{ <SettingsPage/> },
-                            AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
-                        }
-                    })
-                    redirect = Router::redirect(|route: Route| {
-                        AppRoute::NotFound(Permissive(Some(route.route)))
-                    })
-                />
-            </div>
+            <Router<AppRoute>
+                render = Router::render(|switch: AppRoute| {
+                    match switch {
+                        AppRoute::Settings=> html!{ <SettingsPage/> },
+                        AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
+                    }
+                })
+                redirect = Router::redirect(|route: Route| {
+                    AppRoute::NotFound(Permissive(Some(route.route)))
+                })
+            />
         }
     }
 }
