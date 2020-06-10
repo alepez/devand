@@ -1,3 +1,5 @@
+mod captcha;
+
 use crate::PgDevandConn;
 use core::convert::TryFrom;
 use devand_db as db;
