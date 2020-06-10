@@ -122,7 +122,6 @@ extern "C" {
 
 fn make_on_unload_callback(put_handler: Arc<Mutex<PutHandler>>) -> Closure<dyn FnMut() -> ()> {
     let window = yew::utils::window();
-    alert("Ciao");
 
     let on_unload = Box::new(move || {
         log::debug!("Leaving...");
@@ -133,18 +132,16 @@ fn make_on_unload_callback(put_handler: Arc<Mutex<PutHandler>>) -> Closure<dyn F
             // }
 
             if put_handler.debouncer.is_some() {
-                log::debug!("There are unsaved settings");
+                log::error!("There are unsaved settings");
                 // TODO This alert does not diplay
                 alert("There are unsaved settings");
             }
         }
     }) as Box<dyn FnMut()>;
 
-    let on_unload = wasm_bindgen::prelude::Closure::wrap(on_unload);
+    let on_unload = Closure::wrap(on_unload);
 
-    window
-        .add_event_listener_with_callback("beforeunload", on_unload.as_ref().unchecked_ref())
-        .unwrap();
+    window.set_onbeforeunload(Some(&on_unload.as_ref().unchecked_ref()));
 
     on_unload
 }
