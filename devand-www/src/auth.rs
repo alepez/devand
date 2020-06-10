@@ -24,7 +24,7 @@ pub struct Credentials {
 impl Credentials {
     fn normalize(self) -> Self {
         Self {
-            username: trim(self.username).to_lowercase(),
+            username: trimlow(self.username),
             password: self.password,
         }
     }
@@ -104,6 +104,8 @@ pub struct JoinData {
     pub email: String,
     #[validate(custom = "validate_password")]
     pub password: String,
+    #[validate(length(equal = 5))]
+    pub captcha: String,
 }
 
 impl TryFrom<rocket::http::Cookie<'_>> for JoinData {
@@ -136,9 +138,10 @@ impl<'a, 'r> FromRequest<'a, 'r> for JoinData {
 impl JoinData {
     fn normalize(self) -> Self {
         Self {
-            username: trim(self.username).to_lowercase(),
-            email: trim(self.email).to_lowercase(),
+            username: trimlow(self.username),
+            email: trimlow(self.email),
             password: self.password,
+            captcha: trimlow(self.captcha),
         }
     }
 }
@@ -183,6 +186,19 @@ fn is_unique_username(s: &str, conn: &PgDevandConn) -> Result<(), validator::Val
     }
 }
 
+fn validate_captcha(input: String, expected: String) -> Result<(), validator::ValidationError> {
+    let input = trimlow(input);
+    let expected = trimlow(expected);
+
+    if input == expected {
+        Ok(())
+    } else {
+        let mut err = ValidationError::new("captcha");
+        err.message = Some("Wrong captcha".into());
+        Err(err)
+    }
+}
+
 fn check_for_uniqueness(
     join_data: &JoinData,
     conn: &PgDevandConn,
@@ -207,16 +223,34 @@ fn check_for_uniqueness(
 pub(crate) fn join(
     cookies: &mut Cookies,
     join_data: JoinData,
+    expected_captcha: ExpectedCaptcha,
     conn: &PgDevandConn,
 ) -> Result<(), JoinError> {
-    let join_data = join_data.normalize();
+    let mut join_data = join_data.normalize();
 
     let valid = join_data.validate();
+
+    let captcha_input = join_data.captcha;
+    join_data.captcha = String::new();
 
     // Remove old cookie
     cookies.remove_private(Cookie::named(JOIN_COOKIE_KEY));
 
-    let valid = valid.and_then(|_| check_for_uniqueness(&join_data, conn));
+    let valid = valid
+        .and_then(|_| check_for_uniqueness(&join_data, conn))
+        .and_then(|_| {
+            let mut errors = validator::ValidationErrors::new();
+
+            if let Err(e) = validate_captcha(captcha_input, expected_captcha.value) {
+                errors.add("captcha", e);
+            }
+
+            if errors.is_empty() {
+                Ok(())
+            } else {
+                Err(errors)
+            }
+        });
 
     // Add new join data if there is an error
     if valid.is_err() {
@@ -241,7 +275,7 @@ pub(crate) fn join(
 pub(crate) fn captcha(cookies: &mut Cookies) -> Result<CaptchaFile, ()> {
     let captcha = CaptchaFile::new();
 
-    let captcha_value = Captcha {
+    let captcha_value = ExpectedCaptcha {
         value: captcha.value(),
     };
 
@@ -288,7 +322,7 @@ impl ToString for JoinError {
     }
 }
 
-fn trim(s: String) -> String {
+fn trimlow(s: String) -> String {
     // We help the user, trimming spaces and converting to lowercase
     let s = s.to_lowercase();
     // Note: this allocates a new string, in place trimming does not exist
@@ -296,11 +330,11 @@ fn trim(s: String) -> String {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Captcha {
+pub struct ExpectedCaptcha {
     pub value: String,
 }
 
-impl TryFrom<rocket::http::Cookie<'_>> for Captcha {
+impl TryFrom<rocket::http::Cookie<'_>> for ExpectedCaptcha {
     type Error = ();
     fn try_from(cookie: rocket::http::Cookie<'_>) -> Result<Self, Self::Error> {
         let json = cookie.value();
@@ -308,21 +342,21 @@ impl TryFrom<rocket::http::Cookie<'_>> for Captcha {
     }
 }
 
-impl<'a> Into<rocket::http::Cookie<'a>> for Captcha {
+impl<'a> Into<rocket::http::Cookie<'a>> for ExpectedCaptcha {
     fn into(self) -> rocket::http::Cookie<'a> {
         let json = serde_json::to_string(&self).unwrap();
         Cookie::new(JOIN_CAPTCHA_COOKIE_KEY, json)
     }
 }
 
-impl<'a, 'r> FromRequest<'a, 'r> for Captcha {
+impl<'a, 'r> FromRequest<'a, 'r> for ExpectedCaptcha {
     type Error = !;
 
-    fn from_request(request: &'a Request<'r>) -> Outcome<Captcha, !> {
+    fn from_request(request: &'a Request<'r>) -> Outcome<ExpectedCaptcha, !> {
         request
             .cookies()
             .get_private(JOIN_CAPTCHA_COOKIE_KEY)
-            .and_then(|cookie| Captcha::try_from(cookie).ok())
+            .and_then(|cookie| ExpectedCaptcha::try_from(cookie).ok())
             .or_forward(())
     }
 }

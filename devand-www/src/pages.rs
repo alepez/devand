@@ -1,8 +1,8 @@
-use crate::auth::{self, AuthData};
+use crate::auth::{self, AuthData, ExpectedCaptcha};
 use crate::PgDevandConn;
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{Flash, Content, Redirect};
+use rocket::response::{Content, Flash, Redirect};
 use rocket::Route;
 use rocket_contrib::templates::Template;
 use serde::Serialize;
@@ -55,13 +55,16 @@ fn logout(mut cookies: Cookies) -> Flash<Redirect> {
 }
 
 // Handle join request
+// Note: cookies must be after expected_captcha, due to One-At-A-Time cookies
+// restriction
 #[post("/join", data = "<join_data>")]
 fn join(
-    mut cookies: Cookies,
     join_data: Form<auth::JoinData>,
+    expected_captcha: ExpectedCaptcha,
+    mut cookies: Cookies,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    auth::join(&mut cookies, join_data.0, &conn)
+    auth::join(&mut cookies, join_data.0, expected_captcha, &conn)
         .map(|_| Redirect::to(uri!(index)))
         .map_err(|err| Flash::error(Redirect::to(uri!(join_page)), err.to_string()))
 }
