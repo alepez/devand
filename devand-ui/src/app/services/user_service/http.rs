@@ -1,28 +1,35 @@
+use super::FetchCallback;
 use devand_core::User;
+use gloo::timers::callback::Timeout;
 use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
-use super::FetchCallback;
+use std::sync::{Mutex, Arc};
+use std::ops::DerefMut;
 
 const API_URL: &'static str = "/api/settings";
 
 pub struct UserService {
-    service: FetchService,
-    task: Option<FetchTask>,
+    service: Arc<Mutex<FetchService>>,
     callback: FetchCallback,
+    put_task: Arc<Mutex<Option<FetchTask>>>,
+    put_debouncer: Option<Timeout>,
+    get_task: Option<FetchTask>,
 }
 
 impl UserService {
     pub fn new(callback: FetchCallback) -> Self {
         Self {
-            service: FetchService::new(),
-            task: None,
+            service: Arc::new(Mutex::new(FetchService::new())),
             callback,
+            put_task: Arc::new(Mutex::new(None)),
+            put_debouncer: None,
+            get_task: None,
         }
     }
 
     fn request<R>(
-        &mut self,
+        service: &mut FetchService,
         callback: Callback<Result<User, anyhow::Error>>,
         r: http::request::Request<R>,
     ) -> Result<FetchTask, anyhow::Error>
@@ -38,35 +45,42 @@ impl UserService {
             }
         };
 
-        self.service.fetch(r, handler.into())
+        service.fetch(r, handler.into())
     }
 
     fn get(
-        &mut self,
+        service: &mut FetchService,
         callback: Callback<Result<User, anyhow::Error>>,
     ) -> Result<FetchTask, anyhow::Error> {
         let request = Request::get(API_URL).body(Nothing).unwrap();
-        self.request(callback, request)
+        Self::request(service, callback, request)
     }
 
     fn put(
-        &mut self,
+        service: &mut FetchService,
         callback: Callback<Result<User, anyhow::Error>>,
         user: User,
     ) -> Result<FetchTask, anyhow::Error> {
         let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
         let request = Request::put(API_URL).body(json).unwrap();
-        self.request(callback, request)
+        Self::request(service, callback, request)
     }
 
     pub fn restore(&mut self) {
-        self.task = self.get(self.callback.clone()).ok();
+        let mut service = self.service.lock().unwrap();
+        self.get_task = Self::get(&mut service, self.callback.clone()).ok();
     }
 
     pub fn store(&mut self, user: &User) {
         let user: User = user.clone();
-        self.task = self.put(self.callback.clone(), user).ok();
+        let callback = self.callback.clone();
+        let put_task = self.put_task.clone();
+        let service = self.service.clone();
+
+        self.put_debouncer = Some(Timeout::new(1_000, move || {
+            let mut service = service.lock().unwrap();
+            let mut put_task = put_task.lock().unwrap();
+            *put_task.deref_mut() = Self::put(&mut service, callback, user).ok();
+        }));
     }
 }
-
-

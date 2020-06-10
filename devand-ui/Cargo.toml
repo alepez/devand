@@ -21,6 +21,7 @@ wee_alloc = { version = "0.4", optional = true }
 devand-core = { path = "../devand-core" }
 maplit = "1"
 anyhow = "1"
+gloo = "0.2"
 
 [dependencies.yew]
 git = "https://github.com/yewstack/yew.git"
