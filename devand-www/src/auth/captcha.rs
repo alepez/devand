@@ -1,29 +1,37 @@
-use captcha::filters::Noise;
-use captcha::Captcha;
-use std::path::{Path, PathBuf};
+use captcha::{CaptchaName, Difficulty};
+use std::path::PathBuf;
+use uuid::Uuid;
 
-struct DisposableCaptcha {
+pub struct CaptchFile {
     path: Box<PathBuf>,
+    value: String,
 }
 
-impl Drop for DisposableCaptcha {
+impl CaptchFile {
+    pub fn value(&self) -> String {
+        self.value.clone()
+    }
+}
+
+impl Drop for CaptchFile {
     fn drop(&mut self) {
         std::fs::remove_file(self.path.as_ref()).unwrap();
     }
 }
 
-fn generate() -> DisposableCaptcha {
-    let path = PathBuf::from("/tmp/captcha.png");
+fn generate() -> CaptchFile {
+    let uuid = Uuid::new_v4();
+    let filename = uuid.to_string() + ".png";
+    let path = PathBuf::from("/tmp").join(filename);
     let path = Box::new(path);
 
-    Captcha::new()
-        .add_chars(5)
-        .apply_filter(Noise::new(0.1))
-        .view(220, 120)
-        .save(&path)
-        .expect("save failed");
+    let c = captcha::by_name(Difficulty::Medium, CaptchaName::Mila);
 
-    DisposableCaptcha { path }
+    c.save(&path).expect("save failed");
+
+    let value = c.chars_as_string();
+
+    CaptchFile { path, value }
 }
 
 #[cfg(test)]
@@ -32,7 +40,20 @@ mod test {
 
     #[test]
     fn generate_and_destroy() {
+        #[allow(unused_assignments)]
+        let mut path = Box::new(PathBuf::default());
+        {
+            let x = generate();
+            path = x.path.clone();
+            assert!(path.exists());
+        }
+        assert!(!path.exists());
+    }
+
+    #[test]
+    fn captcha_value() {
         let x = generate();
-        std::thread::sleep_ms(1_000);
+        let value = x.value();
+        dbg!(value);
     }
 }

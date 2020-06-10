@@ -12,6 +12,7 @@ serde_json = "1"
 validator = "0.10"
 validator_derive = "0.10"
 captcha = "0.0.7"
+uuid = { version = "0.8", features = ["v4"] }
 
 [dependencies.rocket]
 version = "0.4"
