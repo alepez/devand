@@ -6,20 +6,19 @@ use rocket::response::{Content, Flash, Redirect};
 use rocket::Route;
 use rocket_contrib::templates::Template;
 use serde::Serialize;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 // Handle authentication request
 #[post("/login", data = "<credentials>")]
 fn login(
     mut cookies: Cookies,
     credentials: Form<auth::Credentials>,
-    remote_addr: SocketAddr,
+    real_ip: auth::RealIp,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::login(&mut cookies, credentials.0, &conn)
         .map(|_| Redirect::to(uri!(index)))
         .map_err(|_| {
-            log_fail(remote_addr.ip());
+            log_fail(real_ip.0);
             Flash::error(
                 Redirect::to(uri!(login_page)),
                 "Incorrect username or password",
@@ -65,13 +64,13 @@ fn join(
     join_data: Form<auth::JoinData>,
     expected_captcha: ExpectedCaptcha,
     mut cookies: Cookies,
-    remote_addr: SocketAddr,
+    real_ip: auth::RealIp,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::join(&mut cookies, join_data.0, expected_captcha, &conn)
         .map(|_| Redirect::to(uri!(index)))
         .map_err(|err| {
-            log_fail(remote_addr.ip());
+            log_fail(real_ip.0);
             Flash::error(Redirect::to(uri!(join_page)), err.to_string())
         })
 }

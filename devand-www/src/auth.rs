@@ -360,3 +360,17 @@ impl<'a, 'r> FromRequest<'a, 'r> for ExpectedCaptcha {
             .or_forward(())
     }
 }
+
+pub struct RealIp(pub std::net::IpAddr);
+
+impl<'a, 'r> FromRequest<'a, 'r> for RealIp {
+    type Error = !;
+
+    fn from_request(request: &'a Request<'r>) -> Outcome<RealIp, !> {
+        request
+            .real_ip()
+            .map(|x| RealIp(x))
+            .or_else(|| request.remote().map(|x| RealIp(x.ip())))
+            .or_forward(())
+    }
+}
