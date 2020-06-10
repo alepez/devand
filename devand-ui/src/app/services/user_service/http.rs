@@ -3,6 +3,8 @@ use devand_core::User;
 use gloo::timers::callback::Timeout;
 use std::ops::DerefMut;
 use std::sync::{Arc, Mutex};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
@@ -14,6 +16,7 @@ pub struct UserService {
     // put_handler is wrapped in Arc<Mutex> so it can be passed to Timeout
     put_handler: Arc<Mutex<PutHandler>>,
     get_handler: GetHandler,
+    on_unload: Closure<dyn FnMut() -> ()>,
 }
 
 struct PutHandler {
@@ -75,6 +78,8 @@ impl UserService {
 
         let put_handler = Arc::new(Mutex::new(put_handler));
 
+        let on_unload = make_on_unload_callback(put_handler.clone());
+
         let get_handler = GetHandler {
             service: FetchService::new(),
             callback: callback.clone(),
@@ -84,6 +89,7 @@ impl UserService {
         Self {
             put_handler,
             get_handler,
+            on_unload,
         }
     }
 
@@ -107,4 +113,38 @@ impl UserService {
             }));
         }
     }
+}
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
+
+fn make_on_unload_callback(put_handler: Arc<Mutex<PutHandler>>) -> Closure<dyn FnMut() -> ()> {
+    let window = yew::utils::window();
+    alert("Ciao");
+
+    let on_unload = Box::new(move || {
+        log::debug!("Leaving...");
+        if let Ok(put_handler) = put_handler.lock() {
+            // if let Some(timeout) = put_handler.debouncer.take() {
+            //     let cb = timeout.cancel();
+            //     put_handler.debouncer = Some(Timeout::new(0, cb));
+            // }
+
+            if put_handler.debouncer.is_some() {
+                log::debug!("There are unsaved settings");
+                // TODO This alert does not diplay
+                alert("There are unsaved settings");
+            }
+        }
+    }) as Box<dyn FnMut()>;
+
+    let on_unload = wasm_bindgen::prelude::Closure::wrap(on_unload);
+
+    window
+        .add_event_listener_with_callback("beforeunload", on_unload.as_ref().unchecked_ref())
+        .unwrap();
+
+    on_unload
 }

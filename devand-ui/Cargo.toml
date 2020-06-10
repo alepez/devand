@@ -39,6 +39,7 @@ version = "0.3.4"
 features = [
   'KeyboardEvent',
   'RequestMode',
+  'EventTarget',
 ]
 
 [profile.release]
