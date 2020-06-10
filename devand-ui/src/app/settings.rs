@@ -62,42 +62,37 @@ impl Component for SettingsPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::AddLanguage((lang, preferences)) => {
-                if let Some(user) = &mut self.state.user {
+                self.update_user(move |user| {
                     user.settings
                         .languages
                         .insert(lang.clone(), preferences.clone());
-                    self.user_service.store(user);
-                }
+                });
             }
             Msg::RemoveLanguage(lang) => {
-                if let Some(user) = &mut self.state.user {
+                self.update_user(move |user| {
                     user.settings.languages.remove(&lang);
-                    self.user_service.store(user);
-                }
+                });
             }
             Msg::UpdateVisibleName(s) => {
-                if let Some(user) = &mut self.state.user {
+                self.update_user(move |user| {
                     user.visible_name = s;
-                    self.user_service.store(user);
-                }
+                });
             }
             Msg::ToggleVacationMode => {
-                if let Some(user) = &mut self.state.user {
+                self.update_user(move |user| {
                     user.settings.vacation_mode ^= true;
-                    self.user_service.store(user);
-                }
+                });
+            }
+            Msg::UpdateSchedule(schedule) => {
+                self.update_user(move |user| {
+                    user.settings.schedule = schedule;
+                });
             }
             Msg::UserFetchOk(user) => {
                 self.state.user = Some(user);
             }
             Msg::UserFetchErr => {
                 log::error!("User fetch error");
-            }
-            Msg::UpdateSchedule(schedule) => {
-                if let Some(user) = &mut self.state.user {
-                    user.settings.schedule = schedule;
-                    self.user_service.store(user);
-                }
             }
         }
 
@@ -241,5 +236,14 @@ impl SettingsPage {
     fn view_schedule_panel(&self, schedule: &Schedule) -> Html {
         html! { <ScheduleTable schedule=schedule on_change=self.link.callback(move |s: Schedule| Msg::UpdateSchedule(s)) /> }
     }
-}
 
+    fn update_user<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut User),
+    {
+        if let Some(user) = &mut self.state.user {
+            f(user);
+            self.user_service.store(user);
+        }
+    }
+}
