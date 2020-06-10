@@ -11,11 +11,22 @@ const DELAY_MS: u32 = 5_000;
 const API_URL: &'static str = "/api/settings";
 
 pub struct UserService {
-    service: Arc<Mutex<FetchService>>,
+    // put_handler is wrapped in Arc<Mutex> so it can be passed to Timeout
+    put_handler: Arc<Mutex<PutHandler>>,
+    get_handler: GetHandler,
+}
+
+struct PutHandler {
+    service: FetchService,
     callback: FetchCallback,
-    put_task: Arc<Mutex<Option<FetchTask>>>,
-    put_debouncer: Option<Timeout>,
-    get_task: Option<FetchTask>,
+    task: Option<FetchTask>,
+    debouncer: Option<Timeout>,
+}
+
+struct GetHandler {
+    service: FetchService,
+    callback: FetchCallback,
+    task: Option<FetchTask>,
 }
 
 fn request<R>(
@@ -38,50 +49,62 @@ where
     service.fetch(r, handler.into())
 }
 
-fn get(
-    service: &mut FetchService,
-    callback: Callback<Result<User, anyhow::Error>>,
-) -> Result<FetchTask, anyhow::Error> {
-    let req = Request::get(API_URL).body(Nothing).unwrap();
-    request(service, callback, req)
+impl GetHandler {
+    fn get(&mut self) {
+        let req = Request::get(API_URL).body(Nothing).unwrap();
+        self.task = request(&mut self.service, self.callback.clone(), req).ok();
+    }
 }
 
-fn put(
-    service: &mut FetchService,
-    callback: Callback<Result<User, anyhow::Error>>,
-    user: User,
-) -> Result<FetchTask, anyhow::Error> {
-    let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
-    let req = Request::put(API_URL).body(json).unwrap();
-    request(service, callback, req)
+impl PutHandler {
+    fn put(&mut self, user: User) {
+        let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
+        let req = Request::put(API_URL).body(json).unwrap();
+        self.task = request(&mut self.service, self.callback.clone(), req).ok();
+    }
 }
 
 impl UserService {
     pub fn new(callback: FetchCallback) -> Self {
+        let put_handler = PutHandler {
+            service: FetchService::new(),
+            callback: callback.clone(),
+            task: None,
+            debouncer: None,
+        };
+
+        let put_handler = Arc::new(Mutex::new(put_handler));
+
+        let get_handler = GetHandler {
+            service: FetchService::new(),
+            callback: callback.clone(),
+            task: None,
+        };
+
         Self {
-            service: Arc::new(Mutex::new(FetchService::new())),
-            callback,
-            put_task: Arc::new(Mutex::new(None)),
-            put_debouncer: None,
-            get_task: None,
+            put_handler,
+            get_handler,
         }
     }
 
     pub fn restore(&mut self) {
-        let mut service = self.service.lock().unwrap();
-        self.get_task = get(&mut service, self.callback.clone()).ok();
+        self.get_handler.get();
     }
 
     pub fn store(&mut self, user: &User) {
         let user: User = user.clone();
-        let callback = self.callback.clone();
-        let put_task = self.put_task.clone();
-        let service = self.service.clone();
 
-        self.put_debouncer = Some(Timeout::new(DELAY_MS, move || {
-            let mut service = service.lock().unwrap();
-            let mut put_task = put_task.lock().unwrap();
-            *put_task.deref_mut() = put(&mut service, callback, user).ok();
-        }));
+        let delayed_put_handler = self.put_handler.clone();
+
+        if let Ok(mut put_handler) = self.put_handler.lock() {
+            // Only if not already locked, clear previous timeout and set
+            // a new delayed action. Note: overwriting debouncer clear the
+            // previous timeout.
+            put_handler.deref_mut().debouncer = Some(Timeout::new(DELAY_MS, move || {
+                if let Ok(mut put_handler) = delayed_put_handler.lock() {
+                    put_handler.put(user);
+                }
+            }));
+        }
     }
 }
