@@ -29,6 +29,20 @@ pub enum Error {
     Unknown,
 }
 
+// TODO This is very expensive. Should return an iterator and should be cached
+// somewhere. Or we could use a custom database when this is needed, like
+// when searching for user affinity
+pub fn load_users(conn: &PgConnection) -> Option<Vec<devand_core::User>> {
+    schema::users::table
+        .load(conn)
+        .map(|results: Vec<models::User>| {
+            results
+                .into_iter()
+                .filter_map(|u: models::User| u.try_into().ok())
+                .collect::<Vec<devand_core::User>>()
+        }).ok()
+}
+
 pub fn load_user_by_id(id: i32, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table
         .filter(schema::users::dsl::id.eq(id))

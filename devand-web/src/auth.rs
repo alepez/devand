@@ -393,3 +393,12 @@ impl Into<devand_core::User> for LoggedUser {
         self.0
     }
 }
+
+impl std::ops::Deref for LoggedUser {
+    type Target = devand_core::User;
+
+    #[inline(always)]
+    fn deref(&self) -> &devand_core::User {
+        &self.0
+    }
+}
