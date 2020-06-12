@@ -35,20 +35,12 @@ struct PairLevel(i32);
 impl PairLevel {
     const MAX: Self = PairLevel(3);
     const MEDIUM: Self = PairLevel(2);
-    const LOW: Self = PairLevel(1);
+    const MIN: Self = PairLevel(1);
 
     fn new(a: Level, b: Level) -> Self {
-        match (a, b) {
-            (Level::Expert, Level::Expert) => Self::MAX,
-            (Level::Expert, Level::Proficient) => Self::MEDIUM,
-            (Level::Expert, Level::Novice) => Self::LOW,
-            (Level::Proficient, Level::Expert) => Self::MEDIUM,
-            (Level::Proficient, Level::Proficient) => Self::MAX,
-            (Level::Proficient, Level::Novice) => Self::MEDIUM,
-            (Level::Novice, Level::Expert) => Self::LOW,
-            (Level::Novice, Level::Proficient) => Self::MEDIUM,
-            (Level::Novice, Level::Novice) => Self::MAX,
-        }
+        let diff = ((a.as_number() as i32) - (b.as_number() as i32)).abs();
+        let score = Self::MAX.0 - (diff as i32);
+        Self(score)
     }
 }
 
@@ -260,5 +252,18 @@ mod tests {
     #[test]
     fn normalize_no_affinity_to_zero() {
         assert!(Affinity::NONE.normalize() == 0.0);
+    }
+
+    #[test]
+    fn same_level_is_max() {
+        assert!(PairLevel::new(Level::Expert, Level::Expert) == PairLevel::MAX);
+        assert!(PairLevel::new(Level::Proficient, Level::Proficient) == PairLevel::MAX);
+        assert!(PairLevel::new(Level::Novice, Level::Novice) == PairLevel::MAX);
+    }
+
+    #[test]
+    fn distant_level_is_min() {
+        assert!(PairLevel::new(Level::Expert, Level::Novice) == PairLevel::MIN);
+        assert!(PairLevel::new(Level::Novice, Level::Expert) == PairLevel::MIN);
     }
 }
