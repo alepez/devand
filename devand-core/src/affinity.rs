@@ -34,20 +34,21 @@ struct PairLevel(i32);
 
 impl PairLevel {
     const MAX: Self = PairLevel(3);
+    const MEDIUM: Self = PairLevel(2);
+    const LOW: Self = PairLevel(1);
 
     fn new(a: Level, b: Level) -> Self {
-        let score = match (a, b) {
-            (Level::Expert, Level::Expert) => 3,
-            (Level::Expert, Level::Proficient) => 3,
-            (Level::Expert, Level::Novice) => 3,
-            (Level::Proficient, Level::Expert) => 3,
-            (Level::Proficient, Level::Proficient) => 3,
-            (Level::Proficient, Level::Novice) => 3,
-            (Level::Novice, Level::Expert) => 3,
-            (Level::Novice, Level::Proficient) => 3,
-            (Level::Novice, Level::Novice) => 3,
-        };
-        Self(score)
+        match (a, b) {
+            (Level::Expert, Level::Expert) => Self::MAX,
+            (Level::Expert, Level::Proficient) => Self::MEDIUM,
+            (Level::Expert, Level::Novice) => Self::LOW,
+            (Level::Proficient, Level::Expert) => Self::MEDIUM,
+            (Level::Proficient, Level::Proficient) => Self::MAX,
+            (Level::Proficient, Level::Novice) => Self::MEDIUM,
+            (Level::Novice, Level::Expert) => Self::LOW,
+            (Level::Novice, Level::Proficient) => Self::MEDIUM,
+            (Level::Novice, Level::Novice) => Self::MAX,
+        }
     }
 }
 
@@ -163,13 +164,12 @@ mod tests {
         let b = AffinityParams::new().with_languages(languages.clone());
 
         let affinity = Affinity::from_params(a, b);
-        dbg!(&affinity);
 
         assert!(affinity == Affinity::FULL);
     }
 
     #[test]
-    fn same_params_with_low_priority_have_low_affinity() {
+    fn same_level_with_low_priority_have_low_affinity() {
         let mut languages = Languages::new();
         languages.insert(
             Language::Rust,
@@ -185,6 +185,41 @@ mod tests {
 
         assert!(affinity < Affinity::FULL);
         assert!(affinity > Affinity::NONE);
+        assert!(affinity.0 == 3);
+    }
+
+    #[test]
+    fn distant_level_with_high_priority_low_affinity() {
+        let a = {
+            let mut languages = Languages::new();
+            languages.insert(
+                Language::Rust,
+                LanguagePreference {
+                    level: Level::Expert,
+                    priority: Priority::High,
+                },
+            );
+            AffinityParams::new().with_languages(languages)
+        };
+
+        let b = {
+            let mut languages = Languages::new();
+            languages.insert(
+                Language::Rust,
+                LanguagePreference {
+                    level: Level::Novice,
+                    priority: Priority::High,
+                },
+            );
+            AffinityParams::new().with_languages(languages)
+        };
+
+        let affinity = Affinity::from_params(a, b);
+        dbg!(&affinity);
+
+        assert!(affinity < Affinity::FULL);
+        assert!(affinity > Affinity::NONE);
+        // assert!(affinity.0 == 12);
     }
 
     #[test]
