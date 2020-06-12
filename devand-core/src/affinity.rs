@@ -9,12 +9,11 @@ use crate::Priority;
 use std::collections::BTreeMap;
 
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
-struct Affinity(i32);
-
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 struct PairPriority(i32);
 
 impl PairPriority {
+    const MAX: Self = PairPriority(4);
+
     fn new(a: Priority, b: Priority) -> Self {
         let a = Self::priority_score(a);
         let b = Self::priority_score(b);
@@ -27,6 +26,28 @@ impl PairPriority {
             Priority::Low => 1,
             Priority::High => 2,
         }
+    }
+}
+
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+struct PairLevel(i32);
+
+impl PairLevel {
+    const MAX: Self = PairLevel(3);
+
+    fn new(a: Level, b: Level) -> Self {
+        let score = match (a, b) {
+            (Level::Expert, Level::Expert) => 3,
+            (Level::Expert, Level::Proficient) => 3,
+            (Level::Expert, Level::Novice) => 3,
+            (Level::Proficient, Level::Expert) => 3,
+            (Level::Proficient, Level::Proficient) => 3,
+            (Level::Proficient, Level::Novice) => 3,
+            (Level::Novice, Level::Expert) => 3,
+            (Level::Novice, Level::Proficient) => 3,
+            (Level::Novice, Level::Novice) => 3,
+        };
+        Self(score)
     }
 }
 
@@ -49,9 +70,29 @@ impl AffinityParams {
 type MatchingLanguage = (Language, (LanguagePreference, LanguagePreference));
 struct MatchingLanguages(BTreeMap<Language, (LanguagePreference, LanguagePreference)>);
 
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
+struct LanguageAffinity(i32);
+
+impl LanguageAffinity {
+    const MAX: Self = Self(PairPriority::MAX.0 * PairLevel::MAX.0);
+
+    fn new(a: &LanguagePreference, b: &LanguagePreference) -> Self {
+        let pair_prio = PairPriority::new(a.priority, b.priority);
+        let pair_level = PairLevel::new(a.level, b.level);
+        LanguageAffinity(pair_prio.0 * pair_level.0)
+    }
+}
+
 impl MatchingLanguages {
-    fn find_max_affinity(&self) -> (&MatchingLanguage, Affinity) {
-        todo!()
+    fn find_max_affinity(&self) -> Option<(Language, LanguageAffinity)> {
+        self.0
+            .iter()
+            .map(|(lang, (a, b))| {
+                let aff = LanguageAffinity::new(a, b);
+                (lang, aff)
+            })
+            .max_by(|(_, l), (_, r)| l.cmp(&r))
+            .map(|(&lang, aff)| (lang, aff))
     }
 }
 
@@ -60,7 +101,7 @@ fn find_matching_languages(mut a: Languages, mut b: Languages) -> MatchingLangua
 
     // TODO Algorithm can be optimized
     let matching = Language::iter()
-        .map(|lang| -> Option<MatchingLanguage> {
+        .map(|lang| {
             let a_lang = a.remove(&lang)?;
             let b_lang = b.remove(&lang)?;
             Some((lang, (a_lang, b_lang)))
@@ -71,21 +112,28 @@ fn find_matching_languages(mut a: Languages, mut b: Languages) -> MatchingLangua
     MatchingLanguages(matching)
 }
 
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+struct Affinity(i32);
+
 impl Affinity {
     pub const NONE: Self = Affinity(Self::MIN);
     pub const FULL: Self = Affinity(Self::MAX);
 
     const MIN: i32 = 0;
-    const MAX: i32 = 100;
+    const MAX: i32 = LanguageAffinity::MAX.0;
 
     fn from_params(a: AffinityParams, b: AffinityParams) -> Self {
         let matching_languages = find_matching_languages(a.languages, b.languages);
 
-        if matching_languages.0.is_empty() {
+        if let Some(best_lang) = matching_languages.find_max_affinity() {
+            return Self((best_lang.1).0);
+        } else {
             return Self::NONE;
         }
+    }
 
-        Self::FULL
+    fn normalize(&self) -> f64 {
+        (self.0 as f64) / (Self::MAX as f64)
     }
 }
 
@@ -114,7 +162,10 @@ mod tests {
         let a = AffinityParams::new().with_languages(languages.clone());
         let b = AffinityParams::new().with_languages(languages.clone());
 
-        assert!(Affinity::from_params(a, b) == Affinity::FULL);
+        let affinity = Affinity::from_params(a, b);
+        dbg!(&affinity);
+
+        assert!(affinity == Affinity::FULL);
     }
 
     #[test]
@@ -132,7 +183,7 @@ mod tests {
 
         let affinity = Affinity::from_params(a, b);
 
-        // assert!(affinity < Affinity::FULL);
+        assert!(affinity < Affinity::FULL);
         assert!(affinity > Affinity::NONE);
     }
 
@@ -164,5 +215,15 @@ mod tests {
         let matching = find_matching_languages(a, b);
 
         assert!(matching.0.is_empty());
+    }
+
+    #[test]
+    fn normalize_full_affinity_to_one() {
+        assert!(Affinity::FULL.normalize() == 1.0);
+    }
+
+    #[test]
+    fn normalize_no_affinity_to_zero() {
+        assert!(Affinity::NONE.normalize() == 0.0);
     }
 }
