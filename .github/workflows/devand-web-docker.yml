@@ -5,11 +5,11 @@ on:
     branches:
       - master
     paths:
-    - 'docker/devand-www/Dockerfile'
-    - 'devand-core'
-    - 'devand-db'
-    - 'devand-ui'
-    - 'devand-www'
+      - docker/devand-www/Dockerfile
+      - devand-core/**
+      - devand-db/**
+      - devand-ui'/**
+      - devand-www/**
 
 jobs:
 
