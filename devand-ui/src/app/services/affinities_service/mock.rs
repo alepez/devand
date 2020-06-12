@@ -18,17 +18,16 @@ impl AffinitiesService {
 
 fn mock_affinities() -> Vec<UserAffinity> {
     vec![
-        UserAffinity::new(mock_user(1, "aaaaa"), Affinity::from_number(0.1)),
-        UserAffinity::new(mock_user(2, "bbbbb"), Affinity::from_number(0.2)),
-        UserAffinity::new(mock_user(3, "ccccc"), Affinity::from_number(0.5)),
-        UserAffinity::new(mock_user(4, "ddddd"), Affinity::from_number(1.0)),
+        UserAffinity::new(mock_user("Albert Einstein"), Affinity::from_number(0.1)),
+        UserAffinity::new(mock_user("Isaac Newton"), Affinity::from_number(0.2)),
+        UserAffinity::new(mock_user("James Clerk Maxwell"), Affinity::from_number(0.5)),
+        UserAffinity::new(mock_user("Max Plank"), Affinity::from_number(1.0)),
     ]
 }
 
-fn mock_user(id: i32, username: &str) -> devand_core::PublicUserProfile {
+fn mock_user(name: &str) -> devand_core::PublicUserProfile {
     use devand_core::*;
     use std::collections::BTreeMap;
-    use std::convert::TryFrom;
 
     let mut languages = BTreeMap::default();
 
@@ -69,8 +68,8 @@ fn mock_user(id: i32, username: &str) -> devand_core::PublicUserProfile {
     );
 
     PublicUserProfile {
-        username: username.into(),
-        visible_name: "Alessandro Pezzato".into(),
+        username: name.to_string().to_lowercase().chars().filter(|x| x.is_alphabetic()).collect(),
+        visible_name: name.to_string(),
         languages,
     }
 }

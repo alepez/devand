@@ -106,7 +106,7 @@ fn find_matching_languages(mut a: Languages, mut b: Languages) -> MatchingLangua
 }
 
 // TODO Normalize to [0..1] when serializing
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone)]
 pub struct Affinity(i32);
 
 impl Affinity {
@@ -136,6 +136,12 @@ impl Affinity {
             n if n > 1.0 => Self::MAX,
             n => (n * (Self::MAX as f64)) as i32,
         })
+    }
+}
+
+impl ToString for Affinity {
+    fn to_string(&self) -> String {
+        format!("{:.0}%", self.normalize() * 100.0)
     }
 }
 

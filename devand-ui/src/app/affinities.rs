@@ -51,7 +51,8 @@ impl Component for AffinitiesPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::AffinitiesFetchOk(affinities) => {
+            Msg::AffinitiesFetchOk(mut affinities) => {
+                affinities.sort_unstable_by_key(|x| x.affinity);
                 self.state.affinities = Some(affinities);
             }
             Msg::AffinitiesFetchErr => {
@@ -82,18 +83,19 @@ impl Component for AffinitiesPage {
 impl AffinitiesPage {
     fn view_affinities(&self, affinities: &Vec<UserAffinity>) -> Html {
         html! {
-            <div class="user-affinities">
-            { for affinities.iter().map(|a| self.view_affinity(a)) }
-            </div>
+            <table class="user-affinities">
+            { for affinities.iter().rev().map(|a| self.view_affinity(a)) }
+            </table>
         }
     }
 
     fn view_affinity(&self, affinity: &UserAffinity) -> Html {
         html! {
-            <div class="user-affinity">
-                <div class="user">{ format!("{:?}", affinity.user) }</div>
-                <div class="affinity">{ format!("{:?}", affinity.affinity) }</div>
-            </div>
+            <tr class="user-affinity">
+                <td class="username">{ &affinity.user.username }</td>
+                <td class="visible_name">{ &affinity.user.visible_name }</td>
+                <td class="affinity">{ affinity.affinity }</td>
+            </tr>
         }
     }
 
