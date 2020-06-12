@@ -8,6 +8,8 @@ use std::collections::BTreeMap;
 use std::convert::TryFrom;
 use strum_macros::{Display, EnumIter, EnumString};
 
+pub use affinity::{Affinity, AffinityParams};
+
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
@@ -197,6 +199,7 @@ pub enum Language {
     TypeScript,
     VBA,
 }
+
 
 #[cfg(test)]
 mod tests {

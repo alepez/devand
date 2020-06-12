@@ -1,6 +1,3 @@
-#![allow(unused_imports)]
-#![allow(dead_code)]
-
 use crate::Language;
 use crate::LanguagePreference;
 use crate::Languages;
@@ -34,7 +31,10 @@ struct PairLevel(i32);
 
 impl PairLevel {
     const MAX: Self = PairLevel(3);
+
+    #[allow(dead_code)]
     const MEDIUM: Self = PairLevel(2);
+    #[allow(dead_code)]
     const MIN: Self = PairLevel(1);
 
     fn new(a: Level, b: Level) -> Self {
@@ -45,22 +45,21 @@ impl PairLevel {
 }
 
 #[derive(Debug, Default)]
-struct AffinityParams {
+pub struct AffinityParams {
     languages: Languages,
 }
 
 impl AffinityParams {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
 
-    fn with_languages(mut self, languages: Languages) -> Self {
+    pub fn with_languages(mut self, languages: Languages) -> Self {
         self.languages = languages;
         self
     }
 }
 
-type MatchingLanguage = (Language, (LanguagePreference, LanguagePreference));
 struct MatchingLanguages(BTreeMap<Language, (LanguagePreference, LanguagePreference)>);
 
 #[derive(Ord, PartialOrd, Eq, PartialEq)]
@@ -106,7 +105,7 @@ fn find_matching_languages(mut a: Languages, mut b: Languages) -> MatchingLangua
 }
 
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
-struct Affinity(i32);
+pub struct Affinity(i32);
 
 impl Affinity {
     pub const NONE: Self = Affinity(Self::MIN);
@@ -115,7 +114,7 @@ impl Affinity {
     const MIN: i32 = 0;
     const MAX: i32 = LanguageAffinity::MAX.0;
 
-    fn from_params(a: AffinityParams, b: AffinityParams) -> Self {
+    pub fn from_params(a: AffinityParams, b: AffinityParams) -> Self {
         let matching_languages = find_matching_languages(a.languages, b.languages);
 
         if let Some(best_lang) = matching_languages.find_max_affinity() {
@@ -125,7 +124,7 @@ impl Affinity {
         }
     }
 
-    fn normalize(&self) -> f64 {
+    pub fn normalize(&self) -> f64 {
         (self.0 as f64) / (Self::MAX as f64)
     }
 }
