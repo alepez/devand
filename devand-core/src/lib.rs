@@ -1,5 +1,6 @@
 pub mod mock;
 pub mod auth;
+mod affinity;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
@@ -211,6 +212,11 @@ mod tests {
     fn hourly_schedule_from_comma_separated_list() {
         let s = "5,7,21";
         let schedule = DaySchedule::try_from(s).unwrap();
-        dbg!(&schedule);
+        assert!(schedule.hours[4] == false);
+        assert!(schedule.hours[5] == true);
+        assert!(schedule.hours[6] == false);
+        assert!(schedule.hours[7] == true);
+        assert!(schedule.hours[21] == true);
+        assert!(schedule.hours[22] == false);
     }
 }
