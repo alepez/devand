@@ -7,11 +7,11 @@ type FetchCallback = Callback<Result<Vec<UserAffinity>, anyhow::Error>>;
 // #[cfg(not(feature = "mock_http"))]
 // mod http;
 
-#[cfg(feature = "mock_http")]
+// #[cfg(feature = "mock_http")]
 mod mock;
 
-#[cfg(feature = "mock_http")]
+// #[cfg(feature = "mock_http")]
 pub type AffinitiesService = self::mock::AffinitiesService;
 
-#[cfg(not(feature = "mock_http"))]
-pub type AffinitiesService = self::http::AffinitiesService;
+// #[cfg(not(feature = "mock_http"))]
+// pub type AffinitiesService = self::http::AffinitiesService;
