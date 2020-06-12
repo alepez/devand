@@ -4,7 +4,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const configurations = {
   production: {
-    distPath: path.resolve(__dirname, "../devand-www/static/ui"),
+    distPath: path.resolve(__dirname, "../devand-web/static/ui"),
     publicPath: '/public/ui/',
     cargoFeatures: [],
   },

@@ -1,5 +1,5 @@
 [package]
-name = "devand-www"
+name = "devand-web"
 version = "0.1.0"
 authors = ["Alessandro Pezzato <alessandro@pezzato.net>"]
 edition = "2018"

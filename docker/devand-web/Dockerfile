@@ -11,7 +11,7 @@ RUN bash setup.sh
 RUN yarn install
 RUN yarn run build
 
-WORKDIR /home/builder/project/devand-www
+WORKDIR /home/builder/project/devand-web
 RUN cargo build --release
 
 # Set up the run environment.
@@ -24,9 +24,9 @@ RUN apt-get update && \
     libssl-dev && \
   rm -rf /var/lib/apt/lists/*
 RUN mkdir /app
-COPY --from=builder /home/builder/project/devand-www/static /app/static
-COPY --from=builder /home/builder/project/devand-www/templates /app/templates
-COPY --from=builder /home/builder/project/devand-www/target/release/devand-www /bin/devand-www
+COPY --from=builder /home/builder/project/devand-web/static /app/static
+COPY --from=builder /home/builder/project/devand-web/templates /app/templates
+COPY --from=builder /home/builder/project/devand-web/target/release/devand-web /bin/devand-web
 ENV ROCKET_TEMPLATE_DIR=/app/templates
 ENV ROCKET_STATIC_DIR=/app/static
-ENTRYPOINT ["/bin/devand-www"]
+ENTRYPOINT ["/bin/devand-web"]

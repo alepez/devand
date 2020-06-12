@@ -13,13 +13,13 @@ bash setup.sh
 yarn install
 ```
 
-#### Build for devand-www
+#### Build for devand-web
 
 ```shell
 yarn run build
 ```
 
-Generated files are copied in `../devand-www/static/ui` directory
+Generated files are copied in `../devand-web/static/ui` directory
 
 ### Serve locally
 
