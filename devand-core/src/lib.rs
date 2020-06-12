@@ -1,6 +1,6 @@
-pub mod mock;
-pub mod auth;
 mod affinity;
+pub mod auth;
+pub mod mock;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
@@ -200,6 +200,17 @@ pub enum Language {
     VBA,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct UserAffinity {
+    pub user: User,
+    pub affinity: Affinity,
+}
+
+impl UserAffinity {
+    pub fn new(user: User, affinity: Affinity) -> Self {
+        Self { user, affinity }
+    }
+}
 
 #[cfg(test)]
 mod tests {

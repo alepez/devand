@@ -3,8 +3,8 @@ use crate::LanguagePreference;
 use crate::Languages;
 use crate::Level;
 use crate::Priority;
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 struct PairPriority(i32);
@@ -128,6 +128,14 @@ impl Affinity {
 
     pub fn normalize(&self) -> f64 {
         (self.0 as f64) / (Self::MAX as f64)
+    }
+
+    pub fn from_number(n: f64) -> Self {
+        Affinity(match n {
+            n if n < 0.0 => Self::MIN,
+            n if n > 1.0 => Self::MAX,
+            n => (n * (Self::MAX as f64)) as i32,
+        })
     }
 }
 

@@ -1,9 +1,8 @@
 use crate::auth::{AuthData, LoggedUser};
 use crate::PgDevandConn;
-use devand_core::{Affinity, AffinityParams, User};
+use devand_core::{Affinity, AffinityParams, User, UserAffinity};
 use rocket::Route;
 use rocket_contrib::json::Json;
-use serde::{Deserialize, Serialize};
 
 #[get("/settings")]
 fn settings(user: LoggedUser) -> Json<User> {
@@ -21,12 +20,6 @@ fn settings_put(auth_data: AuthData, user: Json<User>, conn: PgDevandConn) -> Op
     devand_db::save_user(user.0, &conn.0).map(|x| Json(x))
 }
 
-#[derive(Serialize, Deserialize)]
-struct UserAffinity {
-    user: User,
-    affinity: Affinity,
-}
-
 #[get("/affinities")]
 fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
     let logged_user_params = AffinityParams::new().with_languages(user.settings.languages.clone());
@@ -40,7 +33,7 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
         let u_params = AffinityParams::new().with_languages(languages);
         // TODO Avoid cloning logged user params
         let affinity = Affinity::from_params(logged_user_params.clone(), u_params);
-        UserAffinity { user: u, affinity }
+        UserAffinity::new(u, affinity)
     });
 
     Some(Json(affinities.collect()))
