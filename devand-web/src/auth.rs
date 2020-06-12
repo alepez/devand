@@ -66,9 +66,9 @@ impl<'a> Into<rocket::http::Cookie<'a>> for AuthData {
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for AuthData {
-    type Error = !;
+    type Error = ();
 
-    fn from_request(request: &'a Request<'r>) -> Outcome<AuthData, !> {
+    fn from_request(request: &'a Request<'r>) -> Outcome<AuthData, ()> {
         request
             .cookies()
             .get_private(LOGIN_COOKIE_KEY)
@@ -124,9 +124,9 @@ impl<'a> Into<rocket::http::Cookie<'a>> for JoinData {
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for JoinData {
-    type Error = !;
+    type Error = ();
 
-    fn from_request(request: &'a Request<'r>) -> Outcome<JoinData, !> {
+    fn from_request(request: &'a Request<'r>) -> Outcome<JoinData, ()> {
         request
             .cookies()
             .get_private(JOIN_COOKIE_KEY)
@@ -350,9 +350,9 @@ impl<'a> Into<rocket::http::Cookie<'a>> for ExpectedCaptcha {
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for ExpectedCaptcha {
-    type Error = !;
+    type Error = ();
 
-    fn from_request(request: &'a Request<'r>) -> Outcome<ExpectedCaptcha, !> {
+    fn from_request(request: &'a Request<'r>) -> Outcome<ExpectedCaptcha, ()> {
         request
             .cookies()
             .get_private(JOIN_CAPTCHA_COOKIE_KEY)
@@ -364,13 +364,32 @@ impl<'a, 'r> FromRequest<'a, 'r> for ExpectedCaptcha {
 pub struct RealIp(pub std::net::IpAddr);
 
 impl<'a, 'r> FromRequest<'a, 'r> for RealIp {
-    type Error = !;
+    type Error = ();
 
-    fn from_request(request: &'a Request<'r>) -> Outcome<RealIp, !> {
+    fn from_request(request: &'a Request<'r>) -> Outcome<RealIp, ()> {
         request
             .real_ip()
             .map(|x| RealIp(x))
             .or_else(|| request.remote().map(|x| RealIp(x.ip())))
             .or_forward(())
+    }
+}
+
+pub struct LoggedUser(devand_core::User);
+
+impl<'a, 'r> FromRequest<'a, 'r> for LoggedUser {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> Outcome<LoggedUser, ()> {
+        let conn = request.guard::<PgDevandConn>()?;
+        let auth_data = request.guard::<AuthData>()?;
+        let user = devand_db::load_user_by_id(auth_data.user_id, &conn.0);
+        user.map(|x| LoggedUser(x)).or_forward(())
+    }
+}
+
+impl Into<devand_core::User> for LoggedUser {
+    fn into(self) -> devand_core::User {
+        self.0
     }
 }
