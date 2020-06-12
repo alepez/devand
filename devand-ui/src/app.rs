@@ -2,8 +2,10 @@ mod settings;
 mod not_found;
 mod languages;
 mod services;
+mod affinities;
 
 use self::settings::SettingsPage;
+use self::affinities::AffinitiesPage;
 use self::not_found::NotFoundPage;
 
 use serde_derive::{Deserialize, Serialize};
@@ -14,10 +16,12 @@ use yew_router::{prelude::*, Switch};
 
 #[derive(Switch, Debug, Clone)]
 pub enum AppRoute {
-    #[to = "/"]
-    Settings,
+    #[to = "/affinities"]
+    Affinities,
     #[to = "/page-not-found"]
     NotFound(Permissive<String>),
+    #[to = "/"]
+    Settings,
 }
 
 pub struct App {
@@ -51,6 +55,7 @@ impl Component for App {
                 render = Router::render(|switch: AppRoute| {
                     match switch {
                         AppRoute::Settings=> html!{ <SettingsPage/> },
+                        AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                     }
                 })
