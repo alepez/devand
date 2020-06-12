@@ -1,0 +1,20 @@
+name: "devand-web-builder docker image"
+
+on:
+  push:
+    paths:
+    - 'docker/devand-web-builder/Dockerfile'
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: whoan/docker-build-with-cache-action@master
+      with:
+        username: alepez
+        password: "${{ secrets.GITHUB_TOKEN }}"
+        registry: docker.pkg.github.com
+        image_name: devand-web-builder
+        dockerfile: docker/devand-web-builder/Dockerfile
