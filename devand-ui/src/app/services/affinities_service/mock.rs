@@ -1,5 +1,4 @@
 use super::FetchCallback;
-use devand_core::User;
 use devand_core::UserAffinity;
 use devand_core::Affinity;
 
@@ -26,7 +25,7 @@ fn mock_affinities() -> Vec<UserAffinity> {
     ]
 }
 
-fn mock_user(id: i32, name: &str) -> devand_core::User {
+fn mock_user(id: i32, username: &str) -> devand_core::User {
     use devand_core::*;
     use std::collections::BTreeMap;
     use std::convert::TryFrom;
@@ -70,8 +69,8 @@ fn mock_user(id: i32, name: &str) -> devand_core::User {
     );
 
     User {
-        id: 1,
-        username: "alepez".into(),
+        id,
+        username: username.into(),
         visible_name: "Alessandro Pezzato".into(),
         email: "alessandro@pezzato.net".into(),
         settings: UserSettings {

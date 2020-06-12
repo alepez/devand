@@ -1,4 +1,3 @@
-use devand_core::Affinity;
 use devand_core::UserAffinity;
 use yew::prelude::Callback;
 

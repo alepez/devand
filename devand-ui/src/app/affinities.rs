@@ -1,5 +1,5 @@
 use crate::app::services::AffinitiesService;
-use devand_core::{Language, LanguagePreference, Languages, Schedule, User, UserAffinity};
+use devand_core::UserAffinity;
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
@@ -16,7 +16,7 @@ pub enum Msg {
 pub struct AffinitiesPage {
     props: Props,
     state: State,
-    link: ComponentLink<Self>,
+    #[allow(dead_code)]
     affinities_service: AffinitiesService,
 }
 
@@ -44,7 +44,6 @@ impl Component for AffinitiesPage {
 
         Self {
             props,
-            link,
             state,
             affinities_service,
         }

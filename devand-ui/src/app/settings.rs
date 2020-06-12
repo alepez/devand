@@ -158,7 +158,6 @@ impl SettingsPage {
         html! {
             <fieldset>
                 <legend>{ "Profile" }</legend>
-                <a href="/affinities">{ "affinities" }</a>
                 <div class="pure-control-group">
                     <label for="username">{ "Username:" }</label>
                     <input type="text" name="username" id="username" value=&user.username readonly=true />
