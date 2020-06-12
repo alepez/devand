@@ -1,6 +1,6 @@
 use super::FetchCallback;
-use devand_core::UserAffinity;
 use devand_core::Affinity;
+use devand_core::UserAffinity;
 
 pub struct AffinitiesService {
     callback: FetchCallback,
@@ -25,7 +25,7 @@ fn mock_affinities() -> Vec<UserAffinity> {
     ]
 }
 
-fn mock_user(id: i32, username: &str) -> devand_core::User {
+fn mock_user(id: i32, username: &str) -> devand_core::PublicUserProfile {
     use devand_core::*;
     use std::collections::BTreeMap;
     use std::convert::TryFrom;
@@ -68,23 +68,9 @@ fn mock_user(id: i32, username: &str) -> devand_core::User {
         },
     );
 
-    User {
-        id,
+    PublicUserProfile {
         username: username.into(),
         visible_name: "Alessandro Pezzato".into(),
-        email: "alessandro@pezzato.net".into(),
-        settings: UserSettings {
-            languages,
-            vacation_mode: false,
-            schedule: Schedule::Weekly(WeekSchedule {
-                mon: DaySchedule::try_from("21,22,23").unwrap(),
-                tue: DaySchedule::never(),
-                wed: DaySchedule::never(),
-                thu: DaySchedule::never(),
-                fri: DaySchedule::never(),
-                sat: DaySchedule::always(),
-                sun: DaySchedule::never(),
-            }),
-        },
+        languages,
     }
 }

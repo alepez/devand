@@ -202,13 +202,31 @@ pub enum Language {
 
 #[derive(Serialize, Deserialize)]
 pub struct UserAffinity {
-    pub user: User,
+    pub user: PublicUserProfile,
     pub affinity: Affinity,
 }
 
 impl UserAffinity {
-    pub fn new(user: User, affinity: Affinity) -> Self {
+    pub fn new(user: PublicUserProfile, affinity: Affinity) -> Self {
         Self { user, affinity }
+    }
+}
+
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct PublicUserProfile {
+    pub username: String,
+    pub visible_name: String,
+    pub languages: Languages,
+}
+
+impl From<User> for PublicUserProfile {
+    fn from(user: User) -> Self {
+        PublicUserProfile {
+            username: user.username,
+            visible_name: user.visible_name,
+            languages: user.settings.languages,
+        }
     }
 }
 

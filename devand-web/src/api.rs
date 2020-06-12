@@ -24,8 +24,6 @@ fn settings_put(auth_data: AuthData, user: Json<User>, conn: PgDevandConn) -> Op
 fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
     let logged_user_params = AffinityParams::new().with_languages(user.settings.languages.clone());
 
-    dbg!(&logged_user_params);
-
     let users = devand_db::load_users(&conn.0)?;
 
     let affinities = users.into_iter().filter(|u| u.id != user.id).map(|u| {
@@ -33,7 +31,7 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
         let u_params = AffinityParams::new().with_languages(languages);
         // TODO Avoid cloning logged user params
         let affinity = Affinity::from_params(logged_user_params.clone(), u_params);
-        UserAffinity::new(u, affinity)
+        UserAffinity::new(u.into(), affinity)
     });
 
     Some(Json(affinities.collect()))
