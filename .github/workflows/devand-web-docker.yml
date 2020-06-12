@@ -5,11 +5,11 @@ on:
     branches:
       - master
     paths:
-      - docker/devand-www/Dockerfile
+      - docker/devand-web/Dockerfile
       - devand-core/**
       - devand-db/**
       - devand-ui'/**
-      - devand-www/**
+      - devand-web/**
 
 jobs:
 
@@ -23,4 +23,4 @@ jobs:
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
         image_name: devand-web
-        dockerfile: docker/devand-www/Dockerfile
+        dockerfile: docker/devand-web/Dockerfile
