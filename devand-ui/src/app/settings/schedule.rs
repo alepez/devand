@@ -97,7 +97,7 @@ impl ScheduleTable {
     }
 
     fn view_schedule_weekly(&self, schedule: &WeekSchedule) -> Html {
-        let hours = (1..=DaySchedule::HOURS_IN_DAY).map(|h| html! { <th>{ h }</th> });
+        let hours = (0..DaySchedule::HOURS_IN_DAY).map(|h| html! { <th>{ h }</th> });
 
         html! {
             <fieldset>
