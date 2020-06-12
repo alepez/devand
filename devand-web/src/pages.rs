@@ -114,6 +114,15 @@ fn join_captcha(mut cookies: Cookies) -> Option<Content<Vec<u8>>> {
 
 // When user is authenticated, home page shows user's dashboard
 #[get("/")]
+fn index_auth(auth_data: AuthData) -> Template {
+    dashboard(auth_data)
+}
+
+#[get("/affinities")]
+fn affinities(auth_data: AuthData) -> Template {
+    dashboard(auth_data)
+}
+
 fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
@@ -142,6 +151,7 @@ fn index() -> Template {
 pub fn routes() -> Vec<Route> {
     routes![
         index,
+        index_auth,
         join,
         join_authenticated,
         join_page,
@@ -150,7 +160,7 @@ pub fn routes() -> Vec<Route> {
         login_authenticated,
         login_page,
         logout,
-        dashboard,
+        affinities,
     ]
 }
 
