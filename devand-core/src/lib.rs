@@ -10,11 +10,13 @@ use strum_macros::{Display, EnumIter, EnumString};
 
 pub use affinity::{Affinity, AffinityParams};
 
+pub type UserId = i32;
+
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
     /// This is unique and cannot be changed
-    pub id: i32,
+    pub id: UserId,
     /// This is unique and cannot be changed
     pub username: String,
     /// This is unique
@@ -242,7 +244,7 @@ pub fn calculate_affinities(
         .filter(|aff| aff.affinity != Affinity::NONE)
 }
 
-#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct PublicUserProfile {
     pub username: String,
@@ -257,6 +259,33 @@ impl From<User> for PublicUserProfile {
             visible_name: user.visible_name,
             languages: user.settings.languages,
         }
+    }
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct CodeNowUsers {
+    users: std::collections::HashMap<UserId, PublicUserProfile>,
+}
+
+impl Serialize for CodeNowUsers {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeStruct;
+
+        let mut state = serializer.serialize_struct("code_now_users", 3)?;
+        let users : Vec<_> = self.users.values().collect();
+        state.serialize_field("users", &users)?;
+        state.end()
+    }
+}
+
+impl CodeNowUsers {
+    pub fn add(&mut self, u: User) {
+        let id = u.id;
+        let profile = PublicUserProfile::from(u);
+        self.users.insert(id, profile);
     }
 }
 
@@ -280,5 +309,14 @@ mod tests {
         assert!(schedule.hours[7] == true);
         assert!(schedule.hours[21] == true);
         assert!(schedule.hours[22] == false);
+    }
+
+    #[test]
+    fn serialize_code_now_users() {
+        let mut code_now_users = CodeNowUsers::default();
+        let user = crate::mock::user();
+        code_now_users.add(user);
+        let json = serde_json::to_string(&code_now_users);
+        dbg!(json);
     }
 }

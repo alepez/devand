@@ -150,7 +150,7 @@ mod tests {
         let a = AffinityParams::new();
         let b = AffinityParams::new();
 
-        assert!(Affinity::from_params(a, b) == Affinity::NONE);
+        assert!(Affinity::from_params(&a, &b) == Affinity::NONE);
     }
 
     #[test]
@@ -166,7 +166,7 @@ mod tests {
         let a = AffinityParams::new().with_languages(languages.clone());
         let b = AffinityParams::new().with_languages(languages.clone());
 
-        let affinity = Affinity::from_params(a, b);
+        let affinity = Affinity::from_params(&a, &b);
 
         assert!(affinity == Affinity::FULL);
     }
@@ -184,7 +184,7 @@ mod tests {
         let a = AffinityParams::new().with_languages(languages.clone());
         let b = AffinityParams::new().with_languages(languages.clone());
 
-        let affinity = Affinity::from_params(a, b);
+        let affinity = Affinity::from_params(&a, &b);
 
         assert!(affinity < Affinity::FULL);
         assert!(affinity > Affinity::NONE);
@@ -217,7 +217,7 @@ mod tests {
             AffinityParams::new().with_languages(languages)
         };
 
-        let affinity = Affinity::from_params(a, b);
+        let affinity = Affinity::from_params(&a, &b);
         dbg!(&affinity);
 
         assert!(affinity < Affinity::FULL);
@@ -238,7 +238,7 @@ mod tests {
         let a = languages.clone();
         let b = languages.clone();
 
-        let matching = find_matching_languages(a, b);
+        let matching = find_matching_languages(&a, &b);
 
         assert!(matching.0.len() == 1);
         assert!(matching.0.get(&Language::Rust).is_some());
@@ -250,7 +250,7 @@ mod tests {
         let a = languages.clone();
         let b = languages.clone();
 
-        let matching = find_matching_languages(a, b);
+        let matching = find_matching_languages(&a, &b);
 
         assert!(matching.0.is_empty());
     }

@@ -1,7 +1,8 @@
 use crate::auth::{AuthData, LoggedUser};
+use crate::CodeNowUsers;
 use crate::PgDevandConn;
 use devand_core::{User, UserAffinity};
-use rocket::Route;
+use rocket::{Route, State};
 use rocket_contrib::json::Json;
 
 #[get("/settings")]
@@ -28,11 +29,21 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
 }
 
 #[get("/code-now")]
-fn code_now(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
-    let users = devand_db::load_users(&conn.0)?;
-    // TODO Return all online users
-    let affinities = devand_core::calculate_affinities(user.into(), users);
-    Some(Json(affinities.collect()))
+fn code_now(
+    user: LoggedUser,
+    code_now_users: State<CodeNowUsers>,
+) -> Json<devand_core::CodeNowUsers> {
+    {
+        let mut code_now_users = code_now_users.0.write().unwrap();
+        code_now_users.add(user.into());
+    }
+
+    let code_now_users = {
+        let code_now_users = code_now_users.0.read().unwrap();
+        code_now_users.clone()
+    };
+
+    Json(code_now_users)
 }
 
 pub fn routes() -> Vec<Route> {

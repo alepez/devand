@@ -43,12 +43,16 @@ fn run_db_migrations(rocket: Rocket) -> Result<Rocket, Rocket> {
     }
 }
 
+#[derive(Default)]
+struct CodeNowUsers(pub std::sync::RwLock<devand_core::CodeNowUsers>);
+
 fn main() {
     rocket::ignite()
         .attach(Template::fairing())
         .attach(PgDevandConn::fairing())
         .attach(AdHoc::on_attach("Database Migrations", run_db_migrations))
         .attach(AdHoc::on_attach("Static files", static_files))
+        .manage(CodeNowUsers::default())
         .mount("/", pages::routes())
         .mount("/api", api::routes())
         .launch();
