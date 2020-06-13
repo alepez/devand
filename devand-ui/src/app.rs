@@ -1,12 +1,14 @@
-mod settings;
-mod not_found;
-mod languages;
-mod services;
 mod affinities;
+mod code_now;
+mod languages;
+mod not_found;
+mod services;
+mod settings;
 
-use self::settings::SettingsPage;
 use self::affinities::AffinitiesPage;
+use self::code_now::CodeNowPage;
 use self::not_found::NotFoundPage;
+use self::settings::SettingsPage;
 
 use serde_derive::{Deserialize, Serialize};
 use yew::prelude::*;
@@ -18,20 +20,20 @@ use yew_router::{prelude::*, Switch};
 pub enum AppRoute {
     #[to = "/affinities"]
     Affinities,
+    #[to = "/code-now"]
+    CodeNow,
     #[to = "/page-not-found"]
     NotFound(Permissive<String>),
     #[to = "/"]
     Settings,
 }
 
-pub struct App {
-}
+pub struct App {}
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct State {}
 
-pub enum Msg {
-}
+pub enum Msg {}
 
 impl Component for App {
     type Message = Msg;
@@ -56,6 +58,7 @@ impl Component for App {
                     match switch {
                         AppRoute::Settings=> html!{ <SettingsPage/> },
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
+                        AppRoute::CodeNow=> html!{ <CodeNowPage/> },
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                     }
                 })
