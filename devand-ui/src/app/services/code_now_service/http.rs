@@ -1,5 +1,5 @@
 use super::FetchCallback;
-use devand_core::UserAffinity;
+use devand_core::CodeNowUsers;
 use gloo::timers::callback::Interval;
 use std::sync::{Arc, Mutex};
 use yew::format::{Json, Nothing};
@@ -25,13 +25,13 @@ struct GetHandler {
 
 fn request<R>(
     service: &mut FetchService,
-    callback: Callback<Result<Vec<UserAffinity>, anyhow::Error>>,
+    callback: Callback<Result<CodeNowUsers, anyhow::Error>>,
     r: http::request::Request<R>,
 ) -> Result<FetchTask, anyhow::Error>
 where
     R: std::convert::Into<std::result::Result<std::string::String, anyhow::Error>>,
 {
-    let handler = move |response: Response<Json<Result<Vec<UserAffinity>, anyhow::Error>>>| {
+    let handler = move |response: Response<Json<Result<CodeNowUsers, anyhow::Error>>>| {
         let (meta, Json(data)) = response.into_parts();
         if meta.status.is_success() {
             callback.emit(data)

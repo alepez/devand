@@ -262,30 +262,27 @@ impl From<User> for PublicUserProfile {
     }
 }
 
-#[derive(Default, Debug, Clone)]
-pub struct CodeNowUsers {
-    users: std::collections::HashMap<UserId, PublicUserProfile>,
-}
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
-impl Serialize for CodeNowUsers {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        use serde::ser::SerializeStruct;
-
-        let mut state = serializer.serialize_struct("code_now_users", 3)?;
-        let users : Vec<_> = self.users.values().collect();
-        state.serialize_field("users", &users)?;
-        state.end()
+impl From<CodeNowUsersMap> for CodeNowUsers {
+    fn from(m: CodeNowUsersMap) -> Self {
+        CodeNowUsers(m.0.into_iter().map(|(_k, v)| v).collect())
     }
 }
 
-impl CodeNowUsers {
+#[derive(Default, Debug, Clone)]
+pub struct CodeNowUsersMap(std::collections::HashMap<UserId, PublicUserProfile>);
+
+impl CodeNowUsersMap {
     pub fn add(&mut self, u: User) {
         let id = u.id;
         let profile = PublicUserProfile::from(u);
-        self.users.insert(id, profile);
+        self.0.insert(id, profile);
+    }
+
+    pub fn contains(&self, u: &User) -> bool {
+        self.0.contains_key(&u.id)
     }
 }
 
@@ -313,10 +310,13 @@ mod tests {
 
     #[test]
     fn serialize_code_now_users() {
-        let mut code_now_users = CodeNowUsers::default();
+        let mut code_now_users_map = CodeNowUsersMap::default();
         let user = crate::mock::user();
-        code_now_users.add(user);
-        let json = serde_json::to_string(&code_now_users);
-        dbg!(json);
+        code_now_users_map.add(user);
+        let code_now_users = CodeNowUsers::from(code_now_users_map);
+        let json = serde_json::to_string(&code_now_users).unwrap();
+        let code_now_users_2: CodeNowUsers = serde_json::from_str(&json).unwrap();
+        let json_2 = serde_json::to_string(&code_now_users_2).unwrap();
+        assert!(json == json_2);
     }
 }

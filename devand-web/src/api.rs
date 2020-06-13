@@ -33,17 +33,22 @@ fn code_now(
     user: LoggedUser,
     code_now_users: State<CodeNowUsers>,
 ) -> Json<devand_core::CodeNowUsers> {
-    {
-        let mut code_now_users = code_now_users.0.write().unwrap();
-        code_now_users.add(user.into());
+    let user : User = user.into();
+
+    // First try a read lock, can be locked by  multiple readers
+    let cache = code_now_users.0.read().unwrap();
+
+    // Check if it already contains the current user
+    if cache.contains(&user) {
+        Json(cache.clone().into())
+    } else {
+        // If it does not contain it, lock with write access
+        drop(cache);
+        let mut cache = code_now_users.0.write().unwrap();
+        // Now we can add the current user to the cache
+        cache.add(user);
+        Json(cache.clone().into())
     }
-
-    let code_now_users = {
-        let code_now_users = code_now_users.0.read().unwrap();
-        code_now_users.clone()
-    };
-
-    Json(code_now_users)
 }
 
 pub fn routes() -> Vec<Route> {

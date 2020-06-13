@@ -44,7 +44,7 @@ fn run_db_migrations(rocket: Rocket) -> Result<Rocket, Rocket> {
 }
 
 #[derive(Default)]
-struct CodeNowUsers(pub std::sync::RwLock<devand_core::CodeNowUsers>);
+struct CodeNowUsers(pub std::sync::RwLock<devand_core::CodeNowUsersMap>);
 
 fn main() {
     rocket::ignite()

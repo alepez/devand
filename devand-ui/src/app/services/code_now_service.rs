@@ -1,7 +1,7 @@
-use devand_core::UserAffinity;
+use devand_core::CodeNowUsers;
 use yew::prelude::Callback;
 
-type FetchCallback = Callback<Result<Vec<UserAffinity>, anyhow::Error>>;
+type FetchCallback = Callback<Result<CodeNowUsers, anyhow::Error>>;
 
 // Comment line below to compile with mock_http enabled, so checker can run
 #[cfg(not(feature = "mock_http"))]

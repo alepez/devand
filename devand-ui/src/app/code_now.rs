@@ -1,23 +1,23 @@
 use crate::app::services::CodeNowService;
-use devand_core::UserAffinity;
+use devand_core::{PublicUserProfile, CodeNowUsers};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct State {
-    affinities: Option<Vec<UserAffinity>>,
+    code_now_users: Option<CodeNowUsers>,
 }
 
 pub enum Msg {
-    AffinitiesFetchOk(Vec<UserAffinity>),
-    AffinitiesFetchErr,
+    CodeNowUsersFetchOk(CodeNowUsers),
+    CodeNowUsersFetchErr,
 }
 
 pub struct CodeNowPage {
     props: Props,
     state: State,
     #[allow(dead_code)]
-    affinities_service: CodeNowService,
+    service: CodeNowService,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -30,33 +30,32 @@ impl Component for CodeNowPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
 
-        let callback = link.callback(|result: Result<Vec<UserAffinity>, anyhow::Error>| {
-            if let Ok(affinities) = result {
-                Msg::AffinitiesFetchOk(affinities)
+        let callback = link.callback(|result: Result<CodeNowUsers, anyhow::Error>| {
+            if let Ok(code_now_users) = result {
+                Msg::CodeNowUsersFetchOk(code_now_users)
             } else {
-                Msg::AffinitiesFetchErr
+                Msg::CodeNowUsersFetchErr
             }
         });
 
-        let mut affinities_service = CodeNowService::new(callback);
+        let mut service = CodeNowService::new(callback);
 
-        affinities_service.restore();
+        service.restore();
 
         Self {
             props,
             state,
-            affinities_service,
+            service,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::AffinitiesFetchOk(mut affinities) => {
-                affinities.sort_unstable_by_key(|x| x.affinity);
-                self.state.affinities = Some(affinities);
+            Msg::CodeNowUsersFetchOk(code_now_users) => {
+                self.state.code_now_users = Some(code_now_users);
             }
-            Msg::AffinitiesFetchErr => {
-                log::error!("Affinities fetch error");
+            Msg::CodeNowUsersFetchErr => {
+                log::error!("CodeNowUsers fetch error");
             }
         }
         true
@@ -70,8 +69,8 @@ impl Component for CodeNowPage {
     fn view(&self) -> Html {
         html! {
                 {
-                if let Some(affinities) = &self.state.affinities {
-                    self.view_affinities(affinities)
+                if let Some(code_now_users) = &self.state.code_now_users {
+                    self.view_code_now_users(code_now_users)
                 } else {
                     self.view_loading()
                 }
@@ -81,20 +80,19 @@ impl Component for CodeNowPage {
 }
 
 impl CodeNowPage {
-    fn view_affinities(&self, affinities: &Vec<UserAffinity>) -> Html {
+    fn view_code_now_users(&self, code_now_users: &CodeNowUsers) -> Html {
         html! {
-            <table class="user-affinities">
-            { for affinities.iter().rev().map(|a| self.view_affinity(a)) }
+            <table class="code_now_users">
+            { for code_now_users.0.iter().rev().map(|x| self.view_user_profile(x)) }
             </table>
         }
     }
 
-    fn view_affinity(&self, affinity: &UserAffinity) -> Html {
+    fn view_user_profile(&self, user: &PublicUserProfile) -> Html {
         html! {
-            <tr class="user-affinity">
-                <td class="username">{ &affinity.user.username }</td>
-                <td class="visible_name">{ &affinity.user.visible_name }</td>
-                <td class="affinity">{ affinity.affinity }</td>
+            <tr class="user_profile">
+                <td class="username">{ &user.username }</td>
+                <td class="visible_name">{ &user.visible_name }</td>
             </tr>
         }
     }
