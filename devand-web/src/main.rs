@@ -6,6 +6,7 @@ extern crate rocket;
 mod api;
 mod auth;
 mod pages;
+mod state;
 
 use rocket::fairing::AdHoc;
 use rocket::Rocket;
@@ -44,7 +45,7 @@ fn run_db_migrations(rocket: Rocket) -> Result<Rocket, Rocket> {
 }
 
 #[derive(Default)]
-struct CodeNowUsers(pub std::sync::RwLock<devand_core::CodeNowUsersMap>);
+struct CodeNowUsers(pub std::sync::RwLock<state::code_now::CodeNowUsersMap>);
 
 fn main() {
     rocket::ignite()

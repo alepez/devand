@@ -265,27 +265,6 @@ impl From<User> for PublicUserProfile {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
-impl From<CodeNowUsersMap> for CodeNowUsers {
-    fn from(m: CodeNowUsersMap) -> Self {
-        CodeNowUsers(m.0.into_iter().map(|(_k, v)| v).collect())
-    }
-}
-
-#[derive(Default, Debug, Clone)]
-pub struct CodeNowUsersMap(std::collections::HashMap<UserId, PublicUserProfile>);
-
-impl CodeNowUsersMap {
-    pub fn add(&mut self, u: User) {
-        let id = u.id;
-        let profile = PublicUserProfile::from(u);
-        self.0.insert(id, profile);
-    }
-
-    pub fn contains(&self, u: &User) -> bool {
-        self.0.contains_key(&u.id)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -306,17 +285,5 @@ mod tests {
         assert!(schedule.hours[7] == true);
         assert!(schedule.hours[21] == true);
         assert!(schedule.hours[22] == false);
-    }
-
-    #[test]
-    fn serialize_code_now_users() {
-        let mut code_now_users_map = CodeNowUsersMap::default();
-        let user = crate::mock::user();
-        code_now_users_map.add(user);
-        let code_now_users = CodeNowUsers::from(code_now_users_map);
-        let json = serde_json::to_string(&code_now_users).unwrap();
-        let code_now_users_2: CodeNowUsers = serde_json::from_str(&json).unwrap();
-        let json_2 = serde_json::to_string(&code_now_users_2).unwrap();
-        assert!(json == json_2);
     }
 }
