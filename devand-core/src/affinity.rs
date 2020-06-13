@@ -89,17 +89,13 @@ impl MatchingLanguages {
     }
 }
 
-fn find_matching_languages(mut a: Languages, mut b: Languages) -> MatchingLanguages {
-    use strum::IntoEnumIterator;
-
-    // TODO Algorithm can be optimized
-    let matching = Language::iter()
-        .map(|lang| {
-            let a_lang = a.remove(&lang)?;
-            let b_lang = b.remove(&lang)?;
-            Some((lang, (a_lang, b_lang)))
-        })
-        .filter_map(|x| x)
+/// Find the intersection between the two collections a and b, extracting
+/// only items with the same key
+fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
+    let matching = a
+        .iter()
+        .filter_map(|(lang, a_pref)| b.get(lang).map(|b_pref| (lang, (a_pref, b_pref))))
+        .map(|(&lang, (a_pref, b_pref))| (lang, (a_pref.clone(), b_pref.clone())))
         .collect();
 
     MatchingLanguages(matching)
@@ -116,8 +112,8 @@ impl Affinity {
     const MIN: i32 = 0;
     const MAX: i32 = LanguageAffinity::MAX.0;
 
-    pub fn from_params(a: AffinityParams, b: AffinityParams) -> Self {
-        let matching_languages = find_matching_languages(a.languages, b.languages);
+    pub fn from_params(a: &AffinityParams, b: &AffinityParams) -> Self {
+        let matching_languages = find_matching_languages(&a.languages, &b.languages);
 
         if let Some(best_lang) = matching_languages.find_max_affinity() {
             return Self((best_lang.1).0);

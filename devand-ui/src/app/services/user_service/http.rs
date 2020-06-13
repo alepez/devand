@@ -17,6 +17,14 @@ pub struct UserService {
     // put_handler is wrapped in Arc<Mutex> so it can be passed to Timeout
     put_handler: Arc<Mutex<PutHandler>>,
     get_handler: GetHandler,
+
+    // on_unload callback exists because we warn user of unsaved changes
+    // Changes are saved automatically, but only after DELAY_MS. User
+    // may leave the page before this delay has passed or the consequent
+    // request has finished. on_unload is triggered when the user leave
+    // the page and triggers an alert about unsaved changes. This is how GMail
+    // handles this case.
+    #[allow(dead_code)]
     on_unload: Closure<dyn FnMut(BeforeUnloadEvent) -> ()>,
 }
 

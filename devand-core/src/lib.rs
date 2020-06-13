@@ -212,6 +212,36 @@ impl UserAffinity {
     }
 }
 
+impl From<&User> for AffinityParams {
+    fn from(user: &User) -> Self {
+        let languages = user.settings.languages.clone();
+        AffinityParams::new().with_languages(languages)
+    }
+}
+
+/// Calculate affinities between `user` and all `users` passed
+pub fn calculate_affinities(
+    user: User,
+    users: impl IntoIterator<Item = User>,
+) -> impl Iterator<Item = UserAffinity> {
+    let user_id = user.id;
+    let user_params = AffinityParams::from(&user);
+
+    users
+        .into_iter()
+        // There may be same user in the list, just skip it
+        .filter(move |u| u.id != user_id)
+        // Calculate the affinity
+        .map(move |u| {
+            let u_params = AffinityParams::from(&u);
+            // TODO Avoid cloning logged user params
+            let affinity = Affinity::from_params(&user_params, &u_params);
+            UserAffinity::new(u.into(), affinity)
+        })
+        // Remove users who do not have any affinity
+        .filter(|aff| aff.affinity != Affinity::NONE)
+}
+
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct PublicUserProfile {

@@ -3,7 +3,7 @@ use yew::prelude::Callback;
 
 type FetchCallback = Callback<Result<User, anyhow::Error>>;
 
-// Compile even when mock_http is enabled, so checker can run
+// Comment line below to compile with mock_http enabled, so checker can run
 #[cfg(not(feature = "mock_http"))]
 mod http;
 
