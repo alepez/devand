@@ -265,6 +265,12 @@ impl From<User> for PublicUserProfile {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+pub struct CodeNow {
+    pub current_user: User,
+    pub all_users: Vec<PublicUserProfile>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

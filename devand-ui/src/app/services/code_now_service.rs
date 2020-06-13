@@ -1,7 +1,7 @@
-use devand_core::CodeNowUsers;
+use devand_core::CodeNow;
 use yew::prelude::Callback;
 
-type FetchCallback = Callback<Result<CodeNowUsers, anyhow::Error>>;
+type FetchCallback = Callback<Result<CodeNow, anyhow::Error>>;
 
 // Comment line below to compile with mock_http enabled, so checker can run
 #[cfg(not(feature = "mock_http"))]

@@ -29,26 +29,28 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
 }
 
 #[get("/code-now")]
-fn code_now(
-    user: LoggedUser,
-    code_now_users: State<CodeNowUsers>,
-) -> Json<devand_core::CodeNowUsers> {
-    let user : User = user.into();
+fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devand_core::CodeNow> {
+    let user: User = user.into();
 
     // First try a read lock, can be locked by  multiple readers
     let cache = code_now_users.0.read().unwrap();
 
     // Check if it already contains the current user
-    if cache.contains(&user) {
-        Json(cache.clone().into())
+    let all_users: devand_core::CodeNowUsers = if cache.contains(&user) {
+        cache.clone().into()
     } else {
         // If it does not contain it, lock with write access
         drop(cache);
         let mut cache = code_now_users.0.write().unwrap();
         // Now we can add the current user to the cache
-        cache.add(user);
-        Json(cache.clone().into())
-    }
+        cache.add(user.clone());
+        cache.clone().into()
+    };
+
+    Json(devand_core::CodeNow {
+        current_user: user,
+        all_users: all_users.0,
+    })
 }
 
 pub fn routes() -> Vec<Route> {

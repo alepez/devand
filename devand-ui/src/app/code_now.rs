@@ -1,15 +1,15 @@
 use crate::app::services::CodeNowService;
-use devand_core::{PublicUserProfile, CodeNowUsers};
+use devand_core::{CodeNow, PublicUserProfile};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct State {
-    code_now_users: Option<CodeNowUsers>,
+    code_now: Option<CodeNow>,
 }
 
 pub enum Msg {
-    CodeNowUsersFetchOk(CodeNowUsers),
+    CodeNowUsersFetchOk(CodeNow),
     CodeNowUsersFetchErr,
 }
 
@@ -30,9 +30,9 @@ impl Component for CodeNowPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
 
-        let callback = link.callback(|result: Result<CodeNowUsers, anyhow::Error>| {
-            if let Ok(code_now_users) = result {
-                Msg::CodeNowUsersFetchOk(code_now_users)
+        let callback = link.callback(|result: Result<CodeNow, anyhow::Error>| {
+            if let Ok(code_now) = result {
+                Msg::CodeNowUsersFetchOk(code_now)
             } else {
                 Msg::CodeNowUsersFetchErr
             }
@@ -51,11 +51,11 @@ impl Component for CodeNowPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::CodeNowUsersFetchOk(code_now_users) => {
-                self.state.code_now_users = Some(code_now_users);
+            Msg::CodeNowUsersFetchOk(code_now) => {
+                self.state.code_now = Some(code_now);
             }
             Msg::CodeNowUsersFetchErr => {
-                log::error!("CodeNowUsers fetch error");
+                log::error!("CodeNow fetch error");
             }
         }
         true
@@ -69,8 +69,8 @@ impl Component for CodeNowPage {
     fn view(&self) -> Html {
         html! {
                 {
-                if let Some(code_now_users) = &self.state.code_now_users {
-                    self.view_code_now_users(code_now_users)
+                if let Some(code_now) = &self.state.code_now {
+                    self.view_code_now_users(code_now)
                 } else {
                     self.view_loading()
                 }
@@ -80,10 +80,16 @@ impl Component for CodeNowPage {
 }
 
 impl CodeNowPage {
-    fn view_code_now_users(&self, code_now_users: &CodeNowUsers) -> Html {
+    fn view_code_now_users(&self, code_now: &CodeNow) -> Html {
+        let all_users = code_now
+            .all_users
+            .iter()
+            .filter(|u| u.username != code_now.current_user.username)
+            .map(|x| self.view_user_profile(x));
+
         html! {
-            <table class="code_now_users">
-            { for code_now_users.0.iter().rev().map(|x| self.view_user_profile(x)) }
+            <table class="code_now">
+            { for all_users }
             </table>
         }
     }

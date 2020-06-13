@@ -1,5 +1,5 @@
 use super::FetchCallback;
-use devand_core::CodeNowUsers;
+use devand_core::CodeNow;
 
 pub struct CodeNowService {
     callback: FetchCallback,
@@ -15,16 +15,21 @@ impl CodeNowService {
     }
 }
 
-fn mock_code_now_users() -> CodeNowUsers {
-    CodeNowUsers(vec![
-        mock_user("Albert Einstein"),
-        mock_user("Isaac Newton"),
-        mock_user("James Clerk Maxwell"),
-        mock_user("Max Plank"),
-    ])
+fn mock_code_now_users() -> CodeNow {
+    let current_user = mock_user("Betrand Russel");
+    CodeNow {
+        current_user: current_user.clone(),
+        all_users: vec![
+            current_user.into(),
+            mock_user("Albert Einstein").into(),
+            mock_user("Isaac Newton").into(),
+            mock_user("James Clerk Maxwell").into(),
+            mock_user("Max Plank").into(),
+        ],
+    }
 }
 
-fn mock_user(name: &str) -> devand_core::PublicUserProfile {
+fn mock_user(name: &str) -> devand_core::User {
     use devand_core::*;
     use std::collections::BTreeMap;
 
@@ -66,14 +71,16 @@ fn mock_user(name: &str) -> devand_core::PublicUserProfile {
         },
     );
 
-    PublicUserProfile {
+    User {
+        id: 1,
         username: name
             .to_string()
             .to_lowercase()
             .chars()
             .filter(|x| x.is_alphabetic())
             .collect(),
+        email: "a@b.c".to_string(),
         visible_name: name.to_string(),
-        languages,
+        settings: devand_core::UserSettings::default(),
     }
 }
