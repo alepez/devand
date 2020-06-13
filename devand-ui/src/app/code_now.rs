@@ -1,5 +1,5 @@
 use crate::app::services::CodeNowService;
-use devand_core::{CodeNow, PublicUserProfile};
+use devand_core::{CodeNow, UserAffinity};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
@@ -81,24 +81,32 @@ impl Component for CodeNowPage {
 
 impl CodeNowPage {
     fn view_code_now_users(&self, code_now: &CodeNow) -> Html {
-        let all_users = code_now
-            .all_users
-            .iter()
-            .filter(|u| u.username != code_now.current_user.username)
-            .map(|x| self.view_user_profile(x));
+        let CodeNow {
+            all_users,
+            current_user,
+        } = code_now.clone(); // TODO Avoid cloning
+
+        let users = all_users
+            .into_iter()
+            .filter(|u| u.username != code_now.current_user.username);
+
+        let user = current_user.into();
+        let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
+        affinities.sort_unstable_by_key(|x| x.affinity);
 
         html! {
-            <table class="code_now">
-            { for all_users }
+            <table class="user-affinities">
+            { for affinities.iter().rev().map(|a| self.view_affinity(a)) }
             </table>
         }
     }
 
-    fn view_user_profile(&self, user: &PublicUserProfile) -> Html {
+    fn view_affinity(&self, affinity: &UserAffinity) -> Html {
         html! {
-            <tr class="user_profile">
-                <td class="username">{ &user.username }</td>
-                <td class="visible_name">{ &user.visible_name }</td>
+            <tr class="user-affinity">
+                <td class="username">{ &affinity.user.username }</td>
+                <td class="visible_name">{ &affinity.user.visible_name }</td>
+                <td class="affinity">{ affinity.affinity }</td>
             </tr>
         }
     }

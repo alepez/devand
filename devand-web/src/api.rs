@@ -24,10 +24,11 @@ fn settings_put(auth_data: AuthData, user: Json<User>, conn: PgDevandConn) -> Op
 #[get("/affinities")]
 fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
     let users = devand_db::load_users(&conn.0)?;
-    let affinities = devand_core::calculate_affinities(user.into(), users);
+    let affinities = devand_core::calculate_affinities(&user.into(), users);
     Some(Json(affinities.collect()))
 }
 
+// TODO Remove user from cache after inactivity
 #[get("/code-now")]
 fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devand_core::CodeNow> {
     let user: User = user.into();
