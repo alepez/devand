@@ -1,13 +1,20 @@
 use super::FetchCallback;
 use devand_core::UserAffinity;
+use gloo::timers::callback::Interval;
+use std::sync::{Arc, Mutex};
 use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
-const API_URL: &'static str = "/api/affinities";
+const INTERVAL_MS: u32 = 5_000;
+
+const API_URL: &'static str = "/api/code-now";
 
 pub struct CodeNowService {
-    get_handler: GetHandler,
+    get_handler: Arc<Mutex<GetHandler>>,
+
+    #[allow(dead_code)]
+    pinger: Interval,
 }
 
 struct GetHandler {
@@ -39,12 +46,7 @@ where
 impl GetHandler {
     fn get(&mut self) {
         let req = Request::get(API_URL).body(Nothing).unwrap();
-        self.task = request(
-            &mut self.service,
-            self.callback.clone(),
-            req,
-        )
-        .ok();
+        self.task = request(&mut self.service, self.callback.clone(), req).ok();
     }
 }
 
@@ -56,12 +58,22 @@ impl CodeNowService {
             task: None,
         };
 
+        let get_handler = Arc::new(Mutex::new(get_handler));
+
+        let interval_get_handler = get_handler.clone();
+
+        let pinger = Interval::new(INTERVAL_MS, move || {
+            let mut get_handler = interval_get_handler.lock().unwrap();
+            get_handler.get();
+        });
+
         Self {
             get_handler,
+            pinger,
         }
     }
 
     pub fn restore(&mut self) {
-        self.get_handler.get();
+        self.get_handler.lock().unwrap().get();
     }
 }

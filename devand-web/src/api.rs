@@ -27,6 +27,14 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
     Some(Json(affinities.collect()))
 }
 
+#[get("/code-now")]
+fn code_now(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
+    let users = devand_db::load_users(&conn.0)?;
+    // TODO Return all online users
+    let affinities = devand_core::calculate_affinities(user.into(), users);
+    Some(Json(affinities.collect()))
+}
+
 pub fn routes() -> Vec<Route> {
-    routes![settings, settings_put, affinities]
+    routes![settings, settings_put, affinities, code_now]
 }

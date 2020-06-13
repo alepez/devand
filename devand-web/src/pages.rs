@@ -123,6 +123,11 @@ fn affinities(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
+#[get("/code-now")]
+fn code_now(auth_data: AuthData) -> Template {
+    dashboard(auth_data)
+}
+
 fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
@@ -161,6 +166,7 @@ pub fn routes() -> Vec<Route> {
         login_page,
         logout,
         affinities,
+        code_now,
     ]
 }
 
