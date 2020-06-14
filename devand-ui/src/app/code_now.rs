@@ -1,5 +1,5 @@
 use crate::app::services::CodeNowService;
-use devand_core::{CodeNow, UserAffinity};
+use devand_core::{CodeNow, Language, LanguagePreference, PublicUserProfile, UserAffinity};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
@@ -102,12 +102,62 @@ impl CodeNowPage {
     }
 
     fn view_affinity(&self, affinity: &UserAffinity) -> Html {
+        let UserAffinity { user, affinity } = affinity;
+        let PublicUserProfile {
+            username,
+            visible_name,
+            languages,
+        } = user;
+
         html! {
             <tr class="user-affinity">
-                <td class="username">{ &affinity.user.username }</td>
-                <td class="visible_name">{ &affinity.user.visible_name }</td>
-                <td class="affinity">{ affinity.affinity }</td>
+                <td class="username">{ username }</td>
+                <td class="visible_name">{ visible_name }</td>
+                <td class="affinity">{ affinity.to_string() }</td>
+                <td class="languages"> { for languages.clone().into_iter().map(|lang| self.view_language(lang)) } </td>
             </tr>
+        }
+    }
+
+    fn view_language(&self, lang: (Language, LanguagePreference)) -> Html {
+        let (lang, preferences) = lang;
+        html! {
+            <div>
+                <span class="language-tag">{ lang }</span>
+                { self.view_language_level(preferences.level) }
+                { self.view_language_priority(preferences.priority) }
+            </div>
+        }
+    }
+
+    // TODO This is and exact copy of the one in settings page
+    fn view_language_priority(&self, priority: devand_core::Priority) -> Html {
+        let icon = match priority {
+            devand_core::Priority::No => "X",
+            devand_core::Priority::Low => ":|",
+            devand_core::Priority::High => ":)",
+        };
+        let title = format!("{}", priority);
+        let priority_class = format!("language-priority-tag-{}", priority).to_lowercase();
+        let class = vec!["language-priority-tag", &priority_class];
+
+        html! {
+            <span class=class title=title>{ icon }</span>
+        }
+    }
+
+    // TODO This is and exact copy of the one in settings page
+    fn view_language_level(&self, level: devand_core::Level) -> Html {
+        let stars = (1..=3).map(|x| x <= level.as_number());
+        let icon = |on| if on { "★" } else { "☆" };
+        let title = format!("{}", level);
+        let level_class = format!("language-level-tag-{}", level).to_lowercase();
+        let class = vec!["language-level-tag", &level_class];
+
+        html! {
+            <span class=class title=title>
+                { for stars.map(|on| { html! { <span>{ icon(on) }</span> } }) }
+            </span>
         }
     }
 
