@@ -8,7 +8,7 @@ on:
       - docker/devand-web/Dockerfile
       - devand-core/**
       - devand-db/**
-      - devand-ui'/**
+      - devand-ui/**
       - devand-web/**
 
 jobs:
