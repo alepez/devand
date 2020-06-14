@@ -104,7 +104,6 @@ pub struct JoinData {
     pub email: String,
     #[validate(custom = "validate_password")]
     pub password: String,
-    #[validate(length(equal = 5))]
     pub captcha: String,
 }
 
@@ -235,6 +234,7 @@ pub(crate) fn join(
 
     // Remove old cookie
     cookies.remove_private(Cookie::named(JOIN_COOKIE_KEY));
+    cookies.remove_private(Cookie::named(JOIN_CAPTCHA_COOKIE_KEY));
 
     let valid = valid
         .and_then(|_| check_for_uniqueness(&join_data, conn))
