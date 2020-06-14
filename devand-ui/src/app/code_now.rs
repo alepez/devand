@@ -122,7 +122,7 @@ impl CodeNowPage {
     fn view_language(&self, lang: (Language, LanguagePreference)) -> Html {
         let (lang, preferences) = lang;
         html! {
-            <div>
+            <div class="language-control-group ">
                 <span class="language-tag">{ lang }</span>
                 { self.view_language_level(preferences.level) }
                 { self.view_language_priority(preferences.priority) }
