@@ -367,10 +367,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for RealIp {
     type Error = ();
 
     fn from_request(request: &'a Request<'r>) -> Outcome<RealIp, ()> {
-        request
-            .real_ip()
+        let real_ip_from_header = request.real_ip();
+        let remote_ip_from_sock = request.remote().map(|x| x.ip());
+
+        real_ip_from_header
+            .or(remote_ip_from_sock)
             .map(|x| RealIp(x))
-            .or_else(|| request.remote().map(|x| RealIp(x.ip())))
             .or_forward(())
     }
 }
