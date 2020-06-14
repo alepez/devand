@@ -153,6 +153,28 @@ fn index() -> Template {
     Template::render("index", &context)
 }
 
+#[get("/privacy")]
+fn privacy() -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+    }
+
+    let context = Context { title: "Privacy Policy" };
+    Template::render("privacy", &context)
+}
+
+#[get("/code-of-conduct")]
+fn code_of_conduct() -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+    }
+
+    let context = Context { title: "DevAndDev Code of Conduct" };
+    Template::render("code-of-conduct", &context)
+}
+
 pub fn routes() -> Vec<Route> {
     routes![
         index,
@@ -167,6 +189,8 @@ pub fn routes() -> Vec<Route> {
         logout,
         affinities,
         code_now,
+        privacy,
+        code_of_conduct,
     ]
 }
 

@@ -59,7 +59,6 @@ mod test {
     #[test]
     fn captcha_value() {
         let x = CaptchaFile::new();
-        let value = x.value();
-        dbg!(value);
+        let _value = x.value();
     }
 }
