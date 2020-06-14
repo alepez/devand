@@ -24,7 +24,7 @@ pub enum AppRoute {
     CodeNow,
     #[to = "/page-not-found"]
     NotFound(Permissive<String>),
-    #[to = "/"]
+    #[to = "/dashboard"]
     Settings,
 }
 

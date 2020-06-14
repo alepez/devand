@@ -16,7 +16,7 @@ fn login(
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::login(&mut cookies, credentials.0, &conn)
-        .map(|_| Redirect::to(uri!(index)))
+        .map(|_| Redirect::to(uri!(dashboard_index)))
         .map_err(|_| {
             log_fail(real_ip.0);
             Flash::error(
@@ -39,11 +39,13 @@ fn login_page(flash: Option<FlashMessage>) -> Template {
     struct Context {
         title: &'static str,
         flash: Option<String>,
+        authenticated: bool,
     }
 
     let context = Context {
         title: "Sign in to DevAndDev",
         flash: flash.map(|x| x.msg().to_string()),
+        authenticated: false,
     };
 
     Template::render("login", &context)
@@ -91,6 +93,7 @@ fn join_page(flash: Option<FlashMessage>, join_data: Option<auth::JoinData>) -> 
         username: Option<String>,
         email: Option<String>,
         password: Option<String>,
+        authenticated: bool,
     }
 
     let context = Context {
@@ -99,6 +102,7 @@ fn join_page(flash: Option<FlashMessage>, join_data: Option<auth::JoinData>) -> 
         username: join_data.as_ref().map(|x| x.username.to_string()),
         email: join_data.as_ref().map(|x| x.email.to_string()),
         password: join_data.as_ref().map(|x| x.password.to_string()),
+        authenticated: false,
     };
 
     Template::render("join", &context)
@@ -112,19 +116,19 @@ fn join_captcha(mut cookies: Cookies) -> Option<Content<Vec<u8>>> {
     Some(Content(ContentType::PNG, data))
 }
 
-// When user is authenticated, home page shows user's dashboard
-#[get("/")]
-fn index_auth(auth_data: AuthData) -> Template {
+// Some URLs respond with dashboard
+#[get("/dashboard")]
+fn dashboard_index(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
 #[get("/affinities")]
-fn affinities(auth_data: AuthData) -> Template {
+fn dashboard_affinities(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
 #[get("/code-now")]
-fn code_now(auth_data: AuthData) -> Template {
+fn dashboard_code_now(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
@@ -132,53 +136,65 @@ fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
+        authenticated: bool,
     }
 
     let context = Context {
         title: "Your dashboard",
+        authenticated: true,
     };
 
     Template::render("dashboard", &context)
 }
 
-// When user is not authenticated, home page just serve a static file
 #[get("/", rank = 2)]
-fn index() -> Template {
+fn index(auth_data: Option<AuthData>) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
+        authenticated: bool,
     }
 
-    let context = Context { title: "DevAndDev" };
+    let context = Context {
+        title: "DevAndDev",
+        authenticated: auth_data.is_some(),
+    };
     Template::render("index", &context)
 }
 
 #[get("/privacy")]
-fn privacy() -> Template {
+fn privacy(auth_data: Option<AuthData>) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
+        authenticated: bool,
     }
 
-    let context = Context { title: "Privacy Policy" };
+    let context = Context {
+        title: "Privacy Policy",
+        authenticated: auth_data.is_some(),
+    };
     Template::render("privacy", &context)
 }
 
 #[get("/code-of-conduct")]
-fn code_of_conduct() -> Template {
+fn code_of_conduct(auth_data: Option<AuthData>) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
+        authenticated: bool,
     }
 
-    let context = Context { title: "DevAndDev Code of Conduct" };
+    let context = Context {
+        title: "DevAndDev Code of Conduct",
+        authenticated: auth_data.is_some(),
+    };
     Template::render("code-of-conduct", &context)
 }
 
 pub fn routes() -> Vec<Route> {
     routes![
         index,
-        index_auth,
         join,
         join_authenticated,
         join_page,
@@ -187,8 +203,9 @@ pub fn routes() -> Vec<Route> {
         login_authenticated,
         login_page,
         logout,
-        affinities,
-        code_now,
+        dashboard_index,
+        dashboard_affinities,
+        dashboard_code_now,
         privacy,
         code_of_conduct,
     ]
@@ -199,13 +216,6 @@ fn format_fail(ip_addr: std::net::IpAddr) -> String {
 }
 
 // Used by fail2ban
-//
-// Filter:
-//
-//     [Definition]
-//     failregex = ^{"log":"Fail: IpAddr\(<HOST>\)
-//     ignoreregex =
-//
 fn log_fail(ip_addr: std::net::IpAddr) {
     println!("{}", format_fail(ip_addr));
 }

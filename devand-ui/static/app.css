@@ -6,6 +6,30 @@
     line-height: 1.6em;
 }
 
+.main-header {
+    margin-bottom: 2em;
+    background: #e0e0e0;
+}
+
+.main-header-content {
+    margin: 0 auto;
+    max-width: 800px;
+}
+.main-footer {
+    margin-top: 2em;
+    background: #e0e0e0;
+
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.main-footer-content {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
 .alert {
     position: relative;
     padding: .75rem 1.25rem;
@@ -30,6 +54,9 @@
 
 .language-control-group .pure-button {
     margin-right: 0.5rem;
+}
+
+.language-tag {
 }
 
 .language-level-tag,

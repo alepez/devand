@@ -16,24 +16,21 @@
       <div class="pure-menu pure-menu-horizontal">
         <a href="/" class="pure-menu-heading pure-menu-link">DevAndDev</a>
         <ul class="pure-menu-list">
+    {{#if authenticated}}
+          <li class="pure-menu-item">
+            <a href="/dashboard" class="pure-menu-link">Dashboard</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/logout" class="pure-menu-link">Sign Out</a>
+          </li>
+    {{else}}
           <li class="pure-menu-item">
             <a href="/login" class="pure-menu-link">Sign In</a>
           </li>
           <li class="pure-menu-item">
             <a href="/join" class="pure-menu-link">Sign Up</a>
           </li>
-          <li class="pure-menu-item">
-            <a href="/" class="pure-menu-link">Settings</a>
-          </li>
-          <li class="pure-menu-item">
-            <a href="/affinities" class="pure-menu-link">Affinities</a>
-          </li>
-          <li class="pure-menu-item">
-            <a href="/code-now" class="pure-menu-link">Code Now</a>
-          </li>
-          <li class="pure-menu-item">
-            <a href="/sessions" class="pure-menu-link">Scheduled sessions</a>
-          </li>
+    {{/if}}
         </ul>
       </div>
     </div>
