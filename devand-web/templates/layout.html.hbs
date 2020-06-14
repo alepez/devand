@@ -11,11 +11,51 @@
 </head>
 
 <body>
+  <header class="main-header">
+    <div class="main-header-content">
+      <div class="pure-menu pure-menu-horizontal">
+        <a href="/" class="pure-menu-heading pure-menu-link">DevAndDev</a>
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item">
+            <a href="/login" class="pure-menu-link">Sign In</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/join" class="pure-menu-link">Sign Up</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/" class="pure-menu-link">Settings</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/affinities" class="pure-menu-link">Affinities</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/code-now" class="pure-menu-link">Code Now</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/sessions" class="pure-menu-link">Scheduled sessions</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
   <div class="content">
     <h1>{{ title }}</h1>
-{{~> body}}
+    {{~> body}}
   </div>
+  <footer class="main-footer">
+    <div class="main-footer-content">
+      <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item">
+            <a href="/privacy" class="pure-menu-link">Privacy Policy</a>
+          </li>
+          <li class="pure-menu-item">
+            <a href="/code-of-conduct" class="pure-menu-link">Code of Conduct</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 </body>
 
 </html>
-
