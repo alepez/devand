@@ -124,7 +124,6 @@ impl<'a> Into<rocket::http::Cookie<'a>> for JoinData {
         Cookie::build(JOIN_COOKIE_KEY, json)
             .http_only(true)
             .max_age(time::Duration::minutes(10))
-            .path("/join")
             .finish()
     }
 }
@@ -370,7 +369,6 @@ impl<'a> Into<rocket::http::Cookie<'a>> for ExpectedCaptcha {
         Cookie::build(JOIN_CAPTCHA_COOKIE_KEY, json)
             .http_only(true)
             .max_age(time::Duration::minutes(10))
-            .path("/join")
             .finish()
     }
 }
