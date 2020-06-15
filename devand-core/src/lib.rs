@@ -2,6 +2,7 @@ mod affinity;
 pub mod auth;
 pub mod mock;
 mod schedule;
+mod schedule_matcher;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;

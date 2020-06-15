@@ -61,6 +61,13 @@ impl AffinityParams {
     }
 }
 
+impl From<Vec<(Language, LanguagePreference)>> for AffinityParams {
+    fn from(v: Vec<(Language, LanguagePreference)>) -> Self {
+        let languages = Languages(v.into_iter().collect());
+        Self { languages }
+    }
+}
+
 struct MatchingLanguages(BTreeMap<Language, (LanguagePreference, LanguagePreference)>);
 
 #[derive(Ord, PartialOrd, Eq, PartialEq)]
@@ -102,7 +109,7 @@ fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
 }
 
 // TODO Normalize to [0..1] when serializing
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone)]
+#[derive(Debug, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone)]
 pub struct Affinity(i32);
 
 impl Affinity {
@@ -218,7 +225,6 @@ mod tests {
         };
 
         let affinity = Affinity::from_params(&a, &b);
-        dbg!(&affinity);
 
         assert!(affinity < Affinity::FULL);
         assert!(affinity > Affinity::NONE);
