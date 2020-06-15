@@ -9,12 +9,12 @@ pub fn user() -> User {
         visible_name: "Alessandro Pezzato".into(),
         email: "alessandro@pezzato.net".into(),
         settings: UserSettings {
-            languages: btreemap! {
+            languages: Languages(btreemap! {
                 Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low },
                 Language::Javascript => LanguagePreference { level: Level::Proficient, priority: Priority::No },
                 Language::CPlusPlus => LanguagePreference { level: Level::Expert, priority: Priority::Low },
                 Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High },
-            },
+            }),
             vacation_mode: false,
             schedule: Schedule::Weekly(WeekSchedule {
                 mon: DaySchedule::try_from("21,22,23").unwrap(),

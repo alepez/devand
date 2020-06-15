@@ -109,17 +109,19 @@ impl CodeNowPage {
             languages,
         } = user;
 
+        let languages = languages.clone().to_sorted_vec();
+
         html! {
             <tr class="user-affinity">
                 <td class="username">{ username }</td>
                 <td class="visible_name">{ visible_name }</td>
                 <td class="affinity">{ affinity.to_string() }</td>
-                <td class="languages"> { for languages.clone().into_iter().map(|lang| self.view_language(lang)) } </td>
+                <td class="languages"> { for languages.iter().map(|lang| self.view_language(lang)) } </td>
             </tr>
         }
     }
 
-    fn view_language(&self, lang: (Language, LanguagePreference)) -> Html {
+    fn view_language(&self, lang: &(Language, LanguagePreference)) -> Html {
         let (lang, preferences) = lang;
         html! {
             <div class="language-control-group ">

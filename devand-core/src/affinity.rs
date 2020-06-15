@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn same_params_with_high_priority_have_full_affinity() {
-        let mut languages = Languages::new();
+        let mut languages = Languages::default();
         languages.insert(
             Language::Rust,
             LanguagePreference {
@@ -173,7 +173,7 @@ mod tests {
 
     #[test]
     fn same_level_with_low_priority_have_low_affinity() {
-        let mut languages = Languages::new();
+        let mut languages = Languages::default();
         languages.insert(
             Language::Rust,
             LanguagePreference {
@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn distant_level_with_high_priority_low_affinity() {
         let a = {
-            let mut languages = Languages::new();
+            let mut languages = Languages::default();
             languages.insert(
                 Language::Rust,
                 LanguagePreference {
@@ -206,7 +206,7 @@ mod tests {
         };
 
         let b = {
-            let mut languages = Languages::new();
+            let mut languages = Languages::default();
             languages.insert(
                 Language::Rust,
                 LanguagePreference {
@@ -227,7 +227,7 @@ mod tests {
 
     #[test]
     fn find_matching_languages_ok() {
-        let mut languages = Languages::new();
+        let mut languages = Languages::default();
         languages.insert(
             Language::Rust,
             LanguagePreference {
@@ -246,7 +246,7 @@ mod tests {
 
     #[test]
     fn find_matching_languages_none() {
-        let languages = Languages::new();
+        let languages = Languages::default();
         let a = languages.clone();
         let b = languages.clone();
 

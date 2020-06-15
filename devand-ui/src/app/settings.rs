@@ -183,7 +183,7 @@ impl SettingsPage {
             <fieldset>
                 <div class="pure-g">
                     <legend class="pure-u-1">{ "Languages" }</legend>
-                    { for languages.clone().into_iter().map(|lang| self.view_language(lang)) }
+                    { for languages.iter().map(|lang| self.view_language(lang)) }
                     <div class="pure-u-1">
                         <AddLanguageComponent on_add=self.link.callback(move |lang_pref| Msg::AddLanguage(lang_pref))/>
                     </div>
@@ -192,8 +192,8 @@ impl SettingsPage {
         }
     }
 
-    fn view_language(&self, lang: (Language, LanguagePreference)) -> Html {
-        let (lang, preferences) = lang;
+    fn view_language(&self, lang: (&Language, &LanguagePreference)) -> Html {
+        let (&lang, preferences) = lang;
         html! {
             <div class="language-control-group pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
                 <span class="language-tag">

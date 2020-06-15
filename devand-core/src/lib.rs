@@ -27,7 +27,37 @@ pub struct User {
     pub settings: UserSettings,
 }
 
-pub type Languages = BTreeMap<Language, LanguagePreference>;
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+pub struct Languages(pub BTreeMap<Language, LanguagePreference>);
+
+impl std::ops::Deref for Languages {
+    type Target = BTreeMap<Language, LanguagePreference>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for Languages {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Languages {
+    /// Sort languages by priority, then by level
+    pub fn to_sorted_vec(self: Languages) -> Vec<(Language, LanguagePreference)> {
+        let mut languages: Vec<_> = self.0.into_iter().collect();
+
+        languages.sort_by(|(_, l), (_, r)| {
+            l.priority
+                .cmp(&r.priority)
+                .then_with(|| l.level.cmp(&r.level))
+                .reverse()
+        });
+
+        languages
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct UserSettings {
@@ -118,7 +148,20 @@ pub struct WeekSchedule {
     pub sun: DaySchedule,
 }
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone, EnumIter, Display, EnumString)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Copy,
+    Clone,
+    EnumIter,
+    Display,
+    EnumString,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum Level {
     Novice,
@@ -136,7 +179,20 @@ impl Level {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Copy, Clone, EnumIter, Display, EnumString)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Copy,
+    Clone,
+    EnumIter,
+    Display,
+    EnumString,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum Priority {
     /// No: because user can add a known language, but may not want to use it
@@ -321,5 +377,54 @@ mod tests {
         assert!(schedule.hours[7] == true);
         assert!(schedule.hours[21] == true);
         assert!(schedule.hours[22] == false);
+    }
+
+    #[test]
+    fn sort_languages_by_priority_then_level() {
+        let mut languages = Languages::default();
+
+        languages.insert(
+            Language::C,
+            LanguagePreference {
+                level: Level::Expert,
+                priority: Priority::Low,
+            },
+        );
+        languages.insert(
+            Language::Javascript,
+            LanguagePreference {
+                level: Level::Proficient,
+                priority: Priority::Low,
+            },
+        );
+        languages.insert(
+            Language::CPlusPlus,
+            LanguagePreference {
+                level: Level::Novice,
+                priority: Priority::Low,
+            },
+        );
+        languages.insert(
+            Language::Rust,
+            LanguagePreference {
+                level: Level::Proficient,
+                priority: Priority::High,
+            },
+        );
+        languages.insert(
+            Language::Go,
+            LanguagePreference {
+                level: Level::Expert,
+                priority: Priority::No,
+            },
+        );
+
+        let languages = languages.to_sorted_vec();
+
+        assert!(languages[0].0 == Language::Rust);
+        assert!(languages[1].0 == Language::C);
+        assert!(languages[2].0 == Language::Javascript);
+        assert!(languages[3].0 == Language::CPlusPlus);
+        assert!(languages[4].0 == Language::Go);
     }
 }
