@@ -61,7 +61,10 @@ impl TryFrom<rocket::http::Cookie<'_>> for AuthData {
 impl<'a> Into<rocket::http::Cookie<'a>> for AuthData {
     fn into(self) -> rocket::http::Cookie<'a> {
         let json = serde_json::to_string(&self).unwrap();
-        Cookie::new(LOGIN_COOKIE_KEY, json)
+        Cookie::build(LOGIN_COOKIE_KEY, json)
+            .http_only(true)
+            .max_age(time::Duration::days(30))
+            .finish()
     }
 }
 
@@ -118,7 +121,11 @@ impl TryFrom<rocket::http::Cookie<'_>> for JoinData {
 impl<'a> Into<rocket::http::Cookie<'a>> for JoinData {
     fn into(self) -> rocket::http::Cookie<'a> {
         let json = serde_json::to_string(&self).unwrap();
-        Cookie::new(JOIN_COOKIE_KEY, json)
+        Cookie::build(JOIN_COOKIE_KEY, json)
+            .http_only(true)
+            .max_age(time::Duration::minutes(10))
+            .path("/join")
+            .finish()
     }
 }
 
@@ -267,9 +274,14 @@ pub(crate) fn join(
         email: join_data.email,
     };
 
-    db::auth::join(join_data, &conn.0)
-        .map(|_| ())
-        .map_err(|_| JoinError::UnknownError)
+    let result = db::auth::join(join_data, &conn.0);
+
+    if result.is_ok() {
+        cookies.remove_private(Cookie::named(JOIN_COOKIE_KEY));
+        cookies.remove_private(Cookie::named(JOIN_CAPTCHA_COOKIE_KEY));
+    }
+
+    result.map(|_| ()).map_err(|_| JoinError::UnknownError)
 }
 
 pub(crate) fn captcha(cookies: &mut Cookies) -> Result<CaptchaFile, ()> {
@@ -345,7 +357,11 @@ impl TryFrom<rocket::http::Cookie<'_>> for ExpectedCaptcha {
 impl<'a> Into<rocket::http::Cookie<'a>> for ExpectedCaptcha {
     fn into(self) -> rocket::http::Cookie<'a> {
         let json = serde_json::to_string(&self).unwrap();
-        Cookie::new(JOIN_CAPTCHA_COOKIE_KEY, json)
+        Cookie::build(JOIN_CAPTCHA_COOKIE_KEY, json)
+            .http_only(true)
+            .max_age(time::Duration::minutes(10))
+            .path("/join")
+            .finish()
     }
 }
 
