@@ -28,6 +28,7 @@ pub struct User {
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
 pub struct Languages(pub BTreeMap<Language, LanguagePreference>);
 
 impl std::ops::Deref for Languages {
@@ -60,6 +61,7 @@ impl Languages {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[serde(rename_all = "snake_case")]
 pub struct UserSettings {
     /// User can set language preferences
     pub languages: Languages,
@@ -138,6 +140,7 @@ impl DaySchedule {
 
 /// Week scheduling
 #[derive(Debug, Serialize, Deserialize, Clone, Default, Ord, PartialOrd, Eq, PartialEq)]
+#[serde(rename_all = "snake_case")]
 pub struct WeekSchedule {
     pub mon: DaySchedule,
     pub tue: DaySchedule,
@@ -259,6 +262,7 @@ pub enum Language {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct UserAffinity {
     pub user: PublicUserProfile,
     pub affinity: Affinity,
@@ -349,9 +353,11 @@ impl From<User> for PublicUserProfile {
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct CodeNow {
     pub current_user: User,
     pub all_users: Vec<PublicUserProfile>,
