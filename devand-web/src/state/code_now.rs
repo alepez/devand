@@ -1,17 +1,17 @@
 use devand_core::{CodeNowUsers, PublicUserProfile, User, UserId};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone)]
 pub struct CodeNowUsersMap {
-    users: HashMap<UserId, (Instant, PublicUserProfile)>,
+    users: BTreeMap<UserId, (Instant, PublicUserProfile)>,
     last_clear: Instant,
 }
 
 impl Default for CodeNowUsersMap {
     fn default() -> Self {
         Self {
-            users: HashMap::new(),
+            users: BTreeMap::new(),
             last_clear: Instant::now(),
         }
     }

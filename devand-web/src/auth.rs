@@ -41,7 +41,7 @@ impl Into<db::auth::Credentials> for Credentials {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthData {
-    pub user_id: i32,
+    pub user_id: devand_core::UserId,
 }
 
 impl AuthData {

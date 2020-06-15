@@ -4,7 +4,7 @@ use maplit::btreemap;
 
 pub fn user() -> User {
     User {
-        id: 1,
+        id: UserId(1),
         username: "alepez".into(),
         visible_name: "Alessandro Pezzato".into(),
         email: "alessandro@pezzato.net".into(),

@@ -1,17 +1,19 @@
 mod affinity;
-mod schedule;
 pub mod auth;
 pub mod mock;
+mod schedule;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
 use std::collections::BTreeMap;
 use strum_macros::{Display, EnumIter, EnumString};
 
-pub use schedule::{DaySchedule, Schedule, WeekSchedule};
 pub use affinity::{Affinity, AffinityParams};
+pub use schedule::{DaySchedule, Schedule, WeekSchedule};
 
-pub type UserId = i32;
+#[derive(Default, Debug, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[serde(rename_all = "snake_case")]
+pub struct UserId(pub i32);
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]

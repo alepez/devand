@@ -43,7 +43,7 @@ impl TryInto<devand_core::User> for User {
         let visible_name = self.visible_name.unwrap_or(self.username.clone());
 
         let user = devand_core::User {
-            id: self.id,
+            id: devand_core::UserId(self.id),
             username: self.username,
             email: self.email,
             visible_name,

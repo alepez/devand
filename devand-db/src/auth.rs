@@ -1,5 +1,6 @@
 use crate::{models, schema, schema_view, Error};
 use argon2::{self, Config};
+use devand_core::UserId;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
@@ -79,7 +80,7 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<i32, Error> {
+pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<UserId, Error> {
     let Credentials { username, password } = credentials;
 
     let auth: models::Auth = schema_view::login::table
@@ -88,7 +89,7 @@ pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<i32, Error
         .map_err(|_| Error::Unknown)?;
 
     if verify_password(&auth.enc_password, &password) {
-        Ok(auth.user_id)
+        Ok(UserId(auth.user_id))
     } else {
         Err(Error::Unknown)
     }

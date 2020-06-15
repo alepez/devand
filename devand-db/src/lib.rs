@@ -43,9 +43,9 @@ pub fn load_users(conn: &PgConnection) -> Option<Vec<devand_core::User>> {
         }).ok()
 }
 
-pub fn load_user_by_id(id: i32, conn: &PgConnection) -> Option<devand_core::User> {
+pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table
-        .filter(schema::users::dsl::id.eq(id))
+        .filter(schema::users::dsl::id.eq(id.0))
         .first(conn)
         .ok()?;
 
@@ -62,7 +62,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
 
     let settings = serde_json::to_value(settings).unwrap();
 
-    diesel::update(schema::users::table.filter(schema::users::dsl::id.eq(user.id)))
+    diesel::update(schema::users::table.filter(schema::users::dsl::id.eq(user.id.0)))
         .set((
             schema::users::dsl::settings.eq(settings),
             schema::users::dsl::visible_name.eq(visible_name),
