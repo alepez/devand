@@ -70,7 +70,7 @@ fn join(
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::join(&mut cookies, join_data.0, expected_captcha, &conn)
-        .map(|_| Redirect::to(uri!(index)))
+        .map(|_| Redirect::to(uri!(dashboard_index)))
         .map_err(|err| {
             log_fail(real_ip.0);
             Flash::error(Redirect::to(uri!(join_page)), err.to_string())

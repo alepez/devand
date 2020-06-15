@@ -268,20 +268,30 @@ pub(crate) fn join(
     // Early exit if not valid
     valid?;
 
+    let JoinData {
+        username,
+        password,
+        email,
+        ..
+    } = join_data;
+
     let join_data = db::auth::JoinData {
-        username: join_data.username,
-        password: join_data.password.into(),
-        email: join_data.email,
+        username: username.clone(),
+        password: password.clone(),
+        email: email.clone(),
     };
 
-    let result = db::auth::join(join_data, &conn.0);
+    db::auth::join(join_data, &conn.0)
+        .map_err(|_| JoinError::UnknownError)
+        .and_then(|_| {
+            // Remove cookies used during user account registration
+            cookies.remove_private(Cookie::named(JOIN_COOKIE_KEY));
+            cookies.remove_private(Cookie::named(JOIN_CAPTCHA_COOKIE_KEY));
 
-    if result.is_ok() {
-        cookies.remove_private(Cookie::named(JOIN_COOKIE_KEY));
-        cookies.remove_private(Cookie::named(JOIN_CAPTCHA_COOKIE_KEY));
-    }
-
-    result.map(|_| ()).map_err(|_| JoinError::UnknownError)
+            // Automatically log in this user
+            let credentials = Credentials { username, password };
+            login(cookies, credentials, conn).map_err(|_| JoinError::UnknownError)
+        })
 }
 
 pub(crate) fn captcha(cookies: &mut Cookies) -> Result<CaptchaFile, ()> {
