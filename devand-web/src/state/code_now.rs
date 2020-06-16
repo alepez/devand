@@ -59,8 +59,6 @@ impl CodeNowUsersMap {
             .map(|(&id, _)| id)
             .collect();
 
-        dbg!(&old_entities);
-
         for id in old_entities {
             self.users.remove(&id);
         }

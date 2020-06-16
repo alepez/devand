@@ -1,4 +1,5 @@
 use crate::{Affinity, AffinityParams, DaySchedule, UserId, WeekSchedule};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 struct AffinityMatrix(Vec<Option<Affinity>>);
@@ -53,7 +54,14 @@ impl AffinityMatrix {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 struct Hour(i32);
+
+impl ToString for Hour {
+    fn to_string(&self) -> String {
+        format!("{:02}", self.0)
+    }
+}
 
 #[derive(Debug)]
 struct ScheduleMatrix {
@@ -101,6 +109,7 @@ impl From<Vec<(UserId, DaySchedule)>> for ScheduleMatrix {
 }
 
 impl ScheduleMatrix {
+    /// Return a Vec of all users available in a given hour
     pub fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
         self.data
             .iter()
@@ -112,6 +121,7 @@ impl ScheduleMatrix {
             .collect()
     }
 
+    /// Return a Vec of all users available in a given dayly schedule
     pub fn get_available_at_day(&self, day: &DaySchedule) -> Vec<UserId> {
         use std::collections::BTreeSet;
 
@@ -130,6 +140,26 @@ impl ScheduleMatrix {
         set.into_iter().collect()
     }
 }
+
+#[derive(Serialize, Deserialize)]
+struct DayMatching {
+    pub hours: [Vec<UserId>; 24],
+}
+
+// #[derive(Serialize, Deserialize)]
+// struct PeriodMatching {
+//     pub days: Vec<DayMatching>
+// }
+
+// impl PeriodMatching {
+//     fn new() {
+//     }
+// }
+
+// fn get_week_best_matching() -> WeekBestMatching {
+//     WeekBestMatching {
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

@@ -14,6 +14,7 @@ validator_derive = "0.10"
 captcha = "0.0.7"
 uuid = { version = "0.8", features = ["v4"] }
 time = "0.1.43"
+chrono = { version = "0.4", features = ["serde"] }
 
 [dependencies.rocket]
 version = "0.4"
