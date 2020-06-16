@@ -41,6 +41,18 @@ impl From<Vec<(UserId, AffinityParams)>> for AffinityMatrix {
     }
 }
 
+impl AffinityMatrix {
+    fn find_best_match<'a, I>(&self, u: &UserId, o: I) -> Option<UserId>
+    where
+        I: IntoIterator<Item = &'a UserId>,
+    {
+        o.into_iter()
+            .map(|x| (*x, self[(*u, *x)]))
+            .max_by_key(|x| x.1)
+            .map(|x| x.0)
+    }
+}
+
 struct Hour(i32);
 
 #[derive(Debug)]
@@ -186,6 +198,11 @@ mod tests {
         assert!(matrix[(UserId(0), UserId(2))] == Some(Affinity::NONE));
         assert!(matrix[(UserId(0), UserId(3))] == Some(Affinity::NONE));
         assert!(matrix[(UserId(1), UserId(2))] == Some(Affinity::FULL));
+
+        let u = UserId(1);
+        let o = vec![UserId(2), UserId(3)];
+        let best_match = matrix.find_best_match(&u, &o);
+        assert!(best_match == Some(UserId(2)));
     }
 
     #[test]
@@ -218,7 +235,7 @@ mod tests {
 
         assert!(
             matrix.get_available_at_day(&DaySchedule::try_from("4,5,6").unwrap())
-                == vec![ UserId(2), UserId(3)]
+                == vec![UserId(2), UserId(3)]
         );
     }
 }
