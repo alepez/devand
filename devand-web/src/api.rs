@@ -65,16 +65,14 @@ fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devan
 }
 
 #[get("/availability-match")]
-fn availability_match(user: LoggedUser, conn: PgDevandConn) -> Json<AvailabilityMatch> {
+fn availability_match(user: LoggedUser) -> Json<AvailabilityMatch> {
     let now = Utc::now();
     let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
     let User { settings, .. } = user.into();
     let availability = settings.schedule;
     let week_sched_mat = mock_week_sched_mat();
-    let res = find_all_users_matching_in_week(next_week, availability, week_sched_mat);
-
-    let res = AvailabilityMatch {};
-
+    let slots = find_all_users_matching_in_week(next_week, availability, week_sched_mat);
+    let res = AvailabilityMatch { slots };
     Json(res)
 }
 
@@ -83,7 +81,9 @@ fn mock_week_sched_mat() -> WeekScheduleMatrix {
 }
 
 #[derive(Serialize, Deserialize)]
-struct AvailabilityMatch {}
+struct AvailabilityMatch {
+    slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
+}
 
 #[cfg(test)]
 mod tests {

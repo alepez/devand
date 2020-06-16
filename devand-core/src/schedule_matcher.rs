@@ -192,7 +192,10 @@ fn attach_schedule(
     availability: Availability,
 ) -> Vec<(Date<Utc>, DaySchedule)> {
     match availability {
-        Availability::Never => todo!(),
+        Availability::Never => days
+            .iter()
+            .map(|day| (*day, DaySchedule::default()))
+            .collect(),
         Availability::Weekly(week_schedule) => days
             .iter()
             .map(|day| get_day_schedule(*day, &week_schedule))
@@ -208,7 +211,11 @@ fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
         .collect()
 }
 
-pub fn find_all_users_matching_in_week(date: DateTime<Utc>, availability: Availability, week_sched_matrix: WeekScheduleMatrix) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
+pub fn find_all_users_matching_in_week(
+    date: DateTime<Utc>,
+    availability: Availability,
+    week_sched_matrix: WeekScheduleMatrix,
+) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
     let days = days_from(7, date);
     let future_availability = attach_schedule(days, availability);
     match_all_week(&future_availability, &week_sched_matrix)
@@ -324,7 +331,8 @@ mod tests {
 
     #[test]
     fn availability_match_ok() {
-        dbg!(days_from(7, Utc::now()));
+        let _days = days_from(7, Utc::now());
+        // dbg!(days);
     }
 
     #[test]
@@ -334,7 +342,7 @@ mod tests {
         let days = days_from(7, next_week);
         let User { settings, .. } = crate::mock::user();
         let availability = settings.schedule;
-        let future_availability = attach_schedule(days, availability);
-        dbg!(future_availability);
+        let _uture_availability = attach_schedule(days, availability);
+        // dbg!(future_availability);
     }
 }
