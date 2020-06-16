@@ -66,7 +66,7 @@ impl ToString for Hour {
 }
 
 #[derive(Debug)]
-struct DayScheduleMatrix {
+pub struct DayScheduleMatrix {
     data: Vec<bool>,
     max_user_id: UserId,
 }
@@ -112,7 +112,7 @@ impl From<Vec<(UserId, DaySchedule)>> for DayScheduleMatrix {
 
 impl DayScheduleMatrix {
     /// Return a Vec of all users available in a given hour
-    pub fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
+    fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
         self.data
             .iter()
             .skip(h.0 as usize)
@@ -124,7 +124,7 @@ impl DayScheduleMatrix {
     }
 
     /// Return a Vec of all users available in a given dayly schedule
-    pub fn get_available_at_day(&self, day: &DaySchedule) -> Vec<UserId> {
+    fn get_available_at_day(&self, day: &DaySchedule) -> Vec<UserId> {
         use std::collections::BTreeSet;
 
         let mut set: BTreeSet<UserId> = BTreeSet::new();
@@ -144,7 +144,7 @@ impl DayScheduleMatrix {
 }
 
 #[derive(Debug)]
-struct WeekScheduleMatrix {
+pub struct WeekScheduleMatrix {
     pub mon: DayScheduleMatrix,
     pub tue: DayScheduleMatrix,
     pub wed: DayScheduleMatrix,
@@ -178,7 +178,16 @@ fn get_day_schedule(date: Date<Utc>, week_schedule: &WeekSchedule) -> (Date<Utc>
     (date, week_schedule[date.weekday()].clone())
 }
 
-pub fn attach_schedule(
+/// Return a vector with an item for each hour of the next week, each one
+/// containing all available users at that moment.
+fn match_all_week(
+    target: &Vec<(Date<Utc>, DaySchedule)>,
+    week_sched_matrix: &WeekScheduleMatrix,
+) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
+    todo!()
+}
+
+fn attach_schedule(
     days: Vec<Date<Utc>>,
     availability: Availability,
 ) -> Vec<(Date<Utc>, DaySchedule)> {
@@ -191,12 +200,18 @@ pub fn attach_schedule(
     }
 }
 
-pub fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
+fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
     (0..n)
         .into_iter()
         .filter_map(|x| from.checked_add_signed(Duration::days(x as i64)))
         .map(|x| x.date())
         .collect()
+}
+
+pub fn find_all_users_matching_in_week(date: DateTime<Utc>, availability: Availability, week_sched_matrix: WeekScheduleMatrix) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
+    let days = days_from(7, date);
+    let future_availability = attach_schedule(days, availability);
+    match_all_week(&future_availability, &week_sched_matrix)
 }
 
 #[cfg(test)]
