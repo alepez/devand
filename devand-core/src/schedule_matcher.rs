@@ -44,7 +44,10 @@ impl From<Vec<(UserId, AffinityParams)>> for AffinityMatrix {
 struct Hour(i32);
 
 #[derive(Debug)]
-struct ScheduleMatrix(Vec<bool>);
+struct ScheduleMatrix {
+    data: Vec<bool>,
+    max_user_id: UserId,
+}
 
 impl std::ops::Index<(UserId, Hour)> for ScheduleMatrix {
     type Output = bool;
@@ -52,7 +55,7 @@ impl std::ops::Index<(UserId, Hour)> for ScheduleMatrix {
     fn index(&self, pair: (UserId, Hour)) -> &Self::Output {
         let (UserId(i), Hour(h)) = pair;
         let p = (i as usize) * DaySchedule::HOURS_IN_DAY + (h as usize);
-        &self.0[p]
+        &self.data[p]
     }
 }
 
@@ -72,10 +75,29 @@ impl From<Vec<(UserId, DaySchedule)>> for ScheduleMatrix {
                     *cell = in_schedule;
                 }
             }
-            Self(data)
+            Self {
+                data,
+                max_user_id: UserId(*max_user_id),
+            }
         } else {
-            Self(Vec::default())
+            Self {
+                data: Vec::default(),
+                max_user_id: UserId(0),
+            }
         }
+    }
+}
+
+impl ScheduleMatrix {
+    fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
+        self.data
+            .iter()
+            .skip(h.0 as usize)
+            .step_by(DaySchedule::HOURS_IN_DAY)
+            .enumerate()
+            .filter(|(_, in_schedule)| **in_schedule)
+            .map(|(id, _)| UserId(id as i32))
+            .collect()
     }
 }
 
@@ -160,13 +182,17 @@ mod tests {
         let expected_len = params.len() * 24;
         let matrix = ScheduleMatrix::from(params);
 
-        assert!(matrix.0.len() == expected_len);
+        assert!(matrix.data.len() == expected_len);
         assert!(matrix[(UserId(0), Hour(1))] == true);
         assert!(matrix[(UserId(2), Hour(3))] == true);
         assert!(matrix[(UserId(2), Hour(5))] == true);
         assert!(matrix[(UserId(2), Hour(1))] == false);
         assert!(matrix[(UserId(1), Hour(5))] == false);
         assert!(matrix[(UserId(3), Hour(6))] == false);
+
+        assert!(matrix.get_available_at_hour(Hour(1)) == vec![UserId(0), UserId(1)]);
+        assert!(matrix.get_available_at_hour(Hour(3)) == vec![UserId(1), UserId(2), UserId(3)]);
+
         // assert!(matrix[(UserId(0), Hour(1))] == vec![UserId(1)]);
         // assert!(matrix[(UserId(2), Hour(3))] == vec![UserId(1), UserId(3)]);
         // assert!(matrix[(UserId(2), Hour(5))] == vec![UserId(3)]);
