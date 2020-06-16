@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub use affinity::{Affinity, AffinityParams};
-pub use schedule::{DaySchedule, Schedule, WeekSchedule};
+pub use schedule::{DaySchedule, Availability, WeekSchedule};
 
 #[derive(Default, Debug, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[serde(rename_all = "snake_case")]
@@ -70,7 +70,7 @@ pub struct UserSettings {
     /// User can set language preferences
     pub languages: Languages,
     /// User must set a schedule
-    pub schedule: Schedule,
+    pub schedule: Availability,
     /// User can disable all activities without losing schedule
     pub vacation_mode: bool,
 }

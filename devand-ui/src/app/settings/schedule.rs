@@ -1,4 +1,4 @@
-use devand_core::{DaySchedule, Schedule, WeekSchedule};
+use devand_core::{DaySchedule, Availability, WeekSchedule};
 use yew::{prelude::*, Properties};
 
 pub enum Msg {
@@ -19,8 +19,8 @@ pub enum WeekDay {
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
-    pub schedule: Schedule,
-    pub on_change: Callback<Schedule>,
+    pub schedule: Availability,
+    pub on_change: Callback<Availability>,
 }
 
 pub struct ScheduleTable {
@@ -39,11 +39,11 @@ impl Component for ScheduleTable {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::ResetSchedule => {
-                self.props.schedule = Schedule::Weekly(WeekSchedule::default());
+                self.props.schedule = Availability::Weekly(WeekSchedule::default());
                 true
             }
             Msg::ToggleDayHour(d, h) => {
-                if let Schedule::Weekly(week) = &mut self.props.schedule {
+                if let Availability::Weekly(week) = &mut self.props.schedule {
                     let day = match d {
                         WeekDay::Monday => &mut week.mon,
                         WeekDay::Tuesday => &mut week.tue,
@@ -72,10 +72,10 @@ impl Component for ScheduleTable {
 }
 
 impl ScheduleTable {
-    fn view_schedule_panel(&self, schedule: &Schedule) -> Html {
+    fn view_schedule_panel(&self, schedule: &Availability) -> Html {
         match schedule {
-            Schedule::Never => self.view_schedule_never(),
-            Schedule::Weekly(week_schedule) => self.view_schedule_weekly(week_schedule),
+            Availability::Never => self.view_schedule_never(),
+            Availability::Weekly(week_schedule) => self.view_schedule_weekly(week_schedule),
         }
     }
 
@@ -129,7 +129,7 @@ impl ScheduleTable {
         html! {
             <fieldset>
                 <legend>{ "You haven't scheduled anything yet" }</legend>
-                <div><button class="pure-button" onclick=self.link.callback(move |_| Msg::ResetSchedule)>{ "Schedule your availability" }</button></div>
+                <div><button class="pure-button" onclick=self.link.callback(move |_| Msg::ResetSchedule)>{ "Set your availability" }</button></div>
             </fieldset>
         }
     }

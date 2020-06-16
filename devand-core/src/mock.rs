@@ -16,7 +16,7 @@ pub fn user() -> User {
                 Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High },
             }),
             vacation_mode: false,
-            schedule: Schedule::Weekly(WeekSchedule {
+            schedule: Availability::Weekly(WeekSchedule {
                 mon: DaySchedule::try_from("21,22,23").unwrap(),
                 tue: DaySchedule::never(),
                 wed: DaySchedule::never(),

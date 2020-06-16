@@ -2,7 +2,7 @@ mod schedule;
 
 use crate::app::languages::AddLanguageComponent;
 use crate::app::services::UserService;
-use devand_core::{Language, LanguagePreference, Languages, Schedule, User};
+use devand_core::{Language, LanguagePreference, Languages, Availability, User};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
@@ -21,7 +21,7 @@ pub enum Msg {
     RemoveLanguage(Language),
     UserFetchOk(User),
     UserFetchErr,
-    UpdateSchedule(Schedule),
+    UpdateSchedule(Availability),
 }
 
 pub struct SettingsPage {
@@ -138,7 +138,7 @@ impl SettingsPage {
                     if user.settings.vacation_mode {
                         self.view_vacation_mode_panel()
                     } else {
-                        self.view_schedule_panel(&settings.schedule)
+                        self.view_availability_panel(&settings.schedule)
                     }
                 }
                 { self.view_languages_panel(&settings.languages) }
@@ -235,8 +235,8 @@ impl SettingsPage {
         }
     }
 
-    fn view_schedule_panel(&self, schedule: &Schedule) -> Html {
-        html! { <ScheduleTable schedule=schedule on_change=self.link.callback(move |s: Schedule| Msg::UpdateSchedule(s)) /> }
+    fn view_availability_panel(&self, schedule: &Availability) -> Html {
+        html! { <ScheduleTable schedule=schedule on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
     }
 
     fn update_user<F>(&mut self, f: F)

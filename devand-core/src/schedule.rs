@@ -4,16 +4,16 @@ use std::convert::TryFrom;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
-pub enum Schedule {
+pub enum Availability {
     /// Disabled
     Never,
     /// Schedule every week in the future
     Weekly(WeekSchedule),
 }
 
-impl Default for Schedule {
+impl Default for Availability {
     fn default() -> Self {
-        Schedule::Never
+        Availability::Never
     }
 }
 
