@@ -238,11 +238,11 @@ fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
 pub fn find_all_users_matching_in_week(
     date: DateTime<Utc>,
     availability: Availability,
-    week_sched_matrix: WeekScheduleMatrix,
+    week_sched_matrix: &WeekScheduleMatrix,
 ) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
     let days = days_from(7, date);
     let future_availability = attach_schedule(days, availability);
-    match_all_week(&future_availability, &week_sched_matrix)
+    match_all_week(&future_availability, week_sched_matrix)
 }
 
 #[cfg(test)]

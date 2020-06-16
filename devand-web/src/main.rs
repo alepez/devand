@@ -45,7 +45,10 @@ fn run_db_migrations(rocket: Rocket) -> Result<Rocket, Rocket> {
 }
 
 #[derive(Default)]
-struct CodeNowUsers(pub std::sync::RwLock<state::code_now::CodeNowUsersMap>);
+struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
+
+#[derive(Default)]
+struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>);
 
 fn main() {
     rocket::ignite()
@@ -54,6 +57,7 @@ fn main() {
         .attach(AdHoc::on_attach("Database Migrations", run_db_migrations))
         .attach(AdHoc::on_attach("Static files", static_files))
         .manage(CodeNowUsers::default())
+        .manage(WeekScheduleMatrix::default())
         .mount("/", pages::routes())
         .mount("/api", api::routes())
         .launch();

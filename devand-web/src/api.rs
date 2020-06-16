@@ -1,9 +1,8 @@
 use crate::auth::{AuthData, LoggedUser};
-use crate::CodeNowUsers;
-use crate::PgDevandConn;
+use crate::{CodeNowUsers, PgDevandConn, WeekScheduleMatrix};
 use chrono::prelude::*;
 use chrono::Duration;
-use devand_core::schedule_matcher::{find_all_users_matching_in_week, WeekScheduleMatrix};
+use devand_core::schedule_matcher::find_all_users_matching_in_week;
 use devand_core::{User, UserAffinity, UserId};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
@@ -65,19 +64,18 @@ fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devan
 }
 
 #[get("/availability-match")]
-fn availability_match(user: LoggedUser) -> Json<AvailabilityMatch> {
+fn availability_match(
+    user: LoggedUser,
+    week_sched_matrix: State<WeekScheduleMatrix>,
+) -> Json<AvailabilityMatch> {
     let now = Utc::now();
     let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
     let User { settings, .. } = user.into();
     let availability = settings.schedule;
-    let week_sched_mat = mock_week_sched_mat();
-    let slots = find_all_users_matching_in_week(next_week, availability, week_sched_mat);
+    let week_sched_mat = week_sched_matrix.0.read().unwrap();
+    let slots = find_all_users_matching_in_week(next_week, availability, week_sched_mat.get());
     let res = AvailabilityMatch { slots };
     Json(res)
-}
-
-fn mock_week_sched_mat() -> WeekScheduleMatrix {
-    todo!()
 }
 
 #[derive(Serialize, Deserialize)]
