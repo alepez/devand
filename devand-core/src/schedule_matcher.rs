@@ -1,4 +1,6 @@
-use crate::{Affinity, AffinityParams, DaySchedule, UserId, WeekSchedule};
+use crate::{Affinity, AffinityParams, Availability, DaySchedule, User, UserId, WeekSchedule};
+use chrono::prelude::*;
+use chrono::Duration;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
@@ -64,12 +66,12 @@ impl ToString for Hour {
 }
 
 #[derive(Debug)]
-struct ScheduleMatrix {
+struct DayScheduleMatrix {
     data: Vec<bool>,
     max_user_id: UserId,
 }
 
-impl std::ops::Index<(UserId, Hour)> for ScheduleMatrix {
+impl std::ops::Index<(UserId, Hour)> for DayScheduleMatrix {
     type Output = bool;
 
     fn index(&self, pair: (UserId, Hour)) -> &Self::Output {
@@ -79,7 +81,7 @@ impl std::ops::Index<(UserId, Hour)> for ScheduleMatrix {
     }
 }
 
-impl From<Vec<(UserId, DaySchedule)>> for ScheduleMatrix {
+impl From<Vec<(UserId, DaySchedule)>> for DayScheduleMatrix {
     fn from(us: Vec<(UserId, DaySchedule)>) -> Self {
         if let Some((UserId(max_user_id), _)) = us.iter().max_by_key(|x| x.0) {
             let size = (1 + (*max_user_id as usize)) * DaySchedule::HOURS_IN_DAY;
@@ -108,7 +110,7 @@ impl From<Vec<(UserId, DaySchedule)>> for ScheduleMatrix {
     }
 }
 
-impl ScheduleMatrix {
+impl DayScheduleMatrix {
     /// Return a Vec of all users available in a given hour
     pub fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
         self.data
@@ -141,25 +143,61 @@ impl ScheduleMatrix {
     }
 }
 
+#[derive(Debug)]
+struct WeekScheduleMatrix {
+    pub mon: DayScheduleMatrix,
+    pub tue: DayScheduleMatrix,
+    pub wed: DayScheduleMatrix,
+    pub thu: DayScheduleMatrix,
+    pub fri: DayScheduleMatrix,
+    pub sat: DayScheduleMatrix,
+    pub sun: DayScheduleMatrix,
+}
+
+impl std::ops::Index<chrono::Weekday> for WeekScheduleMatrix {
+    type Output = DayScheduleMatrix;
+    fn index(&self, index: chrono::Weekday) -> &Self::Output {
+        match index {
+            chrono::Weekday::Mon => &self.mon,
+            chrono::Weekday::Tue => &self.tue,
+            chrono::Weekday::Wed => &self.wed,
+            chrono::Weekday::Thu => &self.thu,
+            chrono::Weekday::Fri => &self.fri,
+            chrono::Weekday::Sat => &self.sat,
+            chrono::Weekday::Sun => &self.sun,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct DayMatching {
     pub hours: [Vec<UserId>; 24],
 }
 
-// #[derive(Serialize, Deserialize)]
-// struct PeriodMatching {
-//     pub days: Vec<DayMatching>
-// }
+fn get_day_schedule(date: Date<Utc>, week_schedule: &WeekSchedule) -> (Date<Utc>, DaySchedule) {
+    (date, week_schedule[date.weekday()].clone())
+}
 
-// impl PeriodMatching {
-//     fn new() {
-//     }
-// }
+pub fn attach_schedule(
+    days: Vec<Date<Utc>>,
+    availability: Availability,
+) -> Vec<(Date<Utc>, DaySchedule)> {
+    match availability {
+        Availability::Never => todo!(),
+        Availability::Weekly(week_schedule) => days
+            .iter()
+            .map(|day| get_day_schedule(*day, &week_schedule))
+            .collect(),
+    }
+}
 
-// fn get_week_best_matching() -> WeekBestMatching {
-//     WeekBestMatching {
-//     }
-// }
+pub fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
+    (0..n)
+        .into_iter()
+        .filter_map(|x| from.checked_add_signed(Duration::days(x as i64)))
+        .map(|x| x.date())
+        .collect()
+}
 
 #[cfg(test)]
 mod tests {
@@ -245,7 +283,7 @@ mod tests {
         ];
 
         let expected_len = params.len() * 24;
-        let matrix = ScheduleMatrix::from(params);
+        let matrix = DayScheduleMatrix::from(params);
 
         assert!(matrix.data.len() == expected_len);
         assert!(matrix[(UserId(0), Hour(1))] == true);
@@ -267,5 +305,21 @@ mod tests {
             matrix.get_available_at_day(&DaySchedule::try_from("4,5,6").unwrap())
                 == vec![UserId(2), UserId(3)]
         );
+    }
+
+    #[test]
+    fn availability_match_ok() {
+        dbg!(days_from(7, Utc::now()));
+    }
+
+    #[test]
+    fn future_availability_ok() {
+        let now = Utc::now();
+        let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
+        let days = days_from(7, next_week);
+        let User { settings, .. } = crate::mock::user();
+        let availability = settings.schedule;
+        let future_availability = attach_schedule(days, availability);
+        dbg!(future_availability);
     }
 }

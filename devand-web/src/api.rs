@@ -3,13 +3,20 @@ use crate::CodeNowUsers;
 use crate::PgDevandConn;
 use chrono::prelude::*;
 use chrono::Duration;
+use devand_core::schedule_matcher::{attach_schedule, days_from};
 use devand_core::{Availability, DaySchedule, User, UserAffinity, WeekSchedule};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
 use serde::{Deserialize, Serialize};
 
 pub fn routes() -> Vec<Route> {
-    routes![settings, settings_put, affinities, code_now]
+    routes![
+        settings,
+        settings_put,
+        affinities,
+        code_now,
+        availability_match
+    ]
 }
 
 #[get("/settings")]
@@ -74,58 +81,7 @@ fn availability_match(user: LoggedUser, conn: PgDevandConn) -> Json<Availability
 #[derive(Serialize, Deserialize)]
 struct AvailabilityMatch {}
 
-fn get_day_schedule(date: Date<Utc>, week_schedule: &WeekSchedule) -> (Date<Utc>, DaySchedule) {
-    let sched = match date.weekday() {
-        Weekday::Mon => week_schedule.mon.clone(),
-        Weekday::Tue => week_schedule.tue.clone(),
-        Weekday::Wed => week_schedule.wed.clone(),
-        Weekday::Thu => week_schedule.thu.clone(),
-        Weekday::Fri => week_schedule.fri.clone(),
-        Weekday::Sat => week_schedule.sat.clone(),
-        Weekday::Sun => week_schedule.sun.clone(),
-    };
-
-    (date, sched)
-}
-
-fn attach_schedule(
-    days: Vec<Date<Utc>>,
-    availability: Availability,
-) -> Vec<(Date<Utc>, DaySchedule)> {
-    match availability {
-        Availability::Never => todo!(),
-        Availability::Weekly(week_schedule) => days
-            .iter()
-            .map(|day| get_day_schedule(*day, &week_schedule))
-            .collect(),
-    }
-}
-
-fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
-    (0..n)
-        .into_iter()
-        .filter_map(|x| from.checked_add_signed(Duration::days(x as i64)))
-        .map(|x| x.date())
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn availability_match_ok() {
-        dbg!(days_from(7, Utc::now()));
-    }
-
-    #[test]
-    fn future_availability_ok() {
-        let now = Utc::now();
-        let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
-        let days = days_from(7, next_week);
-        let User { settings, .. } = devand_core::mock::user();
-        let availability = settings.schedule;
-        let future_availability = attach_schedule(days, availability);
-        dbg!(future_availability);
-    }
 }

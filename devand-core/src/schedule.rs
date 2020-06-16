@@ -82,6 +82,21 @@ pub struct WeekSchedule {
     pub sun: DaySchedule,
 }
 
+impl std::ops::Index<chrono::Weekday> for WeekSchedule {
+    type Output = DaySchedule;
+    fn index(&self, index: chrono::Weekday) -> &Self::Output {
+        match index {
+            chrono::Weekday::Mon => &self.mon,
+            chrono::Weekday::Tue => &self.tue,
+            chrono::Weekday::Wed => &self.wed,
+            chrono::Weekday::Thu => &self.thu,
+            chrono::Weekday::Fri => &self.fri,
+            chrono::Weekday::Sat => &self.sat,
+            chrono::Weekday::Sun => &self.sun,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
