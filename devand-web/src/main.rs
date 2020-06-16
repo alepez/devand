@@ -44,6 +44,17 @@ fn run_db_migrations(rocket: Rocket) -> Result<Rocket, Rocket> {
     }
 }
 
+fn init_wsmc(rocket: Rocket) -> Result<Rocket, Rocket> {
+    let conn = PgDevandConn::get_one(&rocket).expect("database connection");
+    let conn = conn.0;
+    let wsmc = rocket.state::<WeekScheduleMatrix>();
+    if let Some(wsmc) = wsmc {
+        let mut wsmc = wsmc.0.write().unwrap();
+        wsmc.init(&*conn);
+    }
+    Ok(rocket)
+}
+
 #[derive(Default)]
 struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 
@@ -52,12 +63,13 @@ struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>)
 
 fn main() {
     rocket::ignite()
+        .manage(CodeNowUsers::default())
+        .manage(WeekScheduleMatrix::default())
         .attach(Template::fairing())
         .attach(PgDevandConn::fairing())
         .attach(AdHoc::on_attach("Database Migrations", run_db_migrations))
         .attach(AdHoc::on_attach("Static files", static_files))
-        .manage(CodeNowUsers::default())
-        .manage(WeekScheduleMatrix::default())
+        .attach(AdHoc::on_attach("WeekScheduleMatrixCache", init_wsmc))
         .mount("/", pages::routes())
         .mount("/api", api::routes())
         .launch();

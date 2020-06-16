@@ -67,7 +67,8 @@ impl ToString for Hour {
     }
 }
 
-#[derive(Debug)]
+// TODO Remove Default
+#[derive(Debug, Default)]
 pub struct DayScheduleMatrix {
     data: Vec<bool>,
     max_user_id: UserId,
@@ -147,7 +148,8 @@ impl DayScheduleMatrix {
     }
 }
 
-#[derive(Debug)]
+// TODO Remove Default
+#[derive(Debug, Default)]
 pub struct WeekScheduleMatrix {
     pub mon: DayScheduleMatrix,
     pub tue: DayScheduleMatrix,
