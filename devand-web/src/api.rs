@@ -4,7 +4,7 @@ use crate::PgDevandConn;
 use chrono::prelude::*;
 use chrono::Duration;
 use devand_core::schedule_matcher::{find_all_users_matching_in_week, WeekScheduleMatrix};
-use devand_core::{Availability, DaySchedule, User, UserAffinity, UserId, WeekSchedule};
+use devand_core::{User, UserAffinity, UserId};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
 use serde::{Deserialize, Serialize};
@@ -87,5 +87,5 @@ struct AvailabilityMatch {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
 }

@@ -1,4 +1,4 @@
-use crate::{Affinity, AffinityParams, Availability, DaySchedule, User, UserId, WeekSchedule};
+use crate::{Affinity, AffinityParams, Availability, DaySchedule, UserId, WeekSchedule};
 use chrono::prelude::*;
 use chrono::Duration;
 use serde::{Deserialize, Serialize};
@@ -45,6 +45,8 @@ impl From<Vec<(UserId, AffinityParams)>> for AffinityMatrix {
 }
 
 impl AffinityMatrix {
+    // TODO Cleanup?
+    #[allow(dead_code)]
     fn find_best_match<'a, I>(&self, u: &UserId, o: I) -> Option<UserId>
     where
         I: IntoIterator<Item = &'a UserId>,
@@ -124,6 +126,8 @@ impl DayScheduleMatrix {
     }
 
     /// Return a Vec of all users available in a given dayly schedule
+    // TODO Cleanup?
+    #[allow(dead_code)]
     fn get_available_at_day(&self, day: &DaySchedule) -> Vec<UserId> {
         use std::collections::BTreeSet;
 
@@ -178,13 +182,33 @@ fn get_day_schedule(date: Date<Utc>, week_schedule: &WeekSchedule) -> (Date<Utc>
     (date, week_schedule[date.weekday()].clone())
 }
 
-/// Return a vector with an item for each hour of the next week, each one
+/// Return a vector with an item for each hour of the week, each one
 /// containing all available users at that moment.
 fn match_all_week(
     target: &Vec<(Date<Utc>, DaySchedule)>,
     week_sched_matrix: &WeekScheduleMatrix,
 ) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
-    todo!()
+    target
+        .iter()
+        .flat_map(|(date, day_sched)| {
+            let weekday = date.weekday();
+            let day_sched_mat = &week_sched_matrix[weekday];
+            let z: Vec<_> = day_sched
+                .hours
+                .iter()
+                .enumerate()
+                .filter(|(_, is_available)| **is_available)
+                .map(|(h, _)| {
+                    let t = date.and_hms(h as u32, 0, 0);
+                    let h = Hour(h as i32);
+                    // All user available at this hour in the day
+                    let other_users = day_sched_mat.get_available_at_hour(h);
+                    (t, other_users)
+                })
+                .collect();
+            z
+        })
+        .collect()
 }
 
 fn attach_schedule(
@@ -224,7 +248,7 @@ pub fn find_all_users_matching_in_week(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Language, LanguagePreference, Level, Priority};
+    use crate::{Language, LanguagePreference, Level, Priority, User};
     use std::convert::TryFrom;
 
     #[test]
