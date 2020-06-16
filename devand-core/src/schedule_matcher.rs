@@ -89,7 +89,7 @@ impl From<Vec<(UserId, DaySchedule)>> for ScheduleMatrix {
 }
 
 impl ScheduleMatrix {
-    fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
+    pub fn get_available_at_hour(&self, h: Hour) -> Vec<UserId> {
         self.data
             .iter()
             .skip(h.0 as usize)
@@ -98,6 +98,24 @@ impl ScheduleMatrix {
             .filter(|(_, in_schedule)| **in_schedule)
             .map(|(id, _)| UserId(id as i32))
             .collect()
+    }
+
+    pub fn get_available_at_day(&self, day: &DaySchedule) -> Vec<UserId> {
+        use std::collections::BTreeSet;
+
+        let mut set: BTreeSet<UserId> = BTreeSet::new();
+
+        day.hours.iter().enumerate().for_each(|(h, is_available)| {
+            if *is_available {
+                self.get_available_at_hour(Hour(h as i32))
+                    .iter()
+                    .for_each(|&u| {
+                        set.insert(u);
+                    });
+            }
+        });
+
+        set.into_iter().collect()
     }
 }
 
@@ -193,8 +211,14 @@ mod tests {
         assert!(matrix.get_available_at_hour(Hour(1)) == vec![UserId(0), UserId(1)]);
         assert!(matrix.get_available_at_hour(Hour(3)) == vec![UserId(1), UserId(2), UserId(3)]);
 
-        // assert!(matrix[(UserId(0), Hour(1))] == vec![UserId(1)]);
-        // assert!(matrix[(UserId(2), Hour(3))] == vec![UserId(1), UserId(3)]);
-        // assert!(matrix[(UserId(2), Hour(5))] == vec![UserId(3)]);
+        assert!(
+            matrix.get_available_at_day(&DaySchedule::try_from("2,3,5,6").unwrap())
+                == vec![UserId(0), UserId(1), UserId(2), UserId(3)]
+        );
+
+        assert!(
+            matrix.get_available_at_day(&DaySchedule::try_from("4,5,6").unwrap())
+                == vec![ UserId(2), UserId(3)]
+        );
     }
 }
