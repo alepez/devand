@@ -96,10 +96,16 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
         .enumerate()
         .map(|(i, a)| view_affinity(a, i));
 
-    html! {
-        <table class="user-affinities">
-        { for affinities }
-        </table>
+    if affinities.is_empty() {
+        html! {
+            <p> { "No matching users online" }</p>
+        }
+    } else {
+        html! {
+            <table class="user-affinities">
+            { for affinities }
+            </table>
+        }
     }
 }
 

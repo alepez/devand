@@ -70,7 +70,11 @@ impl Component for AffinitiesPage {
 
     fn view(&self) -> Html {
         if let Some(affinities) = &self.state.affinities {
-            view_affinities(affinities)
+            if affinities.is_empty() {
+                view_no_affinities()
+            } else {
+                view_affinities(affinities)
+            }
         } else {
             view_loading()
         }
@@ -120,5 +124,11 @@ fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
 fn view_loading() -> Html {
     html! {
         <p>{ "Loading..."}</p>
+    }
+}
+
+fn view_no_affinities() -> Html {
+    html! {
+        <p>{ "No matching users found" }</p>
     }
 }

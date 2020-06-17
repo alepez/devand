@@ -1,4 +1,5 @@
 #![recursion_limit = "512"]
+#![feature(exact_size_is_empty)]
 
 mod app;
 
