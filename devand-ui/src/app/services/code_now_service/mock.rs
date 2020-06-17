@@ -72,7 +72,7 @@ fn mock_user(name: &str) -> devand_core::User {
     );
 
     User {
-        id: 1,
+        id: UserId(1),
         username: name
             .to_string()
             .to_lowercase()

@@ -60,15 +60,17 @@ fn mock_user() -> devand_core::User {
         },
     );
 
+    let languages = Languages(languages);
+
     User {
-        id: 1,
+        id: UserId(1),
         username: "alepez".into(),
         visible_name: "Alessandro Pezzato".into(),
         email: "alessandro@pezzato.net".into(),
         settings: UserSettings {
             languages,
             vacation_mode: false,
-            schedule: Schedule::Weekly(WeekSchedule {
+            schedule: Availability::Weekly(WeekSchedule {
                 mon: DaySchedule::try_from("21,22,23").unwrap(),
                 tue: DaySchedule::never(),
                 wed: DaySchedule::never(),
