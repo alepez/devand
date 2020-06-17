@@ -7,18 +7,20 @@ const configurations = {
     distPath: path.resolve(__dirname, "../devand-web/static/ui"),
     publicPath: '/public/ui/',
     cargoFeatures: [],
+    entry: './bootstrap-prod.js',
   },
   development: {
     distPath: path.resolve(__dirname, "dist"),
     publicPath: '',
     cargoFeatures: ["mock_http"],
+    entry: './bootstrap-dev.js',
   }
 };
 
 const argsFromCargoFeatures = (features) => features.map(x => `--features=${x}`).join(" ")
 
 module.exports = (env, argv) => {
-  const {distPath, publicPath, cargoFeatures} = configurations[argv.mode];
+  const {distPath, publicPath, cargoFeatures, entry} = configurations[argv.mode];
 
   return {
     devServer: {
@@ -28,7 +30,7 @@ module.exports = (env, argv) => {
       port: 8001,
       historyApiFallback: true,
     },
-    entry: './bootstrap.js',
+    entry,
     output: {
       path: distPath,
       filename: "devand.js",
