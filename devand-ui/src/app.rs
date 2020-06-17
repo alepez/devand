@@ -11,6 +11,7 @@ use self::code_now::CodeNowPage;
 use self::not_found::NotFoundPage;
 use self::services::UserService;
 use self::settings::SettingsPage;
+use self::components::ChatPage;
 
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
@@ -116,6 +117,7 @@ impl Component for App {
                         AppRoute::Settings=> html!{ <SettingsPage on_change=on_settings_change.clone() user=user.clone() /> },
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
+                        AppRoute::Chat(username) => html!{ <ChatPage chat_with=username />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                         _ => todo!()
                     }
