@@ -69,75 +69,74 @@ impl Component for CodeNowPage {
     }
 
     fn view(&self) -> Html {
-        html! {
-                {
-                if let Some(code_now) = &self.state.code_now {
-                    self.view_code_now_users(code_now)
-                } else {
-                    self.view_loading()
-                }
-                }
+        if let Some(code_now) = &self.state.code_now {
+            view_code_now_users(code_now)
+        } else {
+            view_loading()
         }
     }
 }
 
-impl CodeNowPage {
-    fn view_code_now_users(&self, code_now: &CodeNow) -> Html {
-        let CodeNow {
-            all_users,
-            current_user,
-        } = code_now.clone(); // TODO Avoid cloning
+fn view_code_now_users(code_now: &CodeNow) -> Html {
+    let CodeNow {
+        all_users,
+        current_user,
+    } = code_now.clone(); // TODO Avoid cloning
 
-        let users = all_users
-            .into_iter()
-            .filter(|u| u.username != code_now.current_user.username);
+    let users = all_users
+        .into_iter()
+        .filter(|u| u.username != code_now.current_user.username);
 
-        let user = current_user.into();
-        let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
-        affinities.sort_unstable_by_key(|x| x.affinity);
-        let affinities = affinities
-            .iter()
-            .rev()
-            .enumerate()
-            .map(|(i, a)| self.view_affinity(a, i));
+    let user = current_user.into();
+    let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
+    affinities.sort_unstable_by_key(|x| x.affinity);
+    let affinities = affinities
+        .iter()
+        .rev()
+        .enumerate()
+        .map(|(i, a)| view_affinity(a, i));
 
-        html! {
-            <table class="user-affinities">
-            { for affinities }
-            </table>
-        }
+    html! {
+        <table class="user-affinities">
+        { for affinities }
+        </table>
     }
+}
 
-    fn view_affinity(&self, affinity: &UserAffinity, i: usize) -> Html {
-        let UserAffinity { user, affinity } = affinity;
-        let PublicUserProfile {
-            username,
-            visible_name,
-            languages,
-        } = user;
+fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
+    let UserAffinity { user, affinity } = affinity;
 
-        let languages = languages.clone().to_sorted_vec();
+    let PublicUserProfile {
+        visible_name,
+        languages,
+        ..
+    } = user;
 
-        let languages_tags = languages.iter().map(|(lang, pref)| {
-            html! {
-                <LanguageTag lang=lang pref=pref />
-            }
-        });
+    let languages = languages.clone().to_sorted_vec();
 
-        let odd = if i % 2 == 1 { Some("pure-table-odd")} else { None };
-
+    let languages_tags = languages.iter().map(|(lang, pref)| {
         html! {
-            <tr class=("user-affinity", odd)>
-                <td class="visible_name">{ visible_name }</td>
-                <td class="affinity">{ affinity.to_string() }</td>
-                <td class="languages"> { for languages_tags } </td>
-            </tr>
+            <LanguageTag lang=lang pref=pref />
         }
+    });
+
+    let odd = if i % 2 == 1 {
+        Some("pure-table-odd")
+    } else {
+        None
+    };
+
+    html! {
+        <tr class=("user-affinity", odd)>
+            <td class="affinity">{ affinity.to_string() }</td>
+            <td class="visible_name">{ visible_name }</td>
+            <td class="languages"> { for languages_tags } </td>
+        </tr>
     }
+}
 
-    fn view_loading(&self) -> Html {
-        html! {
-            <p>{ "Loading..."}</p>
-        }
+fn view_loading() -> Html {
+    html! {
+        <p>{ "Loading..."}</p>
     }
 }

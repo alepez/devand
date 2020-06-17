@@ -1,5 +1,6 @@
+use crate::app::components::LanguageTag;
 use crate::app::services::AffinitiesService;
-use devand_core::UserAffinity;
+use devand_core::{PublicUserProfile, UserAffinity};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
@@ -68,40 +69,56 @@ impl Component for AffinitiesPage {
     }
 
     fn view(&self) -> Html {
-        html! {
-                {
-                if let Some(affinities) = &self.state.affinities {
-                    self.view_affinities(affinities)
-                } else {
-                    self.view_loading()
-                }
-                }
+        if let Some(affinities) = &self.state.affinities {
+            view_affinities(affinities)
+        } else {
+            view_loading()
         }
     }
 }
 
-impl AffinitiesPage {
-    fn view_affinities(&self, affinities: &Vec<UserAffinity>) -> Html {
-        html! {
-            <table class="user-affinities">
-            { for affinities.iter().rev().map(|a| self.view_affinity(a)) }
-            </table>
-        }
+fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
+    html! {
+        <table class="user-affinities">
+        { for affinities.iter().rev().enumerate().map(|(i, a)| view_affinity(a,i)) }
+        </table>
     }
+}
 
-    fn view_affinity(&self, affinity: &UserAffinity) -> Html {
+fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
+    let UserAffinity { user, affinity } = affinity;
+
+    let PublicUserProfile {
+        visible_name,
+        languages,
+        ..
+    } = user;
+
+    let languages = languages.clone().to_sorted_vec();
+
+    let languages_tags = languages.iter().map(|(lang, pref)| {
         html! {
-            <tr class="user-affinity">
-                <td class="username">{ &affinity.user.username }</td>
-                <td class="visible_name">{ &affinity.user.visible_name }</td>
-                <td class="affinity">{ affinity.affinity }</td>
-            </tr>
+            <LanguageTag lang=lang pref=pref />
         }
+    });
+
+    let odd = if i % 2 == 1 {
+        Some("pure-table-odd")
+    } else {
+        None
+    };
+
+    html! {
+        <tr class=("user-affinity", odd)>
+            <td class="affinity">{ affinity.to_string() }</td>
+            <td class="visible_name">{ visible_name }</td>
+            <td class="languages"> { for languages_tags } </td>
+        </tr>
     }
+}
 
-    fn view_loading(&self) -> Html {
-        html! {
-            <p>{ "Loading..."}</p>
-        }
+fn view_loading() -> Html {
+    html! {
+        <p>{ "Loading..."}</p>
     }
 }
