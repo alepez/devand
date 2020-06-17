@@ -1,3 +1,4 @@
+use crate::app::style::pure_table_odd;
 use crate::app::components::LanguageTag;
 use crate::app::services::AffinitiesService;
 use devand_core::{PublicUserProfile, UserAffinity};
@@ -105,14 +106,8 @@ fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
         }
     });
 
-    let odd = if i % 2 == 1 {
-        Some("pure-table-odd")
-    } else {
-        None
-    };
-
     html! {
-        <tr class=("user-affinity", odd)>
+        <tr class=("user-affinity", pure_table_odd(i))>
             <td class="affinity">{ affinity.to_string() }</td>
             <td class="visible_name">{ visible_name }</td>
             <td class="languages"> { for languages_tags } </td>

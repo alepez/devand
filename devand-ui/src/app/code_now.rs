@@ -1,6 +1,7 @@
 use crate::app::components::LanguageTag;
 use crate::app::services::CodeNowService;
-use crate::app::{AppRoute,RouterButton};
+use crate::app::style::pure_table_odd;
+use crate::app::{AppRoute, RouterButton};
 use devand_core::{CodeNow, PublicUserProfile, UserAffinity};
 use yew::{prelude::*, Properties};
 
@@ -81,7 +82,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     let CodeNow {
         all_users,
         current_user,
-    } = code_now.clone(); // TODO Avoid cloning
+    } = code_now.clone();
 
     let users = all_users
         .into_iter()
@@ -126,14 +127,8 @@ fn view_affinity(affinity: UserAffinity, i: usize) -> Html {
         }
     });
 
-    let odd = if i % 2 == 1 {
-        Some("pure-table-odd")
-    } else {
-        None
-    };
-
     html! {
-        <tr class=("user-affinity", odd)>
+        <tr class=("user-affinity", pure_table_odd(i))>
             <td class="start-chat"><RouterButton route=AppRoute::Chat(username)>{ "💬" }</RouterButton></td>
             <td class="affinity">{ affinity.to_string() }</td>
             <td class="visible_name">{ visible_name }</td>
