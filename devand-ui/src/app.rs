@@ -20,6 +20,7 @@ use yew_router::{prelude::*, Switch};
 use devand_core::User;
 
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
+type RouterButton = yew_router::components::RouterButton<AppRoute>;
 
 #[derive(Switch, Debug, Clone)]
 pub enum AppRoute {
@@ -31,6 +32,8 @@ pub enum AppRoute {
     NotFound(Permissive<String>),
     #[to = "/dashboard"]
     Settings,
+    #[to = "/chat/{username}"]
+    Chat(String),
 }
 
 pub struct App {

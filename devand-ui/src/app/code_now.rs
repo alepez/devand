@@ -1,5 +1,6 @@
 use crate::app::components::LanguageTag;
 use crate::app::services::CodeNowService;
+use crate::app::{AppRoute,RouterButton};
 use devand_core::{CodeNow, PublicUserProfile, UserAffinity};
 use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
@@ -91,7 +92,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
     affinities.sort_unstable_by_key(|x| x.affinity);
     let affinities = affinities
-        .iter()
+        .into_iter()
         .rev()
         .enumerate()
         .map(|(i, a)| view_affinity(a, i));
@@ -109,13 +110,13 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     }
 }
 
-fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
+fn view_affinity(affinity: UserAffinity, i: usize) -> Html {
     let UserAffinity { user, affinity } = affinity;
 
     let PublicUserProfile {
         visible_name,
         languages,
-        ..
+        username,
     } = user;
 
     let languages = languages.clone().to_sorted_vec();
@@ -134,6 +135,7 @@ fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
 
     html! {
         <tr class=("user-affinity", odd)>
+            <td class="start-chat"><RouterButton route=AppRoute::Chat(username)>{ "💬" }</RouterButton></td>
             <td class="affinity">{ affinity.to_string() }</td>
             <td class="visible_name">{ visible_name }</td>
             <td class="languages"> { for languages_tags } </td>
