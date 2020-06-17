@@ -1,19 +1,18 @@
 mod affinities;
 mod code_now;
+mod components;
 mod languages;
 mod not_found;
 mod services;
 mod settings;
-mod components;
 mod style;
 
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;
+use self::components::ChatPage;
 use self::not_found::NotFoundPage;
 use self::services::UserService;
 use self::settings::SettingsPage;
-use self::components::ChatPage;
-
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
@@ -105,12 +104,15 @@ impl Component for App {
     fn view(&self) -> VNode {
         let on_settings_change = self.link.callback(Msg::UserStore);
         let user = self.state.user.clone();
+
         html! {
             <>
-            <div>
-                <RouterAnchor route=AppRoute::Settings classes="pure-button" >{ "Settings" }</RouterAnchor>
-                <RouterAnchor route=AppRoute::Affinities classes="pure-button" >{ "Affinities" }</RouterAnchor>
-                <RouterAnchor route=AppRoute::CodeNow classes="pure-button" >{ "Code Now" }</RouterAnchor>
+            <div class=("pure-menu", "pure-menu-horizontal")>
+                <ul class=("pure-menu-list")>
+                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
+                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
+                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
+                </ul>
             </div>
             <Router<AppRoute>
                 render = Router::render(move |switch: AppRoute| {

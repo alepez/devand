@@ -1,6 +1,6 @@
-use crate::app::style::pure_table_odd;
 use crate::app::components::LanguageTag;
 use crate::app::services::AffinitiesService;
+use crate::app::style::pure_table_odd;
 use devand_core::{PublicUserProfile, UserAffinity};
 use yew::{prelude::*, Properties};
 
@@ -69,23 +69,30 @@ impl Component for AffinitiesPage {
     }
 
     fn view(&self) -> Html {
-        if let Some(affinities) = &self.state.affinities {
-            if affinities.is_empty() {
-                view_no_affinities()
-            } else {
-                view_affinities(affinities)
-            }
-        } else {
-            view_loading()
+        html! {
+            <>
+                <h1>{ "Affinities" }</h1>
+                {
+                if let Some(affinities) = &self.state.affinities {
+                    view_affinities(affinities)
+                } else {
+                    view_loading()
+                }
+                }
+            </>
         }
     }
 }
 
 fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
-    html! {
-        <table class="user-affinities">
-        { for affinities.iter().rev().enumerate().map(|(i, a)| view_affinity(a,i)) }
-        </table>
+    if affinities.is_empty() {
+        view_no_affinities()
+    } else {
+        html! {
+            <table class="user-affinities">
+            { for affinities.iter().rev().enumerate().map(|(i, a)| view_affinity(a,i)) }
+            </table>
+        }
     }
 }
 

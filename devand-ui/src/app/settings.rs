@@ -76,6 +76,7 @@ impl Component for SettingsPage {
     fn view(&self) -> Html {
         html! {
             <div class="dashboard">
+                <h1>{ "Settings" }</h1>
                 {
                 if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)

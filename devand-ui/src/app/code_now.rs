@@ -70,10 +70,17 @@ impl Component for CodeNowPage {
     }
 
     fn view(&self) -> Html {
-        if let Some(code_now) = &self.state.code_now {
-            view_code_now_users(code_now)
-        } else {
-            view_loading()
+        html! {
+            <>
+                <h1>{ "Code Now" }</h1>
+                {
+                if let Some(code_now) = &self.state.code_now {
+                    view_code_now_users(code_now)
+                } else {
+                    view_loading()
+                }
+                }
+            </>
         }
     }
 }
