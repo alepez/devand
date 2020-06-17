@@ -29,6 +29,8 @@ pub enum AppRoute {
     Affinities,
     #[to = "/code-now"]
     CodeNow,
+    #[to = "/schedule"]
+    Schedule,
     #[to = "/page-not-found"]
     NotFound(Permissive<String>),
     #[to = "/dashboard"]
@@ -112,6 +114,7 @@ impl Component for App {
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
+                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
                 </ul>
             </div>
             <Router<AppRoute>
