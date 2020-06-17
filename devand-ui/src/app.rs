@@ -16,6 +16,8 @@ use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
 
+type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
+
 #[derive(Switch, Debug, Clone)]
 pub enum AppRoute {
     #[to = "/affinities"]
@@ -53,6 +55,12 @@ impl Component for App {
 
     fn view(&self) -> VNode {
         html! {
+            <>
+            <div>
+                <RouterAnchor route=AppRoute::Settings classes="pure-button" >{ "Settings" }</RouterAnchor>
+                <RouterAnchor route=AppRoute::Affinities classes="pure-button" >{ "Affinities" }</RouterAnchor>
+                <RouterAnchor route=AppRoute::CodeNow classes="pure-button" >{ "Code Now" }</RouterAnchor>
+            </div>
             <Router<AppRoute>
                 render = Router::render(|switch: AppRoute| {
                     match switch {
@@ -62,10 +70,9 @@ impl Component for App {
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                     }
                 })
-                redirect = Router::redirect(|route: Route| {
-                    AppRoute::NotFound(Permissive(Some(route.route)))
-                })
+                redirect = Router::redirect(|route: Route| { AppRoute::NotFound(Permissive(Some(route.route))) })
             />
+            </>
         }
     }
 }
