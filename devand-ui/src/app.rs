@@ -9,7 +9,7 @@ mod style;
 
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;
-use self::components::ChatPage;
+use self::components::{SchedulePage, ChatPage};
 use self::not_found::NotFoundPage;
 use self::services::UserService;
 use self::settings::SettingsPage;
@@ -123,6 +123,7 @@ impl Component for App {
                         AppRoute::Settings=> html!{ <SettingsPage on_change=on_settings_change.clone() user=user.clone() /> },
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
+                        AppRoute::Schedule=> html!{ <SchedulePage/> },
                         AppRoute::Chat(username) => html!{ <ChatPage chat_with=username />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                         _ => todo!()

@@ -1,17 +1,15 @@
 use yew::{prelude::*, Properties};
 
-pub struct ChatPage {
+pub struct SchedulePage {
     props: Props,
 }
 
 #[derive(Clone, PartialEq, Properties)]
-pub struct Props {
-    pub chat_with: String,
-}
+pub struct Props {}
 
 pub enum Msg {}
 
-impl Component for ChatPage {
+impl Component for SchedulePage {
     type Message = Msg;
     type Properties = Props;
 
@@ -30,7 +28,10 @@ impl Component for ChatPage {
 
     fn view(&self) -> Html {
         html! {
-            <p>{ format!("WIP - chat with {} will be here", self.props.chat_with) }</p>
+            <>
+                <h1>{ "Schedule" }</h1>
+                <p>{ "WIP - schedule will be here" }</p>
+            </>
         }
     }
 }
