@@ -2,10 +2,9 @@ use crate::app::components::LanguageTag;
 use crate::app::services::CodeNowService;
 use crate::app::{AppRoute,RouterButton};
 use devand_core::{CodeNow, PublicUserProfile, UserAffinity};
-use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Default)]
 pub struct State {
     code_now: Option<CodeNow>,
 }

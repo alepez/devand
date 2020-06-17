@@ -1,11 +1,9 @@
 use devand_core::{Language, LanguagePreference, Priority};
-use serde_derive::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum::IntoEnumIterator;
 use yew::callback::Callback;
 use yew::{prelude::*, Properties};
 
-#[derive(Serialize, Deserialize)]
 pub struct State {
     language: Option<Language>,
     preferences: LanguagePreference,

@@ -1,8 +1,4 @@
-use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
-
-#[derive(Serialize, Deserialize)]
-pub struct State {}
 
 pub enum Msg {}
 

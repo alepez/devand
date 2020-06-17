@@ -1,10 +1,9 @@
 use crate::app::components::LanguageTag;
 use crate::app::services::AffinitiesService;
 use devand_core::{PublicUserProfile, UserAffinity};
-use serde_derive::{Deserialize, Serialize};
 use yew::{prelude::*, Properties};
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Default)]
 pub struct State {
     affinities: Option<Vec<UserAffinity>>,
 }
