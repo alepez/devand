@@ -21,22 +21,23 @@ impl CodeNowUsersMap {
     const TTL: Duration = Duration::from_secs(60);
     const CLEAR_INTERVAL: Duration = Duration::from_secs(30);
 
-    pub fn add(&mut self, u: User) {
+    fn add(&mut self, u: User) {
         let id = u.id;
         let profile = PublicUserProfile::from(u);
         let now = Instant::now();
         self.users.insert(id, (now, profile));
     }
 
-    pub fn touch(&mut self, id: UserId) -> bool {
+    pub fn touch(&mut self, u: User) -> bool {
         if self.is_time_to_clear() {
             self.clear();
         }
 
-        if let Some(entry) = self.users.get_mut(&id) {
+        if let Some(entry) = self.users.get_mut(&u.id) {
             entry.0 = Instant::now();
             true
         } else {
+            self.add(u);
             false
         }
     }

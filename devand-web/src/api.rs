@@ -45,15 +45,10 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
 fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devand_core::CodeNow> {
     let user: User = user.into();
 
-    // We always need a write lock, because we are updating cache ttl
-    let mut cache = code_now_users.0.write().unwrap();
-
     let all_users: devand_core::CodeNowUsers = {
-        if !cache.touch(user.id) {
-            // Now we can add the current user to the cache
-            cache.add(user.clone());
-        }
-
+        // We always need a write lock, because we are updating cache ttl
+        let mut cache = code_now_users.0.write().unwrap();
+        cache.touch(user.clone());
         cache.clone().into()
     };
 
