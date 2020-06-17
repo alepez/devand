@@ -30,11 +30,11 @@ impl Component for LanguageTag {
 
     fn view(&self) -> Html {
         html! {
-            <div class="language-control-group ">
-                <span class="language-tag">{ self.props.lang }</span>
+            <span class="language-tag">
+                <span>{ self.props.lang }</span>
                 { view_language_level(self.props.pref.level) }
                 { view_language_priority(self.props.pref.priority) }
-            </div>
+            </span>
         }
     }
 }

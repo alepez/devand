@@ -156,7 +156,9 @@ impl SettingsPage {
             <fieldset>
                 <div class="pure-g">
                     <legend class="pure-u-1">{ "Languages" }</legend>
-                    { for languages_tags }
+                    <div class="pure-u-1">
+                        { for languages_tags }
+                    </div>
                     <div class="pure-u-1">
                         <AddLanguageComponent on_add=self.link.callback(move |lang_pref| Msg::AddLanguage(lang_pref))/>
                     </div>

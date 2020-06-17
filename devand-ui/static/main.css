@@ -1,0 +1,50 @@
+.container {
+    position: relative;
+    min-height: 100vh;
+}
+
+.content {
+    margin: 0 auto;
+    padding: 0 2em;
+    max-width: 800px;
+    line-height: 1.6em;
+    padding-bottom: 2.5rem;
+}
+
+.main-header {
+    margin-bottom: 2em;
+    background: #e0e0e0;
+}
+
+.main-header-content {
+    margin: 0 auto;
+    max-width: 800px;
+}
+.main-footer {
+    background: #e0e0e0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;
+}
+
+.main-footer-content {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.alert {
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+

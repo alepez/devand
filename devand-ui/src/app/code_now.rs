@@ -95,15 +95,20 @@ impl CodeNowPage {
         let user = current_user.into();
         let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
         affinities.sort_unstable_by_key(|x| x.affinity);
+        let affinities = affinities
+            .iter()
+            .rev()
+            .enumerate()
+            .map(|(i, a)| self.view_affinity(a, i));
 
         html! {
             <table class="user-affinities">
-            { for affinities.iter().rev().map(|a| self.view_affinity(a)) }
+            { for affinities }
             </table>
         }
     }
 
-    fn view_affinity(&self, affinity: &UserAffinity) -> Html {
+    fn view_affinity(&self, affinity: &UserAffinity, i: usize) -> Html {
         let UserAffinity { user, affinity } = affinity;
         let PublicUserProfile {
             username,
@@ -119,9 +124,10 @@ impl CodeNowPage {
             }
         });
 
+        let odd = if i % 2 == 1 { Some("pure-table-odd")} else { None };
+
         html! {
-            <tr class="user-affinity">
-                <td class="username">{ username }</td>
+            <tr class=("user-affinity", odd)>
                 <td class="visible_name">{ visible_name }</td>
                 <td class="affinity">{ affinity.to_string() }</td>
                 <td class="languages"> { for languages_tags } </td>

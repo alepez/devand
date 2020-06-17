@@ -42,12 +42,12 @@ impl Component for EditableLanguageTag {
 
     fn view(&self) -> Html {
         html! {
-            <div class="language-control-group pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
+            <span class="editable-language-tag language-tag">
                 <button class="pure-button" onclick=self.link.callback(move |_| Msg::Remove)>{ "✖" }</button>
-                <span class="language-tag">{ self.props.lang }</span>
+                <span>{ self.props.lang }</span>
                 { view_language_level(self.props.pref.level) }
                 { view_language_priority(self.props.pref.priority) }
-            </div>
+            </span>
         }
     }
 }
