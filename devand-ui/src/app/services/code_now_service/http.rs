@@ -36,7 +36,7 @@ where
         if meta.status.is_success() {
             callback.emit(data)
         } else {
-            callback.emit(Err(anyhow::anyhow!("Error {} restoring user", meta.status)))
+            callback.emit(Err(anyhow::anyhow!(meta.status)))
         }
     };
 
