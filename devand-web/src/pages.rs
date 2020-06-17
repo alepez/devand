@@ -132,6 +132,16 @@ fn dashboard_code_now(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
+#[get("/chat/<_username>")]
+fn dashboard_chat(auth_data: AuthData, _username: String) -> Template {
+    dashboard(auth_data)
+}
+
+#[get("/schedule")]
+fn dashboard_schedule(auth_data: AuthData) -> Template {
+    dashboard(auth_data)
+}
+
 fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
@@ -156,7 +166,7 @@ fn index(auth_data: Option<AuthData>) -> Template {
     }
 
     let context = Context {
-        title: "DevAndDev",
+        title: "Find your pair-programming pal",
         authenticated: auth_data.is_some(),
     };
     Template::render("index", &context)
@@ -206,6 +216,8 @@ pub fn routes() -> Vec<Route> {
         dashboard_index,
         dashboard_affinities,
         dashboard_code_now,
+        dashboard_schedule,
+        dashboard_chat,
         privacy,
         code_of_conduct,
     ]

@@ -30,7 +30,10 @@ impl Component for ChatPage {
 
     fn view(&self) -> Html {
         html! {
-            <p>{ format!("WIP - chat with {} will be here", self.props.chat_with) }</p>
+            <>
+                <h1>{ format!("Chat with {}", self.props.chat_with) }</h1>
+                <p>{ format!("WIP - chat with {} will be here", self.props.chat_with) }</p>
+            </>
         }
     }
 }
