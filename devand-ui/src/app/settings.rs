@@ -1,17 +1,13 @@
 mod schedule;
 
 use crate::app::languages::AddLanguageComponent;
-use crate::app::services::UserService;
-use devand_core::{Language, LanguagePreference, Languages, Availability, User};
-use serde_derive::{Deserialize, Serialize};
+use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
 
 use schedule::ScheduleTable;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Default)]
 pub struct State {
-    user: Option<User>,
-    pending_save: bool,
 }
 
 pub enum Msg {
@@ -19,43 +15,29 @@ pub enum Msg {
     ToggleVacationMode,
     AddLanguage((Language, LanguagePreference)),
     RemoveLanguage(Language),
-    UserFetchOk(User),
-    UserFetchErr,
     UpdateSchedule(Availability),
 }
 
 pub struct SettingsPage {
     props: Props,
     state: State,
-    user_service: UserService,
     link: ComponentLink<Self>,
 }
 
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {}
+#[derive(Clone, Properties)]
+pub struct Props {
+    pub on_change: Callback<User>,
+    pub user: Option<User>,
+}
 
 impl Component for SettingsPage {
     type Message = Msg;
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let fetch_callback = link.callback(|result: Result<User, anyhow::Error>| {
-            if let Ok(user) = result {
-                Msg::UserFetchOk(user)
-            } else {
-                log::error!("{:?}", result);
-                Msg::UserFetchErr
-            }
-        });
-
-        let mut user_service = UserService::new(fetch_callback);
-
-        user_service.restore();
-
         SettingsPage {
             props,
             state: State::default(),
-            user_service,
             link,
         }
     }
@@ -89,13 +71,6 @@ impl Component for SettingsPage {
                     user.settings.schedule = schedule;
                 });
             }
-            Msg::UserFetchOk(user) => {
-                self.state.user = Some(user);
-                self.state.pending_save = false;
-            }
-            Msg::UserFetchErr => {
-                log::error!("User fetch error");
-            }
         }
 
         true
@@ -110,7 +85,7 @@ impl Component for SettingsPage {
         html! {
             <div class="dashboard">
                 {
-                if let Some(user) = &self.state.user {
+                if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)
                 } else {
                     self.view_loading()
@@ -243,9 +218,9 @@ impl SettingsPage {
     where
         F: FnOnce(&mut User),
     {
-        if let Some(user) = &mut self.state.user {
+        if let Some(user) = &mut self.props.user {
             f(user);
-            self.user_service.store(user);
+            self.props.on_change.emit(user.clone());
         }
     }
 }

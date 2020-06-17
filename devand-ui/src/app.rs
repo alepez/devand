@@ -8,13 +8,15 @@ mod settings;
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;
 use self::not_found::NotFoundPage;
+use self::services::UserService;
 use self::settings::SettingsPage;
 
-use serde_derive::{Deserialize, Serialize};
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
+
+use devand_core::User;
 
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
 
@@ -30,30 +32,73 @@ pub enum AppRoute {
     Settings,
 }
 
-pub struct App {}
+pub struct App {
+    user_service: UserService,
+    state: State,
+    link: ComponentLink<Self>,
+}
 
-#[derive(Serialize, Deserialize, Default)]
-pub struct State {}
+#[derive(Default)]
+pub struct State {
+    user: Option<User>,
+    pending_save: bool,
+}
 
-pub enum Msg {}
+pub enum Msg {
+    UserStore(User),
+    UserFetchOk(User),
+    UserFetchErr,
+}
 
 impl Component for App {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        App {}
+    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let fetch_callback = link.callback(|result: Result<User, anyhow::Error>| match result {
+            Ok(user) => Msg::UserFetchOk(user),
+            Err(err) => {
+                log::error!("{:?}", err);
+                Msg::UserFetchErr
+            }
+        });
+
+        let mut user_service = UserService::new(fetch_callback);
+        user_service.restore();
+
+        App {
+            user_service,
+            state: State::default(),
+            link,
+        }
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
         false
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        true
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            Msg::UserStore(user) => {
+                self.user_service.store(&user);
+                false
+            }
+            Msg::UserFetchOk(user) => {
+                log::debug!("User fetch ok");
+                self.state.user = Some(user);
+                self.state.pending_save = false;
+                true
+            }
+            Msg::UserFetchErr => {
+                log::error!("User fetch error");
+                false
+            }
+        }
     }
 
     fn view(&self) -> VNode {
+        let on_settings_change = self.link.callback(Msg::UserStore);
+        let user = self.state.user.clone();
         html! {
             <>
             <div>
@@ -62,12 +107,13 @@ impl Component for App {
                 <RouterAnchor route=AppRoute::CodeNow classes="pure-button" >{ "Code Now" }</RouterAnchor>
             </div>
             <Router<AppRoute>
-                render = Router::render(|switch: AppRoute| {
+                render = Router::render(move |switch: AppRoute| {
                     match switch {
-                        AppRoute::Settings=> html!{ <SettingsPage/> },
+                        AppRoute::Settings=> html!{ <SettingsPage on_change=on_settings_change.clone() user=user.clone() /> },
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
+                        _ => todo!()
                     }
                 })
                 redirect = Router::redirect(|route: Route| { AppRoute::NotFound(Permissive(Some(route.route))) })
