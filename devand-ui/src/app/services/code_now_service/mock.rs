@@ -81,6 +81,10 @@ fn mock_user(name: &str) -> devand_core::User {
             .collect(),
         email: "a@b.c".to_string(),
         visible_name: name.to_string(),
-        settings: devand_core::UserSettings::default(),
+        settings: devand_core::UserSettings {
+            languages: Languages(languages),
+            schedule: Availability::default(),
+            vacation_mode: false,
+        },
     }
 }

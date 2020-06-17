@@ -4,6 +4,7 @@ mod languages;
 mod not_found;
 mod services;
 mod settings;
+mod components;
 
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;

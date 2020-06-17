@@ -1,14 +1,11 @@
 mod schedule;
 
+use crate::app::components::EditableLanguageTag;
 use crate::app::languages::AddLanguageComponent;
 use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
 
 use schedule::ScheduleTable;
-
-#[derive(Default)]
-pub struct State {
-}
 
 pub enum Msg {
     UpdateVisibleName(String),
@@ -20,7 +17,6 @@ pub enum Msg {
 
 pub struct SettingsPage {
     props: Props,
-    state: State,
     link: ComponentLink<Self>,
 }
 
@@ -35,11 +31,7 @@ impl Component for SettingsPage {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        SettingsPage {
-            props,
-            state: State::default(),
-            link,
-        }
+        SettingsPage { props, link }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -154,59 +146,22 @@ impl SettingsPage {
     }
 
     fn view_languages_panel(&self, languages: &Languages) -> Html {
+        let languages_tags = languages.iter().map(|(&lang, pref)| {
+            html! {
+                <EditableLanguageTag lang=lang pref=pref on_remove=self.link.callback(move |_| Msg::RemoveLanguage(lang))/>
+            }
+        });
+
         html! {
             <fieldset>
                 <div class="pure-g">
                     <legend class="pure-u-1">{ "Languages" }</legend>
-                    { for languages.iter().map(|lang| self.view_language(lang)) }
+                    { for languages_tags }
                     <div class="pure-u-1">
                         <AddLanguageComponent on_add=self.link.callback(move |lang_pref| Msg::AddLanguage(lang_pref))/>
                     </div>
                 </div>
             </fieldset>
-        }
-    }
-
-    fn view_language(&self, lang: (&Language, &LanguagePreference)) -> Html {
-        let (&lang, preferences) = lang;
-        html! {
-            <div class="language-control-group pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
-                <span class="language-tag">
-                    <button class="pure-button" onclick=self.link.callback(move |_| Msg::RemoveLanguage(lang))>{ "✖" }</button>
-                    { lang }
-                </span>
-                { self.view_language_level(preferences.level) }
-                { self.view_language_priority(preferences.priority) }
-            </div>
-        }
-    }
-
-    fn view_language_priority(&self, priority: devand_core::Priority) -> Html {
-        let icon = match priority {
-            devand_core::Priority::No => "X",
-            devand_core::Priority::Low => ":|",
-            devand_core::Priority::High => ":)",
-        };
-        let title = format!("{}", priority);
-        let priority_class = format!("language-priority-tag-{}", priority).to_lowercase();
-        let class = vec!["language-priority-tag", &priority_class];
-
-        html! {
-            <span class=class title=title>{ icon }</span>
-        }
-    }
-
-    fn view_language_level(&self, level: devand_core::Level) -> Html {
-        let stars = (1..=3).map(|x| x <= level.as_number());
-        let icon = |on| if on { "★" } else { "☆" };
-        let title = format!("{}", level);
-        let level_class = format!("language-level-tag-{}", level).to_lowercase();
-        let class = vec!["language-level-tag", &level_class];
-
-        html! {
-            <span class=class title=title>
-                { for stars.map(|on| { html! { <span>{ icon(on) }</span> } }) }
-            </span>
         }
     }
 

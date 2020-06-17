@@ -129,7 +129,7 @@ pub enum Priority {
     High,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct LanguagePreference {
     pub level: Level,
@@ -185,7 +185,7 @@ pub enum Language {
     VBA,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub struct UserAffinity {
     pub user: PublicUserProfile,
