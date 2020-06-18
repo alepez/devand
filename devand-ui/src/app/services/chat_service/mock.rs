@@ -23,10 +23,34 @@ impl ChatService {
 }
 
 fn mock_history(me: UserId, other: UserId) -> Vec<ChatMessage> {
-    vec![ChatMessage {
-        created_at: chrono::Utc.timestamp(1592475298, 0),
-        from: me,
-        to: other,
-        txt: "Ciao!".to_string(),
-    }]
+    use fake::faker::lorem::en::*;
+    use fake::Fake;
+    use rand::rngs::StdRng;
+    use rand::Rng;
+    use rand::SeedableRng;
+
+    let seed = [
+        1, 0, 0, 0, 23, 0, 0, 0, 200, 1, 0, 0, 210, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0,
+    ];
+
+    let ref mut rng = StdRng::from_seed(seed);
+
+    let mut history = Vec::new();
+    let mut t: i64 = 1592475298;
+
+    for _ in 0..10 {
+        let t_diff: i64 = rng.gen_range(0, 5000);
+        let from_me : bool = rng.gen();
+        t += t_diff;
+
+        history.push(ChatMessage {
+            created_at: chrono::Utc.timestamp(t, 0),
+            from: if from_me { me } else { other },
+            to: if from_me { other } else { me },
+            txt: Sentence(1..30).fake_with_rng(rng),
+        });
+    }
+
+    history
 }

@@ -23,6 +23,8 @@ maplit = "1"
 anyhow = "1"
 gloo = "0.2"
 chrono = { version = "0.4", features = ["serde"] }
+fake = { version = "2", optional = true, features = ["derive", "chrono"] }
+rand = { version = "0.7", optional = true }
 
 [dependencies.yew]
 git = "https://github.com/yewstack/yew.git"
@@ -31,9 +33,6 @@ tag = "0.16.2"
 [dependencies.yew-router]
 git = "https://github.com/yewstack/yew.git"
 tag = "0.16.2"
-
-[dev-dependencies]
-wasm-bindgen-test = "0.3"
 
 [dependencies.web-sys]
 version = "0.3.4"
@@ -44,10 +43,13 @@ features = [
   'BeforeUnloadEvent',
 ]
 
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
 [profile.release]
 lto = true
 opt-level = 's'
 
 [features]
 default = []
-mock_http = []
+mock_http = ["fake", "rand"]
