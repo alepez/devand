@@ -1,6 +1,5 @@
 use crate::app::components::LanguageTag;
 use crate::app::services::AffinitiesService;
-use crate::app::style::pure_table_odd;
 use devand_core::{PublicUserProfile, UserAffinity};
 use yew::{prelude::*, Properties};
 
@@ -89,7 +88,7 @@ fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
         view_no_affinities()
     } else {
         html! {
-            <table class="user-affinities">
+            <table class="user-affinities pure-table-striped">
             { for affinities.iter().rev().enumerate().map(|(i, a)| view_affinity(a,i)) }
             </table>
         }
@@ -114,7 +113,7 @@ fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
     });
 
     html! {
-        <tr class=("user-affinity", pure_table_odd(i))>
+        <tr class=("user-affinity")>
             <td class="affinity">{ affinity.to_string() }</td>
             <td class="visible_name">{ visible_name }</td>
             <td class="languages"> { for languages_tags } </td>
