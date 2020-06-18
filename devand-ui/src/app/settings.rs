@@ -81,7 +81,7 @@ impl Component for SettingsPage {
                 if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)
                 } else {
-                    self.view_loading()
+                    view_loading()
                 }
                 }
             </div>
@@ -89,13 +89,21 @@ impl Component for SettingsPage {
     }
 }
 
-impl SettingsPage {
-    fn view_loading(&self) -> Html {
-        html! {
-            <p>{ "Loading..."}</p>
-        }
+fn view_loading() -> Html {
+    html! {
+        <p>{ "Loading..."}</p>
     }
+}
 
+fn view_vacation_mode_panel() -> Html {
+    html! {
+        <fieldset>
+            <legend>{ "You are currently in vacation mode" }</legend>
+        </fieldset>
+    }
+}
+
+impl SettingsPage {
     fn view_settings_panel(&self, user: &User) -> Html {
         let settings = &user.settings;
 
@@ -104,21 +112,13 @@ impl SettingsPage {
                 { self.view_profile_panel(user) }
                 {
                     if user.settings.vacation_mode {
-                        self.view_vacation_mode_panel()
+                        view_vacation_mode_panel()
                     } else {
                         self.view_availability_panel(&settings.schedule)
                     }
                 }
                 { self.view_languages_panel(&settings.languages) }
             </div>
-        }
-    }
-
-    fn view_vacation_mode_panel(&self) -> Html {
-        html! {
-            <fieldset>
-                <legend>{ "You are currently in vacation mode" }</legend>
-            </fieldset>
         }
     }
 
@@ -140,7 +140,7 @@ impl SettingsPage {
                     <input type="text" name="visible_name" id="visible_name" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
                 </div>
                 <div class="pure-control-group">
-                    <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode oninput=self.link.callback(move |e: InputData| Msg::ToggleVacationMode) />{ " Vacation mode" }</label>
+                    <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ " Vacation mode" }</label>
                 </div>
             </fieldset>
         }
