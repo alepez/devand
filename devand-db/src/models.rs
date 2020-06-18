@@ -1,6 +1,4 @@
-use super::schema::auth;
-use super::schema::users;
-use super::schema::messages;
+use super::schema::{auth, chats, messages, users};
 use chrono::{DateTime, Utc};
 use serde_json;
 use std::convert::TryInto;
@@ -72,6 +70,18 @@ pub struct NewChatMessage {
     pub created_at: chrono::NaiveDateTime,
     pub txt: String,
     pub author: i32,
+}
+
+#[derive(Queryable)]
+pub struct Chat {
+    pub id: i32,
+    pub members: serde_json::Value,
+}
+
+#[derive(Insertable)]
+#[table_name = "chats"]
+pub struct NewChat {
+    pub members: serde_json::Value,
 }
 
 impl Into<devand_core::chat::ChatMessage> for ChatMessage {

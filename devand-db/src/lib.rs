@@ -121,11 +121,32 @@ fn find_chat_id_by_members(
         .map(devand_core::chat::ChatId)
 }
 
+fn find_or_create_chat_by_members(
+    members: &[devand_core::UserId],
+    conn: &PgConnection,
+) -> Result<devand_core::chat::ChatId, Error> {
+    if let Some(chat_id) = find_chat_id_by_members(members, conn) {
+        Ok(chat_id)
+    } else {
+        let new_chat = models::NewChat {
+            members: serde_json::to_value(members).unwrap(),
+        };
+        diesel::insert_into(schema::chats::table)
+            .values(new_chat)
+            .get_result(conn)
+            .map_err(|err| {
+                dbg!(err);
+                Error::Unknown
+            })
+            .map(|x: models::Chat| devand_core::chat::ChatId(x.id))
+    }
+}
+
 pub fn load_chat_history_by_members(
     members: &[devand_core::UserId],
     conn: &PgConnection,
 ) -> Vec<devand_core::chat::ChatMessage> {
-    if let Some(chat_id) = find_chat_id_by_members(members, conn) {
+    if let Ok(chat_id) = find_or_create_chat_by_members(members, conn) {
         load_chat_history_by_id(chat_id, conn)
     } else {
         Vec::default()
@@ -159,7 +180,7 @@ pub fn add_chat_message_by_members(
     new_message: devand_core::chat::ChatMessage,
     conn: &PgConnection,
 ) -> Option<devand_core::chat::ChatMessage> {
-    if let Some(chat_id) = find_chat_id_by_members(members, conn) {
+    if let Ok(chat_id) = find_or_create_chat_by_members(members, conn) {
         add_chat_message_by_id(chat_id, new_message, conn).ok()
     } else {
         None
