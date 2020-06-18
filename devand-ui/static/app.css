@@ -68,3 +68,58 @@
   font-weight: bold;
   text-align: center;
 }
+
+.devand-chat-message-bubble {
+  border-radius: 2em;
+  background-color: #ddddff;
+  padding: 1em 1em 1.5em 1em;
+  margin-top: 1em;
+  margin-right: 5em;
+  clear: both;
+  position: relative;
+}
+
+.devand-chat-message-bubble.devand-from-me {
+  background-color: #ddffdd;
+  margin-right: 0;
+  margin-left: 5em;
+}
+
+.devand-chat-message-bubble.devand-from-other:after {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border: 0.75em solid transparent;
+	border-right-color: #ddddff;
+	border-left: 0;
+	border-top: 0;
+	margin-top: -0.375em;
+	margin-left: -0.75em;
+}
+
+.devand-chat-message-bubble.devand-from-me:after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border: 0.75em solid transparent;
+	border-left-color: #ddffdd;
+	border-right: 0;
+	border-top: 0;
+	margin-top: -0.375em;
+	margin-right: -0.75em;
+}
+
+.devand-chat-message-bubble .devand-timestamp {
+  font-size: 75%;
+  color: #808080;
+  float: right;
+  position: absolute;
+  bottom: 0;
+  right: 2em;
+}

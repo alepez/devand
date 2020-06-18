@@ -70,6 +70,7 @@ fn mock_user(name: &str) -> devand_core::PublicUserProfile {
     let languages = Languages(languages);
 
     PublicUserProfile {
+        id: UserId(3),
         username: name.to_string().to_lowercase().chars().filter(|x| x.is_alphabetic()).collect(),
         visible_name: name.to_string(),
         languages,

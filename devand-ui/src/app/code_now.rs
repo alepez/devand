@@ -122,6 +122,7 @@ fn view_affinity(affinity: UserAffinity) -> Html {
         visible_name,
         languages,
         username,
+        ..
     } = user;
 
     let languages = languages.clone().to_sorted_vec();

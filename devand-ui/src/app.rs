@@ -9,7 +9,7 @@ mod style;
 
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;
-use self::components::{SchedulePage, ChatPage};
+use self::components::{ChatPage, SchedulePage};
 use self::not_found::NotFoundPage;
 use self::services::UserService;
 use self::settings::SettingsPage;
@@ -18,7 +18,7 @@ use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
 
-use devand_core::User;
+use devand_core::{PublicUserProfile, User};
 
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
 type RouterButton = yew_router::components::RouterButton<AppRoute>;
@@ -106,6 +106,7 @@ impl Component for App {
     fn view(&self) -> VNode {
         let on_settings_change = self.link.callback(Msg::UserStore);
         let user = self.state.user.clone();
+        let pub_user_profile: Option<PublicUserProfile> = self.state.user.clone().map(|x| x.into());
 
         html! {
             <>
@@ -124,7 +125,7 @@ impl Component for App {
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
                         AppRoute::Schedule=> html!{ <SchedulePage/> },
-                        AppRoute::Chat(username) => html!{ <ChatPage chat_with=username />},
+                        AppRoute::Chat(username) => html!{ <ChatPage chat_with=username me=pub_user_profile.clone().unwrap() />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                         _ => todo!()
                     }
