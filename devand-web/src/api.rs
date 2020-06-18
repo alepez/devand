@@ -73,6 +73,22 @@ fn availability_match(
     Json(res)
 }
 
+#[get("/chat/<other_user>/messages")]
+fn chat_messages_get(user: LoggedUser, other_user: String) -> Json<()> {
+    Json(())
+}
+
+#[post("/chat/<other_user>/messages")]
+fn chat_messages_post(user: LoggedUser, other_user: String) -> Json<()> {
+    Json(())
+}
+
+#[get("/chat/<other_user>/messages/poll/<from>")]
+fn chat_messages_poll(user: LoggedUser, other_user: String, from: String) -> Json<()> {
+    // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
+    Json(())
+}
+
 #[derive(Serialize, Deserialize)]
 struct AvailabilityMatch {
     slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
