@@ -10,4 +10,4 @@ serde_json = "1.0"
 maplit = "1.0"
 strum = "0.17"
 strum_macros = "0.17"
-chrono = { version = "0.4" }
+chrono = { version = "0.4", features = ["serde"] }
