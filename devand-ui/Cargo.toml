@@ -22,6 +22,7 @@ devand-core = { path = "../devand-core" }
 maplit = "1"
 anyhow = "1"
 gloo = "0.2"
+chrono = { version = "0.4", features = ["serde"] }
 
 [dependencies.yew]
 git = "https://github.com/yewstack/yew.git"

@@ -1,20 +1,10 @@
-use devand_core::{DaySchedule, Availability, WeekSchedule};
+use devand_core::{Availability, DaySchedule, WeekSchedule};
 use yew::{prelude::*, Properties};
+use chrono::Weekday;
 
-pub enum Msg {
-    ResetSchedule,
-    ToggleDayHour(WeekDay, usize),
-}
-
-#[derive(Debug, Copy, Clone)]
-pub enum WeekDay {
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday,
+pub struct AvailabilityTable {
+    props: Props,
+    link: ComponentLink<Self>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -23,12 +13,12 @@ pub struct Props {
     pub on_change: Callback<Availability>,
 }
 
-pub struct ScheduleTable {
-    props: Props,
-    link: ComponentLink<Self>,
+pub enum Msg {
+    ResetSchedule,
+    ToggleDayHour(Weekday, usize),
 }
 
-impl Component for ScheduleTable {
+impl Component for AvailabilityTable {
     type Message = Msg;
     type Properties = Props;
 
@@ -44,15 +34,7 @@ impl Component for ScheduleTable {
             }
             Msg::ToggleDayHour(d, h) => {
                 if let Availability::Weekly(week) = &mut self.props.schedule {
-                    let day = match d {
-                        WeekDay::Monday => &mut week.mon,
-                        WeekDay::Tuesday => &mut week.tue,
-                        WeekDay::Wednesday => &mut week.wed,
-                        WeekDay::Thursday => &mut week.thu,
-                        WeekDay::Friday => &mut week.fri,
-                        WeekDay::Saturday => &mut week.sat,
-                        WeekDay::Sunday => &mut week.sun,
-                    };
+                    let day = &mut week[d];
                     day.hours[h] ^= true;
                 }
                 self.props.on_change.emit(self.props.schedule.clone());
@@ -71,7 +53,7 @@ impl Component for ScheduleTable {
     }
 }
 
-impl ScheduleTable {
+impl AvailabilityTable {
     fn view_schedule_panel(&self, schedule: &Availability) -> Html {
         match schedule {
             Availability::Never => self.view_schedule_never(),
@@ -79,7 +61,7 @@ impl ScheduleTable {
         }
     }
 
-    fn view_schedule_day(&self, schedule: &DaySchedule, day: WeekDay) -> Html {
+    fn view_schedule_day(&self, schedule: &DaySchedule, day: Weekday) -> Html {
         let hours = schedule.hours.iter().enumerate().map(|(h, &on)| {
             html! {
                 <td>
@@ -111,13 +93,13 @@ impl ScheduleTable {
                             </tr>
                         </thead>
                         <tbody>
-                            { self.view_schedule_day(&schedule.mon, WeekDay::Monday) }
-                            { self.view_schedule_day(&schedule.tue, WeekDay::Tuesday) }
-                            { self.view_schedule_day(&schedule.wed, WeekDay::Wednesday) }
-                            { self.view_schedule_day(&schedule.thu, WeekDay::Thursday) }
-                            { self.view_schedule_day(&schedule.fri, WeekDay::Friday) }
-                            { self.view_schedule_day(&schedule.sat, WeekDay::Saturday) }
-                            { self.view_schedule_day(&schedule.sun, WeekDay::Sunday) }
+                            { self.view_schedule_day(&schedule.mon, Weekday::Mon) }
+                            { self.view_schedule_day(&schedule.tue, Weekday::Tue) }
+                            { self.view_schedule_day(&schedule.wed, Weekday::Wed) }
+                            { self.view_schedule_day(&schedule.thu, Weekday::Thu) }
+                            { self.view_schedule_day(&schedule.fri, Weekday::Fri) }
+                            { self.view_schedule_day(&schedule.sat, Weekday::Sat) }
+                            { self.view_schedule_day(&schedule.sun, Weekday::Sun) }
                         </tbody>
                     </table>
                 </div>

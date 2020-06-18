@@ -97,6 +97,20 @@ impl std::ops::Index<chrono::Weekday> for WeekSchedule {
     }
 }
 
+impl std::ops::IndexMut<chrono::Weekday> for WeekSchedule {
+    fn index_mut(&mut self, index: chrono::Weekday) -> &mut Self::Output {
+        match index {
+            chrono::Weekday::Mon => &mut self.mon,
+            chrono::Weekday::Tue => &mut self.tue,
+            chrono::Weekday::Wed => &mut self.wed,
+            chrono::Weekday::Thu => &mut self.thu,
+            chrono::Weekday::Fri => &mut self.fri,
+            chrono::Weekday::Sat => &mut self.sat,
+            chrono::Weekday::Sun => &mut self.sun,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

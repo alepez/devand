@@ -1,11 +1,9 @@
-mod schedule;
-
 use crate::app::components::EditableLanguageTag;
 use crate::app::languages::AddLanguageComponent;
 use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
 
-use schedule::ScheduleTable;
+use crate::app::components::AvailabilityTable;
 
 pub enum Msg {
     UpdateVisibleName(String),
@@ -169,7 +167,7 @@ impl SettingsPage {
     }
 
     fn view_availability_panel(&self, schedule: &Availability) -> Html {
-        html! { <ScheduleTable schedule=schedule on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
+        html! { <AvailabilityTable schedule=schedule on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
     }
 
     fn update_user<F>(&mut self, f: F)
