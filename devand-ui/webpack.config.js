@@ -11,7 +11,7 @@ const configurations = {
   },
   development: {
     distPath: path.resolve(__dirname, "dist"),
-    publicPath: '',
+    publicPath: '/',
     cargoFeatures: ["mock_http"],
     entry: './bootstrap-dev.js',
   }
@@ -28,7 +28,9 @@ module.exports = (env, argv) => {
       compress: argv.mode === 'production',
       host: '0.0.0.0',
       port: 8001,
-      historyApiFallback: true,
+      historyApiFallback: {
+        index: "/index.html"
+      }
     },
     entry,
     output: {
