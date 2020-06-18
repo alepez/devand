@@ -353,6 +353,7 @@ dependencies = [
 name = "devand-db"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "devand-core",
  "diesel",
  "diesel_migrations",
@@ -420,6 +421,7 @@ checksum = "33d7ca63eb2efea87a7f56a283acc49e2ce4b2bd54adf7465dc1d81fef13d8fc"
 dependencies = [
  "bitflags 1.2.1",
  "byteorder",
+ "chrono",
  "diesel_derives",
  "pq-sys",
  "r2d2",

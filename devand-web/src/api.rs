@@ -14,7 +14,10 @@ pub fn routes() -> Vec<Route> {
         settings_put,
         affinities,
         code_now,
-        availability_match
+        availability_match,
+        chat_messages_get,
+        chat_messages_post,
+        chat_messages_poll,
     ]
 }
 
@@ -73,20 +76,28 @@ fn availability_match(
     Json(res)
 }
 
-#[get("/chat/<other_user>/messages")]
-fn chat_messages_get(user: LoggedUser, other_user: String) -> Json<()> {
-    Json(())
+#[get("/chat/<members>/messages")]
+fn chat_messages_get(user: LoggedUser, members: String) -> Json<Vec<devand_core::chat::ChatMessage>> {
+    // TODO Load from db
+    Json(vec![])
 }
 
-#[post("/chat/<other_user>/messages")]
-fn chat_messages_post(user: LoggedUser, other_user: String) -> Json<()> {
-    Json(())
+#[post("/chat/<members>/messages", data = "<txt>")]
+fn chat_messages_post(user: LoggedUser, members: String, txt: Json<String>) -> Json<Vec<devand_core::chat::ChatMessage>> {
+    let new_message = devand_core::chat::ChatMessage {
+        author: user.id,
+        txt: txt.0,
+        created_at: Utc::now(),
+    };
+    // TODO Save to db
+    Json(vec![new_message])
 }
 
-#[get("/chat/<other_user>/messages/poll/<from>")]
-fn chat_messages_poll(user: LoggedUser, other_user: String, from: String) -> Json<()> {
+#[get("/chat/<members>/messages/poll/<from>")]
+fn chat_messages_poll(user: LoggedUser, members: String, from: String) -> Json<Vec<devand_core::chat::ChatMessage>> {
     // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
-    Json(())
+    // TODO Load from db from given point
+    Json(vec![])
 }
 
 #[derive(Serialize, Deserialize)]

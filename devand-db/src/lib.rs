@@ -94,16 +94,17 @@ pub fn is_email_available(email: &str, conn: &PgConnection) -> bool {
     count == 0
 }
 
-pub fn load_chat_by_id(
+pub fn load_chat_history_by_id(
     chat_id: devand_core::chat::ChatId,
     conn: &PgConnection,
 ) -> Vec<devand_core::chat::ChatMessage> {
-    schema::chats::table
-        .filter(schema::chats::dsl::chat_id.eq(chat_id.to_number()))
-        .first(conn)
+    let result: Option<Vec<devand_core::chat::ChatMessage>> = schema::messages::table
+        .filter(schema::messages::dsl::chat_id.eq(chat_id.0))
+        .load(conn)
         .ok()
-        .and_then(|x: models::Chat| x.try_into().ok())
-        .unwrap_or(Vec::default())
+        .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect());
+
+    result.unwrap_or(Vec::default())
 }
 
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {

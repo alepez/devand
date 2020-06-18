@@ -15,7 +15,7 @@ pub struct ChatPage {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub chat_with: String,
-    pub me: PublicUserProfile,
+    pub me: Option<PublicUserProfile>,
 }
 
 pub enum Msg {
@@ -35,8 +35,8 @@ impl Component for ChatPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let callback = link.callback(Msg::AddMessages);
 
-        let chat_id = ChatId::new(UserId(1), UserId(2)); // TPDP
-        let mut service = ChatService::new(chat_id, callback);
+        let chat_members = vec![UserId(1), UserId(2)]; // TODO
+        let mut service = ChatService::new(chat_members, callback);
         service.load_history();
         let state = State::default();
         Self {
@@ -48,8 +48,6 @@ impl Component for ChatPage {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        use chrono::offset::TimeZone;
-
         match msg {
             Msg::AddMessages(messages) => {
                 log::debug!("{:?}", messages);
@@ -60,12 +58,7 @@ impl Component for ChatPage {
             }
             Msg::SendMessage(txt) => {
                 log::debug!("{}", txt);
-                self.state.messages.push(ChatMessage {
-                    from: self.props.me.id,
-                    to: UserId(42), // FIXME
-                    created_at: chrono::Utc.timestamp(1592490955, 0), // FIXME
-                    txt,
-                });
+                self.service.send_message(txt);
                 true
             }
         }
@@ -77,8 +70,18 @@ impl Component for ChatPage {
     }
 
     fn view(&self) -> Html {
+        if let Some(me) = &self.props.me {
+            self.view_main(me)
+        } else {
+            html! {}
+        }
+    }
+}
+
+impl ChatPage {
+    fn view_main(&self, me: &PublicUserProfile) -> Html {
         let messages = self.state.messages.iter().map(|msg| {
-            let from_me = msg.from == self.props.me.id;
+            let from_me = msg.author == me.id;
             let from_me_class = if from_me {
                 "devand-from-me"
             } else {

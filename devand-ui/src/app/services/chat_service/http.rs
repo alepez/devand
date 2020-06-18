@@ -5,48 +5,55 @@ use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
-fn api_url_get(chat_id: ChatId) -> String {
-    format!("/api/chat/{}/messages", chat_id)
+fn encode_chat_members(chat_members: &[UserId]) -> String {
+    chat_members
+        .into_iter()
+        .map(|x| x.0.to_string())
+        .collect::<Vec<_>>()
+        .join("-")
 }
 
-fn api_url_post(chat_id: ChatId) -> String {
-    format!("/api/chat/{}/messages", chat_id)
+fn api_url_get(chat_members: &[UserId]) -> String {
+    format!("/api/chat/{}/messages", encode_chat_members(chat_members))
 }
 
-fn api_url_poll(chat_id: ChatId) -> String {
-    format!("/api/chat/{}/messages/poll", chat_id)
+fn api_url_post(chat_members: &[UserId]) -> String {
+    format!("/api/chat/{}/messages", encode_chat_members(chat_members))
+}
+
+fn api_url_poll(chat_members: &[UserId]) -> String {
+    format!("/api/chat/{}/messages/poll", encode_chat_members(chat_members))
 }
 
 pub struct ChatService {
-    chat_id: ChatId,
+    chat_members: Vec<UserId>,
     new_messages_callback: NewMessagesCallback,
 
-    get_messages_service: FetchService,
-    get_messages_task: Option<FetchTask>,
+    service: FetchService,
+    task: Option<FetchTask>,
 }
 
 impl ChatService {
-    pub fn new(chat_id: ChatId, new_messages_callback: NewMessagesCallback) -> Self {
+    pub fn new(chat_members: Vec<UserId>, new_messages_callback: NewMessagesCallback) -> Self {
         Self {
-            chat_id,
+            chat_members,
             new_messages_callback,
-            get_messages_service: FetchService::new(),
-            get_messages_task: None,
+            service: FetchService::new(),
+            task: None,
         }
     }
 
     pub fn load_history(&mut self) {
-        let url = api_url_get(self.chat_id);
+        let url = api_url_get(&self.chat_members);
         let req = Request::get(url).body(Nothing).unwrap();
-        self.get_messages_task = request(
-            &mut self.get_messages_service,
-            self.new_messages_callback.clone(),
-            req,
-        )
-        .ok();
+        self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+    }
 
-        // self.new_messages_callback
-        //     .emit(mock_history(self.chat_id.user_me, self.chat_id.user_other))
+    pub fn send_message(&mut self, txt: String) {
+        let url = api_url_post(&self.chat_members);
+        let json = serde_json::to_string(&txt).map_err(|_| anyhow::anyhow!("Cannot serialize"));
+        let req = Request::post(url).body(json).unwrap();
+        self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
     }
 }
 

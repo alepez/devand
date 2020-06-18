@@ -1,5 +1,6 @@
 use super::schema::auth;
 use super::schema::users;
+use chrono::{DateTime, Utc};
 use serde_json;
 use std::convert::TryInto;
 
@@ -55,15 +56,20 @@ impl TryInto<devand_core::User> for User {
 }
 
 #[derive(Queryable)]
-pub struct Chat {
-    pub chat_id: i64,
-    pub messages: serde_json::Value,
+pub struct ChatMessage {
+    pub id: i32,
+    pub chat_id: i32,
+    pub created_at: chrono::NaiveDateTime,
+    pub txt: String,
+    pub author: i32,
 }
 
-impl TryInto<Vec<devand_core::chat::ChatMessage>> for Chat {
-    type Error = ();
-
-    fn try_into(self) -> Result<Vec<devand_core::chat::ChatMessage>, ()> {
-        serde_json::from_value(self.messages).map_err(|_| ())
+impl Into<devand_core::chat::ChatMessage> for ChatMessage {
+    fn into(self) -> devand_core::chat::ChatMessage {
+        devand_core::chat::ChatMessage {
+            created_at: DateTime::from_utc(self.created_at, Utc),
+            txt: self.txt,
+            author: devand_core::UserId(self.author),
+        }
     }
 }
