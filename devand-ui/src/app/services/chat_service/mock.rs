@@ -16,7 +16,7 @@ impl ChatService {
         }
     }
 
-    pub fn load_old_messages(&mut self) {
+    pub fn load_history(&mut self) {
         self.new_messages_callback
             .emit(mock_history(self.chat_id.user_me, self.chat_id.user_other))
     }

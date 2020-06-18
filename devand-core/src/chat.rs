@@ -10,7 +10,7 @@ pub struct ChatMessage {
     pub txt: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct ChatId {
     pub user_me: UserId,
     pub user_other: UserId,
@@ -21,6 +21,16 @@ impl ChatId {
         Self {
             user_me,
             user_other,
+        }
+    }
+}
+
+impl std::fmt::Display for ChatId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.user_me.0 < self.user_other.0 {
+            write!(f, "{}-{}", self.user_me.0, self.user_other.0)
+        } else {
+            write!(f, "{}-{}", self.user_other.0, self.user_me.0)
         }
     }
 }

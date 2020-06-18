@@ -37,7 +37,7 @@ impl Component for ChatPage {
 
         let chat_id = ChatId::new(UserId(1), UserId(2)); // TPDP
         let mut service = ChatService::new(chat_id, callback);
-        service.load_old_messages();
+        service.load_history();
         let state = State::default();
         Self {
             props,
