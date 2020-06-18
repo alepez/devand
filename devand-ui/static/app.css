@@ -73,8 +73,7 @@
   border-radius: 2em;
   background-color: #ddddff;
   padding: 1em 1em 1.5em 1em;
-  margin-top: 1em;
-  margin-right: 5em;
+  margin: 1em 5em 0 1em;
   clear: both;
   position: relative;
 }
@@ -82,7 +81,7 @@
 .devand-chat-message-bubble.devand-from-me {
   background-color: #ddffdd;
   margin-right: 0;
-  margin-left: 5em;
+  margin: 1em 1em 0 5em;
 }
 
 .devand-chat-message-bubble.devand-from-other:after {
@@ -122,4 +121,24 @@
   position: absolute;
   bottom: 0;
   right: 2em;
+}
+
+.devand-chat-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.devand-chat-messages {
+  padding-bottom: 1em;
+}
+
+.devand-chat-footer {
+  display: flex;
+  height: 5em;
+}
+
+.devand-chat-footer input {
+  flex: 1;
+  margin: 0.5em;
 }

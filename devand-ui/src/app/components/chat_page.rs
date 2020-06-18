@@ -73,9 +73,16 @@ impl Component for ChatPage {
         });
         html! {
             <>
-                // <h1>{ format!("Chat with {}", self.props.chat_with.visible_name) }</h1>
-                // <p>{ format!("WIP - chat with {} will be here", self.props.chat_with.visible_name) }</p>
-                { for messages }
+                <h1>{ format!("Chat with {}", self.props.chat_with) }</h1>
+                <p>{ format!("WIP - chat with {} will be here", self.props.chat_with) }</p>
+                <div class="devand-chat-container">
+                    <div class="devand-chat-messages">
+                        { for messages }
+                    </div>
+                    <div class="devand-chat-footer">
+                    <input type="text" />
+                    </div>
+                </div>
             </>
         }
     }
