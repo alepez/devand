@@ -1,6 +1,6 @@
+use chrono::Weekday;
 use devand_core::{Availability, DaySchedule, WeekSchedule};
 use yew::{prelude::*, Properties};
-use chrono::Weekday;
 
 pub struct AvailabilityTable {
     props: Props,
@@ -57,53 +57,57 @@ impl AvailabilityTable {
     fn view_schedule_panel(&self, schedule: &Availability) -> Html {
         match schedule {
             Availability::Never => self.view_schedule_never(),
-            Availability::Weekly(week_schedule) => self.view_schedule_weekly(week_schedule),
+            Availability::Weekly(week_schedule) => self.view_week(week_schedule),
         }
     }
 
-    fn view_schedule_day(&self, schedule: &DaySchedule, day: Weekday) -> Html {
-        let hours = schedule.hours.iter().enumerate().map(|(h, &on)| {
-            html! {
-                <td>
-                    <input type="checkbox" checked=on onclick=self.link.callback(move |_| Msg::ToggleDayHour(day, h)) />
-                </td>
-            }
-        });
-
-        html! {
-            <tr>
-                <td>{ format!("{:?}", day) }</td>
-                { for hours }
-            </tr>
-        }
-    }
-
-    fn view_schedule_weekly(&self, schedule: &WeekSchedule) -> Html {
-        let hours = (0..DaySchedule::HOURS_IN_DAY).map(|h| html! { <th>{ h }</th> });
-
+    fn view_week(&self, schedule: &WeekSchedule) -> Html {
         html! {
             <fieldset>
                 <legend>{ "Your current weekly schedule. Check your available hours. All hours are in UTC" }</legend>
                 <div class="schedule-table-wrapper">
-                    <table class="pure-table pure-table-striped schedule-table">
-                        <thead>
-                            <tr>
-                                <th>{ "Day" }</th>
-                                { for hours }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { self.view_schedule_day(&schedule.mon, Weekday::Mon) }
-                            { self.view_schedule_day(&schedule.tue, Weekday::Tue) }
-                            { self.view_schedule_day(&schedule.wed, Weekday::Wed) }
-                            { self.view_schedule_day(&schedule.thu, Weekday::Thu) }
-                            { self.view_schedule_day(&schedule.fri, Weekday::Fri) }
-                            { self.view_schedule_day(&schedule.sat, Weekday::Sat) }
-                            { self.view_schedule_day(&schedule.sun, Weekday::Sun) }
-                        </tbody>
-                    </table>
+                    { self.view_days(schedule) }
                 </div>
             </fieldset>
+        }
+    }
+
+    fn view_days(&self, schedule: &WeekSchedule) -> Html {
+        html! {
+            <ul class="availability-week">
+                { self.view_day(&schedule.mon, Weekday::Mon) }
+                { self.view_day(&schedule.tue, Weekday::Tue) }
+                { self.view_day(&schedule.wed, Weekday::Wed) }
+                { self.view_day(&schedule.thu, Weekday::Thu) }
+                { self.view_day(&schedule.fri, Weekday::Fri) }
+                { self.view_day(&schedule.sat, Weekday::Sat) }
+                { self.view_day(&schedule.sun, Weekday::Sun) }
+            </ul>
+        }
+    }
+
+    fn view_day(&self, schedule: &DaySchedule, day: Weekday) -> Html {
+        let hours = schedule.hours.iter().enumerate().map(|(h, &on)| {
+            let active = if on {
+                Some("pure-button-active pure-button-primary")
+            } else {
+                None
+            };
+
+            html! {
+                <button
+                    class=("pure-button", active)
+                    onclick=self.link.callback(move |_| Msg::ToggleDayHour(day, h))>{ h }</button>
+            }
+        });
+
+        html! {
+            <li class="availability-day">
+                <h3 class="availability-day-header">{ format!("{:?}", day) }</h3>
+                <div class="availability-day-column">
+                    { for hours }
+                </div>
+            </li>
         }
     }
 
@@ -111,7 +115,13 @@ impl AvailabilityTable {
         html! {
             <fieldset>
                 <legend>{ "You haven't scheduled anything yet" }</legend>
-                <div><button class="pure-button" onclick=self.link.callback(move |_| Msg::ResetSchedule)>{ "Set your availability" }</button></div>
+                <div>
+                    <button
+                        class="pure-button"
+                        onclick=self.link.callback(move |_| Msg::ResetSchedule)>
+                        { "Set your availability" }
+                    </button>
+                </div>
             </fieldset>
         }
     }

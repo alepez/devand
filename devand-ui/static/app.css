@@ -32,3 +32,39 @@
   overflow-x:auto;
   width: 800px;
 }
+
+.availability-week {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.availability-day {
+  display: flex;
+  flex-direction: column;
+  width: 14.28%;
+}
+
+.availability-day-header {
+  text-align: center;
+}
+
+.availability-day-column {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  height: 40em;
+}
+
+.availability-day button {
+  display: block;
+  padding: 5px;
+  width: 3em;
+  height: 3em;
+  margin: 0.1em;
+  line-height: 1em;
+  font-weight: bold;
+  text-align: center;
+}
