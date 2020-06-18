@@ -41,6 +41,7 @@ features = [
   'RequestMode',
   'EventTarget',
   'BeforeUnloadEvent',
+  'DateTimeValue',
 ]
 
 [dev-dependencies]

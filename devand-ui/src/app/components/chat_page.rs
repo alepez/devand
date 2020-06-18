@@ -1,3 +1,4 @@
+use crate::app::components::ChatInput;
 use crate::app::services::ChatService;
 use devand_core::chat::{ChatId, ChatMessage};
 use devand_core::{PublicUserProfile, UserId};
@@ -8,6 +9,7 @@ pub struct ChatPage {
     #[allow(dead_code)]
     service: ChatService,
     state: State,
+    link: ComponentLink<Self>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -18,6 +20,7 @@ pub struct Props {
 
 pub enum Msg {
     AddMessages(Vec<ChatMessage>),
+    SendMessage(String),
 }
 
 #[derive(Default)]
@@ -40,16 +43,29 @@ impl Component for ChatPage {
             props,
             service,
             state,
+            link,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        use chrono::offset::TimeZone;
+
         match msg {
             Msg::AddMessages(messages) => {
                 log::debug!("{:?}", messages);
                 for msg in messages {
                     self.state.messages.push(msg);
                 }
+                true
+            }
+            Msg::SendMessage(txt) => {
+                log::debug!("{}", txt);
+                self.state.messages.push(ChatMessage {
+                    from: self.props.me.id,
+                    to: UserId(42), // FIXME
+                    created_at: chrono::Utc.timestamp(1592490955, 0), // FIXME
+                    txt,
+                });
                 true
             }
         }
@@ -63,7 +79,11 @@ impl Component for ChatPage {
     fn view(&self) -> Html {
         let messages = self.state.messages.iter().map(|msg| {
             let from_me = msg.from == self.props.me.id;
-            let from_me_class = if from_me { "devand-from-me" } else { "devand-from-other" };
+            let from_me_class = if from_me {
+                "devand-from-me"
+            } else {
+                "devand-from-other"
+            };
             html! {
                 <div class=("devand-chat-message-bubble", from_me_class)>
                     <span class=("devand-chat-message-txt")>{ &msg.txt }</span>
@@ -80,7 +100,7 @@ impl Component for ChatPage {
                         { for messages }
                     </div>
                     <div class="devand-chat-footer">
-                    <input type="text" />
+                        <ChatInput on_return=self.link.callback(Msg::SendMessage) />
                     </div>
                 </div>
             </>
