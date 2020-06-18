@@ -1,5 +1,6 @@
 use super::schema::auth;
 use super::schema::users;
+use super::schema::messages;
 use chrono::{DateTime, Utc};
 use serde_json;
 use std::convert::TryInto;
@@ -58,6 +59,15 @@ impl TryInto<devand_core::User> for User {
 #[derive(Queryable)]
 pub struct ChatMessage {
     pub id: i32,
+    pub chat_id: i32,
+    pub created_at: chrono::NaiveDateTime,
+    pub txt: String,
+    pub author: i32,
+}
+
+#[derive(Insertable)]
+#[table_name = "messages"]
+pub struct NewChatMessage {
     pub chat_id: i32,
     pub created_at: chrono::NaiveDateTime,
     pub txt: String,

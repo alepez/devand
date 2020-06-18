@@ -76,25 +76,54 @@ fn availability_match(
     Json(res)
 }
 
+fn parse_members(s: &str) -> Vec<UserId> {
+    s.split("-")
+        .filter_map(|x| x.parse().ok())
+        .map(UserId)
+        .collect()
+}
+
 #[get("/chat/<members>/messages")]
-fn chat_messages_get(user: LoggedUser, members: String) -> Json<Vec<devand_core::chat::ChatMessage>> {
-    // TODO Load from db
-    Json(vec![])
+fn chat_messages_get(
+    user: LoggedUser,
+    members: String,
+    conn: PgDevandConn,
+) -> Json<Vec<devand_core::chat::ChatMessage>> {
+    // FIXME Check if user is in members
+    let members = parse_members(&members);
+    let result = devand_db::load_chat_history_by_members(&members, &conn);
+    Json(result)
 }
 
 #[post("/chat/<members>/messages", data = "<txt>")]
-fn chat_messages_post(user: LoggedUser, members: String, txt: Json<String>) -> Json<Vec<devand_core::chat::ChatMessage>> {
+fn chat_messages_post(
+    user: LoggedUser,
+    members: String,
+    txt: Json<String>,
+    conn: PgDevandConn,
+) -> Json<Vec<devand_core::chat::ChatMessage>> {
     let new_message = devand_core::chat::ChatMessage {
         author: user.id,
         txt: txt.0,
         created_at: Utc::now(),
     };
-    // TODO Save to db
-    Json(vec![new_message])
+
+    let members = parse_members(&members);
+
+    if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
+    {
+        Json(vec![new_message])
+    } else {
+        Json(vec![])
+    }
 }
 
 #[get("/chat/<members>/messages/poll/<from>")]
-fn chat_messages_poll(user: LoggedUser, members: String, from: String) -> Json<Vec<devand_core::chat::ChatMessage>> {
+fn chat_messages_poll(
+    user: LoggedUser,
+    members: String,
+    from: String,
+) -> Json<Vec<devand_core::chat::ChatMessage>> {
     // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
     // TODO Load from db from given point
     Json(vec![])

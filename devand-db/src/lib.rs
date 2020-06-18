@@ -107,6 +107,65 @@ pub fn load_chat_history_by_id(
     result.unwrap_or(Vec::default())
 }
 
+fn find_chat_id_by_members(
+    members: &[devand_core::UserId],
+    conn: &PgConnection,
+) -> Option<devand_core::chat::ChatId> {
+    let members = serde_json::to_value(members).unwrap();
+
+    schema::chats::table
+        .filter(schema::chats::dsl::members.eq(members))
+        .select(schema::chats::id)
+        .first(conn)
+        .ok()
+        .map(devand_core::chat::ChatId)
+}
+
+pub fn load_chat_history_by_members(
+    members: &[devand_core::UserId],
+    conn: &PgConnection,
+) -> Vec<devand_core::chat::ChatMessage> {
+    if let Some(chat_id) = find_chat_id_by_members(members, conn) {
+        load_chat_history_by_id(chat_id, conn)
+    } else {
+        Vec::default()
+    }
+}
+
+pub fn add_chat_message_by_id(
+    chat_id: devand_core::chat::ChatId,
+    new_message: devand_core::chat::ChatMessage,
+    conn: &PgConnection,
+) -> Result<devand_core::chat::ChatMessage, Error> {
+    let new_message = models::NewChatMessage {
+        chat_id: chat_id.0,
+        created_at: new_message.created_at.naive_utc(),
+        txt: new_message.txt,
+        author: new_message.author.0,
+    };
+
+    diesel::insert_into(schema::messages::table)
+        .values(new_message)
+        .get_result(conn)
+        .map_err(|err| {
+            dbg!(err);
+            Error::Unknown
+        })
+        .map(|x: models::ChatMessage| x.into())
+}
+
+pub fn add_chat_message_by_members(
+    members: &[devand_core::UserId],
+    new_message: devand_core::chat::ChatMessage,
+    conn: &PgConnection,
+) -> Option<devand_core::chat::ChatMessage> {
+    if let Some(chat_id) = find_chat_id_by_members(members, conn) {
+        add_chat_message_by_id(chat_id, new_message, conn).ok()
+    } else {
+        None
+    }
+}
+
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
     embedded_migrations::run(&*conn)
 }
