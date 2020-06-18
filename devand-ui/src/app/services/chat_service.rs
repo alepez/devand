@@ -11,7 +11,7 @@ type NewMessagesCallback = Callback<Vec<ChatMessage>>;
 mod mock;
 
 // #[cfg(feature = "mock_http")]
-pub type ChatService = self::mock::ChatService;
+pub use self::mock::ChatService;
 
 // #[cfg(not(feature = "mock_http"))]
 // pub type UserService = self::http::UserService;
