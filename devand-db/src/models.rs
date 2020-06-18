@@ -53,3 +53,17 @@ impl TryInto<devand_core::User> for User {
         Ok(user)
     }
 }
+
+#[derive(Queryable)]
+pub struct Chat {
+    pub chat_id: i64,
+    pub messages: serde_json::Value,
+}
+
+impl TryInto<Vec<devand_core::chat::ChatMessage>> for Chat {
+    type Error = ();
+
+    fn try_into(self) -> Result<Vec<devand_core::chat::ChatMessage>, ()> {
+        serde_json::from_value(self.messages).map_err(|_| ())
+    }
+}

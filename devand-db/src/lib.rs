@@ -40,7 +40,8 @@ pub fn load_users(conn: &PgConnection) -> Option<Vec<devand_core::User>> {
                 .into_iter()
                 .filter_map(|u: models::User| u.try_into().ok())
                 .collect::<Vec<devand_core::User>>()
-        }).ok()
+        })
+        .ok()
 }
 
 pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
@@ -91,6 +92,18 @@ pub fn is_email_available(email: &str, conn: &PgConnection) -> bool {
         .expect("Checking for email availability");
 
     count == 0
+}
+
+pub fn load_chat_by_id(
+    chat_id: devand_core::chat::ChatId,
+    conn: &PgConnection,
+) -> Vec<devand_core::chat::ChatMessage> {
+    schema::chats::table
+        .filter(schema::chats::dsl::chat_id.eq(chat_id.to_number()))
+        .first(conn)
+        .ok()
+        .and_then(|x: models::Chat| x.try_into().ok())
+        .unwrap_or(Vec::default())
 }
 
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
