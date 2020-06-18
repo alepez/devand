@@ -1,11 +1,7 @@
-use devand_core::User;
+use devand_core::chat::ChatMessage;
 use yew::prelude::Callback;
 
-struct ChatHistory;
-struct ChatMessage;
-
-type HistoryLoadedCallback = Callback<ChatHistory>;
-type NewMessageCallback = Callback<ChatMessage>;
+type NewMessagesCallback = Callback<Vec<ChatMessage>>;
 
 // Comment line below to compile with mock_http enabled, so checker can run
 // #[cfg(not(feature = "mock_http"))]
@@ -19,4 +15,3 @@ pub type ChatService = self::mock::ChatService;
 
 // #[cfg(not(feature = "mock_http"))]
 // pub type UserService = self::http::UserService;
-

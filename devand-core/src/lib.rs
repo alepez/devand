@@ -4,6 +4,7 @@ mod languages;
 pub mod mock;
 mod schedule;
 pub mod schedule_matcher;
+pub mod chat;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
