@@ -1,13 +1,15 @@
 use super::NewMessagesCallback;
-use devand_core::chat::ChatMessage;
+use devand_core::chat::{ChatId, ChatMessage};
 
 pub struct ChatService {
+    chat_id: ChatId,
     new_messages_callback: NewMessagesCallback,
 }
 
 impl ChatService {
-    pub fn new(new_messages_callback: NewMessagesCallback) -> Self {
+    pub fn new(chat_id: ChatId, new_messages_callback: NewMessagesCallback) -> Self {
         Self {
+            chat_id,
             new_messages_callback,
         }
     }
