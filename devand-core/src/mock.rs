@@ -11,7 +11,7 @@ pub fn user() -> User {
         settings: UserSettings {
             languages: Languages(btreemap! {
                 Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low },
-                Language::Javascript => LanguagePreference { level: Level::Proficient, priority: Priority::No },
+                Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::No },
                 Language::CPlusPlus => LanguagePreference { level: Level::Expert, priority: Priority::Low },
                 Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High },
             }),

@@ -43,7 +43,7 @@ fn mock_user(name: &str) -> devand_core::User {
         },
     );
     languages.insert(
-        Language::Javascript,
+        Language::JavaScript,
         LanguagePreference {
             level: Level::Proficient,
             priority: Priority::Low,

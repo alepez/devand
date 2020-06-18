@@ -1,5 +1,6 @@
 mod affinity;
 pub mod auth;
+mod languages;
 pub mod mock;
 mod schedule;
 pub mod schedule_matcher;
@@ -10,7 +11,8 @@ use std::collections::BTreeMap;
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub use affinity::{Affinity, AffinityParams};
-pub use schedule::{DaySchedule, Availability, WeekSchedule};
+pub use languages::Language;
+pub use schedule::{Availability, DaySchedule, WeekSchedule};
 
 #[derive(Default, Debug, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[serde(rename_all = "snake_case")]
@@ -145,46 +147,6 @@ impl Default for LanguagePreference {
     }
 }
 
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Ord,
-    PartialOrd,
-    Eq,
-    PartialEq,
-    Copy,
-    Clone,
-    EnumIter,
-    Display,
-    EnumString,
-)]
-#[serde(rename_all = "snake_case")]
-pub enum Language {
-    C,
-    CPlusPlus,
-    CSharp,
-    Clojure,
-    Dart,
-    Elixir,
-    Erlang,
-    FSharp,
-    Go,
-    Java,
-    Javascript,
-    Kotlin,
-    ObjectiveC,
-    PHP,
-    Python,
-    R,
-    Ruby,
-    Rust,
-    Scala,
-    Swift,
-    TypeScript,
-    VBA,
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub struct UserAffinity {
@@ -309,7 +271,7 @@ mod tests {
             },
         );
         languages.insert(
-            Language::Javascript,
+            Language::JavaScript,
             LanguagePreference {
                 level: Level::Proficient,
                 priority: Priority::Low,
@@ -341,7 +303,7 @@ mod tests {
 
         assert!(languages[0].0 == Language::Rust);
         assert!(languages[1].0 == Language::C);
-        assert!(languages[2].0 == Language::Javascript);
+        assert!(languages[2].0 == Language::JavaScript);
         assert!(languages[3].0 == Language::CPlusPlus);
         assert!(languages[4].0 == Language::Go);
     }
