@@ -6,6 +6,13 @@ table! {
 }
 
 table! {
+    chats (chat_id) {
+        chat_id -> Int8,
+        messages -> Jsonb,
+    }
+}
+
+table! {
     users (id) {
         id -> Int4,
         username -> Varchar,
@@ -17,5 +24,6 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     auth,
+    chats,
     users,
 );
