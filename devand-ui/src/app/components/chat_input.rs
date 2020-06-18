@@ -35,6 +35,7 @@ impl Component for ChatInput {
         match msg {
             Msg::Input(e) => {
                 self.state.txt = e.value;
+                true
             }
             Msg::Keydown(e) => {
                 if e.key_code() == 13 {
@@ -42,10 +43,9 @@ impl Component for ChatInput {
                     self.state.txt.clear();
                     self.props.on_return.emit(txt);
                 }
+                true
             }
         }
-        log::info!("{}", &self.state.txt);
-        true
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
@@ -55,7 +55,7 @@ impl Component for ChatInput {
 
     fn view(&self) -> Html {
         html! {
-            <input type="text" onkeydown=self.link.callback(Msg::Keydown) oninput=self.link.callback(Msg::Input) />
+            <input type="text" value=self.state.txt onkeydown=self.link.callback(Msg::Keydown) oninput=self.link.callback(Msg::Input) />
         }
     }
 }
