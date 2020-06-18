@@ -87,15 +87,16 @@ fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
     if affinities.is_empty() {
         view_no_affinities()
     } else {
+        let affinities = affinities.iter().rev().map(|a| view_affinity(a));
         html! {
             <table class="user-affinities pure-table-striped">
-            { for affinities.iter().rev().enumerate().map(|(i, a)| view_affinity(a,i)) }
+            { for affinities}
             </table>
         }
     }
 }
 
-fn view_affinity(affinity: &UserAffinity, i: usize) -> Html {
+fn view_affinity(affinity: &UserAffinity) -> Html {
     let UserAffinity { user, affinity } = affinity;
 
     let PublicUserProfile {

@@ -100,8 +100,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     let affinities = affinities
         .into_iter()
         .rev()
-        .enumerate()
-        .map(|(i, a)| view_affinity(a, i));
+        .map(|a| view_affinity(a));
 
     if affinities.is_empty() {
         html! {
@@ -116,7 +115,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     }
 }
 
-fn view_affinity(affinity: UserAffinity, i: usize) -> Html {
+fn view_affinity(affinity: UserAffinity) -> Html {
     let UserAffinity { user, affinity } = affinity;
 
     let PublicUserProfile {
