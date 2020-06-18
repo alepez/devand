@@ -23,14 +23,20 @@ impl ChatId {
             user_other,
         }
     }
+
+    pub fn to_number(&self) -> i64 {
+        let (min, max) = if self.user_me.0 < self.user_other.0 {
+            (self.user_me.0, self.user_other.0)
+        } else {
+            (self.user_other.0, self.user_me.0)
+        };
+
+        (min as i64) * 1_000_000_000 + (max as i64)
+    }
 }
 
 impl std::fmt::Display for ChatId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.user_me.0 < self.user_other.0 {
-            write!(f, "{}-{}", self.user_me.0, self.user_other.0)
-        } else {
-            write!(f, "{}-{}", self.user_other.0, self.user_me.0)
-        }
+        write!(f, "{}", self.to_number())
     }
 }
