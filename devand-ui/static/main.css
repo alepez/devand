@@ -8,7 +8,7 @@
     padding: 0 2em;
     max-width: 800px;
     line-height: 1.6em;
-    padding-bottom: 2.5rem;
+    padding-bottom: 5rem;
 }
 
 .main-header {
@@ -20,6 +20,7 @@
     margin: 0 auto;
     max-width: 800px;
 }
+
 .main-footer {
     background: #e0e0e0;
     position: absolute;
