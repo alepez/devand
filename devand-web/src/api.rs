@@ -88,11 +88,17 @@ fn chat_messages_get(
     user: LoggedUser,
     members: String,
     conn: PgDevandConn,
-) -> Json<Vec<devand_core::chat::ChatMessage>> {
-    // FIXME Check if user is in members
+) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     let members = parse_members(&members);
+
+    // FIXME Authorize using request guard
+    let authorized = members.contains(&user.id);
+    if !authorized {
+        return None;
+    }
+
     let result = devand_db::load_chat_history_by_members(&members, &conn);
-    Json(result)
+    Some(Json(result))
 }
 
 #[post("/chat/<members>/messages", data = "<txt>")]
@@ -101,7 +107,7 @@ fn chat_messages_post(
     members: String,
     txt: Json<String>,
     conn: PgDevandConn,
-) -> Json<Vec<devand_core::chat::ChatMessage>> {
+) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     let new_message = devand_core::chat::ChatMessage {
         author: user.id,
         txt: txt.0,
@@ -110,11 +116,17 @@ fn chat_messages_post(
 
     let members = parse_members(&members);
 
+    // FIXME Authorize using request guard
+    let authorized = members.contains(&user.id);
+    if !authorized {
+        return None;
+    }
+
     if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
     {
-        Json(vec![new_message])
+        Some(Json(vec![new_message]))
     } else {
-        Json(vec![])
+        None
     }
 }
 
@@ -124,17 +136,23 @@ fn chat_messages_poll(
     members: String,
     after: i64,
     conn: PgDevandConn,
-) -> Json<Vec<devand_core::chat::ChatMessage>> {
+) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
-    // FIXME Check if user is in members
     let members = parse_members(&members);
+
+    // FIXME Authorize using request guard
+    let authorized = members.contains(&user.id);
+    if !authorized {
+        return None;
+    }
+
     // TODO It could be better loading from db only messages created after the
     // threshold, instead of filtering here.
     let result = devand_db::load_chat_history_by_members(&members, &conn)
         .into_iter()
         .filter(|x| x.created_at.timestamp() > after)
         .collect();
-    Json(result)
+    Some(Json(result))
 }
 
 #[derive(Serialize, Deserialize)]
