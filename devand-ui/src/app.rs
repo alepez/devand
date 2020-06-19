@@ -118,10 +118,6 @@ fn view_loading() -> VNode {
 
 impl App {
     fn view_ok(&self, user: &User) -> VNode {
-        let on_settings_change = self.link.callback(Msg::UserStore);
-        let user = user.clone();
-        let pub_user_profile: Option<PublicUserProfile> = self.state.user.clone().map(|x| x.into());
-
         html! {
             <>
             { self.view_menu() }

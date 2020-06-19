@@ -1,7 +1,7 @@
 use crate::app::components::ChatInput;
 use crate::app::services::ChatService;
 use devand_core::chat::ChatMessage;
-use devand_core::PublicUserProfile;
+use devand_core::{PublicUserProfile, UserId};
 use yew::services::interval::{IntervalService, IntervalTask};
 use yew::{prelude::*, Properties};
 
@@ -107,27 +107,28 @@ impl Component for ChatPage {
     }
 
     fn view(&self) -> Html {
-        let messages = self.state.messages.iter().map(|msg| {
-            let from_me = msg.author == self.props.me.id;
-            let from_me_class = if from_me {
-                "devand-from-me"
-            } else {
-                "devand-from-other"
-            };
-            html! {
-                <div class=("devand-chat-message-bubble", from_me_class)>
-                    <span class=("devand-chat-message-txt")>{ &msg.txt }</span>
-                    <span class=("devand-timestamp")>{ format!("{:?}", msg.created_at) }</span>
-                </div>
-            }
-        });
+        if let Some(other_user) = &self.state.other_user {
+            self.view_messages(other_user)
+        } else {
+            html! { <div>{"Loading..."} </div> }
+        }
+    }
+}
+
+impl ChatPage {
+    fn view_messages(&self, other_user: &PublicUserProfile) -> Html {
+        let msg_bubbles = self
+            .state
+            .messages
+            .iter()
+            .map(|msg| view_bubble(self.props.me.id, msg));
+
         html! {
             <>
-                <h1>{ format!("Chat with {}", self.props.chat_with) }</h1>
-                <p>{ format!("WIP - chat with {} will be here", self.props.chat_with) }</p>
+                <h1>{ format!("Chat with {}", &other_user.visible_name) }</h1>
                 <div class="devand-chat-container">
                     <div class="devand-chat-messages">
-                        { for messages }
+                        { for msg_bubbles }
                     </div>
                     <div class="devand-chat-footer">
                         <ChatInput on_return=self.link.callback(Msg::SendMessage) />
@@ -135,5 +136,20 @@ impl Component for ChatPage {
                 </div>
             </>
         }
+    }
+}
+
+fn view_bubble(me: UserId, msg: &ChatMessage) -> Html {
+    let from_me = msg.author == me;
+    let from_me_class = if from_me {
+        "devand-from-me"
+    } else {
+        "devand-from-other"
+    };
+    html! {
+        <div class=("devand-chat-message-bubble", from_me_class)>
+            <span class=("devand-chat-message-txt")>{ &msg.txt }</span>
+            <span class=("devand-timestamp")>{ format!("{:?}", msg.created_at) }</span>
+        </div>
     }
 }
