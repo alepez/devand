@@ -202,6 +202,22 @@ fn code_of_conduct(auth_data: Option<AuthData>) -> Template {
     Template::render("code-of-conduct", &context)
 }
 
+#[get("/help")]
+fn help(auth_data: Option<AuthData>) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        authenticated: bool,
+    }
+
+    let context = Context {
+        title: "Need help?",
+        authenticated: auth_data.is_some(),
+    };
+
+    Template::render("help", &context)
+}
+
 pub fn routes() -> Vec<Route> {
     routes![
         index,
@@ -220,6 +236,7 @@ pub fn routes() -> Vec<Route> {
         dashboard_chat,
         privacy,
         code_of_conduct,
+        help,
     ]
 }
 
