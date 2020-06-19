@@ -102,8 +102,20 @@ impl Component for ChatPage {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        let mut changed = false;
+
+        if self.props.chat_with != props.chat_with {
+            self.service.load_other_user(&props.chat_with);
+            changed = true;
+        }
+
+        if self.props.me.id != props.me.id {
+            // Changing `me` does not make any sense
+            unimplemented!()
+        }
+
         self.props = props;
-        true
+        changed
     }
 
     fn view(&self) -> Html {
