@@ -1,7 +1,8 @@
 use crate::app::components::ChatInput;
 use crate::app::services::ChatService;
-use devand_core::chat::{ChatId, ChatMessage};
+use devand_core::chat::ChatMessage;
 use devand_core::{PublicUserProfile, UserId};
+use yew::services::interval::{IntervalService, IntervalTask};
 use yew::{prelude::*, Properties};
 
 pub struct ChatPage {
@@ -10,6 +11,10 @@ pub struct ChatPage {
     service: ChatService,
     state: State,
     link: ComponentLink<Self>,
+    #[allow(dead_code)]
+    poll_service: IntervalService,
+    #[allow(dead_code)]
+    poll_task: IntervalTask,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -21,6 +26,7 @@ pub struct Props {
 pub enum Msg {
     AddMessages(Vec<ChatMessage>),
     SendMessage(String),
+    Poll,
 }
 
 #[derive(Default)]
@@ -39,11 +45,21 @@ impl Component for ChatPage {
         let mut service = ChatService::new(chat_members, callback);
         service.load_history();
         let state = State::default();
+
+        let mut poll_service = IntervalService::new();
+
+        let poll_task = poll_service.spawn(
+            std::time::Duration::from_secs(1),
+            link.callback(|_| Msg::Poll),
+        );
+
         Self {
             props,
             service,
             state,
             link,
+            poll_service,
+            poll_task,
         }
     }
 
@@ -60,6 +76,11 @@ impl Component for ChatPage {
                 log::debug!("{}", txt);
                 self.service.send_message(txt);
                 true
+            }
+            Msg::Poll => {
+                let last_message = self.state.messages.last();
+                self.service.poll(last_message);
+                false
             }
         }
     }

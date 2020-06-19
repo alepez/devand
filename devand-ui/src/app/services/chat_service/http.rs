@@ -1,5 +1,5 @@
 use super::NewMessagesCallback;
-use devand_core::chat::{ChatId, ChatMessage};
+use devand_core::chat::ChatMessage;
 use devand_core::UserId;
 use yew::format::{Json, Nothing};
 use yew::prelude::*;
@@ -21,8 +21,12 @@ fn api_url_post(chat_members: &[UserId]) -> String {
     format!("/api/chat/{}/messages", encode_chat_members(chat_members))
 }
 
-fn api_url_poll(chat_members: &[UserId]) -> String {
-    format!("/api/chat/{}/messages/poll", encode_chat_members(chat_members))
+fn api_url_poll(chat_members: &[UserId], last_message: Option<&ChatMessage>) -> String {
+    format!(
+        "/api/chat/{}/messages/poll/{}",
+        encode_chat_members(chat_members),
+        last_message.map(|x| x.created_at.timestamp()).unwrap_or(0)
+    )
 }
 
 pub struct ChatService {
@@ -55,6 +59,12 @@ impl ChatService {
         let req = Request::post(url).body(json).unwrap();
         self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
     }
+
+    pub fn poll(&mut self, last_message: Option<&ChatMessage>) {
+        let url = api_url_poll(&self.chat_members, last_message);
+        let req = Request::get(url).body(Nothing).unwrap();
+        self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+    }
 }
 
 fn request<R>(
@@ -75,8 +85,4 @@ where
     };
 
     service.fetch(r, handler.into())
-}
-
-fn mock_history(_me: UserId, _other: UserId) -> Vec<ChatMessage> {
-    Vec::default()
 }

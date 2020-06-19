@@ -118,15 +118,23 @@ fn chat_messages_post(
     }
 }
 
-#[get("/chat/<members>/messages/poll/<from>")]
+#[get("/chat/<members>/messages/poll/<after>")]
 fn chat_messages_poll(
     user: LoggedUser,
     members: String,
-    from: String,
+    after: i64,
+    conn: PgDevandConn,
 ) -> Json<Vec<devand_core::chat::ChatMessage>> {
     // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
-    // TODO Load from db from given point
-    Json(vec![])
+    // FIXME Check if user is in members
+    let members = parse_members(&members);
+    // TODO It could be better loading from db only messages created after the
+    // threshold, instead of filtering here.
+    let result = devand_db::load_chat_history_by_members(&members, &conn)
+        .into_iter()
+        .filter(|x| x.created_at.timestamp() > after)
+        .collect();
+    Json(result)
 }
 
 #[derive(Serialize, Deserialize)]

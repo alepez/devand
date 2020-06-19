@@ -10,8 +10,8 @@ mod http;
 #[cfg(feature = "mock_http")]
 mod mock;
 
-#[cfg(feature = "mock_http")]
-pub use self::mock::ChatService;
+// #[cfg(feature = "mock_http")]
+// pub use self::mock::ChatService;
 
-#[cfg(not(feature = "mock_http"))]
+// #[cfg(not(feature = "mock_http"))]
 pub use self::http::ChatService;
