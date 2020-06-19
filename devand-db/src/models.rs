@@ -36,10 +36,12 @@ pub struct Auth {
 }
 
 impl TryInto<devand_core::User> for User {
-    type Error = ();
+    type Error = Error;
 
-    fn try_into(self) -> Result<devand_core::User, ()> {
-        let settings = serde_json::from_value(self.settings).map_err(|_| ())?;
+    fn try_into(self) -> Result<devand_core::User, Error> {
+        let settings = serde_json::from_value(self.settings)
+            .map_err(|e| Error::CannotDeserializeUserSettings(e.to_string()))?;
+
         let visible_name = self.visible_name.unwrap_or(self.username.clone());
 
         let user = devand_core::User {
@@ -92,4 +94,9 @@ impl Into<devand_core::chat::ChatMessage> for ChatMessage {
             author: devand_core::UserId(self.author),
         }
     }
+}
+
+#[derive(Debug)]
+pub enum Error {
+    CannotDeserializeUserSettings(String),
 }

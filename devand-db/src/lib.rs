@@ -44,13 +44,22 @@ pub fn load_users(conn: &PgConnection) -> Option<Vec<devand_core::User>> {
         .ok()
 }
 
+pub fn load_user_by_username(username: &str, conn: &PgConnection) -> Option<devand_core::User> {
+    let user: models::User = schema::users::table
+        .filter(schema::users::dsl::username.eq(username))
+        .first(conn)
+        .ok()?;
+
+    user.try_into().map_err(|e| dbg!(e)).ok()
+}
+
 pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table
         .filter(schema::users::dsl::id.eq(id.0))
         .first(conn)
         .ok()?;
 
-    user.try_into().ok()
+    user.try_into().map_err(|e| dbg!(e)).ok()
 }
 
 pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_core::User> {

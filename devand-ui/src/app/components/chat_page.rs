@@ -1,7 +1,7 @@
 use crate::app::components::ChatInput;
 use crate::app::services::ChatService;
 use devand_core::chat::ChatMessage;
-use devand_core::{PublicUserProfile, UserId};
+use devand_core::PublicUserProfile;
 use yew::services::interval::{IntervalService, IntervalTask};
 use yew::{prelude::*, Properties};
 
@@ -20,10 +20,12 @@ pub struct ChatPage {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub chat_with: String,
+    // TODO Having `me` as an Option is giving me troubles. Now we need it due to routes in app.rs
     pub me: Option<PublicUserProfile>,
 }
 
 pub enum Msg {
+    OtherUserLoaded(Option<PublicUserProfile>),
     AddMessages(Vec<ChatMessage>),
     SendMessage(String),
     Poll,
@@ -32,6 +34,7 @@ pub enum Msg {
 #[derive(Default)]
 struct State {
     messages: Vec<ChatMessage>,
+    other_user: Option<PublicUserProfile>,
 }
 
 impl Component for ChatPage {
@@ -39,11 +42,18 @@ impl Component for ChatPage {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let callback = link.callback(Msg::AddMessages);
+        let new_messages_callback = link.callback(Msg::AddMessages);
+        let other_user_loaded_callback = link.callback(Msg::OtherUserLoaded);
 
-        let chat_members = vec![UserId(1), UserId(2)]; // TODO
-        let mut service = ChatService::new(chat_members, callback);
-        service.load_history();
+        let mut service = ChatService::new(new_messages_callback, other_user_loaded_callback);
+
+        //  When ChatPage is created, `props.me` may be some or none.
+        //  We must start up the chat  (loading other user's profile and
+        //  messages) only when `props.me` is some.
+        if props.me.is_some() {
+            service.load_other_user(&props.chat_with);
+        }
+
         let state = State::default();
 
         let mut poll_service = IntervalService::new();
@@ -65,6 +75,20 @@ impl Component for ChatPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::OtherUserLoaded(user) => {
+                log::info!("Other user loaded");
+
+                let me = self.props.me.as_ref().unwrap().id;
+
+                if let Some(user) = &user {
+                    let members = vec![user.id, me];
+                    self.service.load_history(members);
+                } else {
+                    // TODO Display error
+                }
+                self.state.other_user = user;
+                true
+            }
             Msg::AddMessages(messages) => {
                 log::debug!("{:?}", messages);
                 for msg in messages {
@@ -86,6 +110,10 @@ impl Component for ChatPage {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        if self.props.me.is_none() && props.me.is_some() {
+            self.service.load_other_user(&props.chat_with);
+        }
+
         self.props = props;
         true
     }

@@ -1,4 +1,4 @@
-use super::NewMessagesCallback;
+use super::{NewMessagesCallback, OtherUserLoadedCallback};
 use devand_core::chat::ChatMessage;
 use devand_core::UserId;
 use yew::format::{Json, Nothing};
@@ -11,6 +11,10 @@ fn encode_chat_members(chat_members: &[UserId]) -> String {
         .map(|x| x.0.to_string())
         .collect::<Vec<_>>()
         .join("-")
+}
+
+fn api_url_get_user(u: &str) -> String {
+    format!("/api/u/{}", u)
 }
 
 fn api_url_get(chat_members: &[UserId]) -> String {
@@ -30,40 +34,74 @@ fn api_url_poll(chat_members: &[UserId], last_message: Option<&ChatMessage>) -> 
 }
 
 pub struct ChatService {
-    chat_members: Vec<UserId>,
+    chat_members: Option<Vec<UserId>>,
     new_messages_callback: NewMessagesCallback,
+    other_user_loaded_callback: OtherUserLoadedCallback,
 
     service: FetchService,
     task: Option<FetchTask>,
 }
 
 impl ChatService {
-    pub fn new(chat_members: Vec<UserId>, new_messages_callback: NewMessagesCallback) -> Self {
+    pub fn new(
+        new_messages_callback: NewMessagesCallback,
+        other_user_loaded_callback: OtherUserLoadedCallback,
+    ) -> Self {
         Self {
-            chat_members,
+            chat_members: None,
             new_messages_callback,
+            other_user_loaded_callback,
             service: FetchService::new(),
             task: None,
         }
     }
 
-    pub fn load_history(&mut self) {
-        let url = api_url_get(&self.chat_members);
+    pub fn load_other_user(&mut self, username: &str) {
+        let url = api_url_get_user(username);
+        let req = Request::get(url).body(Nothing).unwrap();
+
+        let callback = self.other_user_loaded_callback.clone();
+
+        let handler = move |response: Response<
+            Json<Result<devand_core::PublicUserProfile, anyhow::Error>>,
+        >| {
+            let (meta, Json(data)) = response.into_parts();
+            if let Ok(data) = data {
+                callback.emit(Some(data));
+            } else {
+                log::error!("{:?}", &meta);
+                callback.emit(None);
+            }
+        };
+
+        self.task = self.service.fetch(req, handler.into()).ok();
+    }
+
+    pub fn load_history(&mut self, mut chat_members: Vec<UserId>) {
+        chat_members.sort();
+        self.chat_members = Some(chat_members.clone());
+        let url = api_url_get(&chat_members);
         let req = Request::get(url).body(Nothing).unwrap();
         self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
     }
 
     pub fn send_message(&mut self, txt: String) {
-        let url = api_url_post(&self.chat_members);
-        let json = serde_json::to_string(&txt).map_err(|_| anyhow::anyhow!("Cannot serialize"));
-        let req = Request::post(url).body(json).unwrap();
-        self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+        if let Some(chat_members) = &self.chat_members {
+            let url = api_url_post(chat_members);
+            let json = serde_json::to_string(&txt).map_err(|_| anyhow::anyhow!("Cannot serialize"));
+            let req = Request::post(url).body(json).unwrap();
+            self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+        } else {
+            log::error!("Cannot send message without knowing chat members");
+        }
     }
 
     pub fn poll(&mut self, last_message: Option<&ChatMessage>) {
-        let url = api_url_poll(&self.chat_members, last_message);
-        let req = Request::get(url).body(Nothing).unwrap();
-        self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+        if let Some(chat_members) = &self.chat_members {
+            let url = api_url_poll(chat_members, last_message);
+            let req = Request::get(url).body(Nothing).unwrap();
+            self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+        }
     }
 }
 
