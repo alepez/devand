@@ -20,8 +20,7 @@ pub struct ChatPage {
 #[derive(Clone, PartialEq, Properties)]
 pub struct Props {
     pub chat_with: String,
-    // TODO Having `me` as an Option is giving me troubles. Now we need it due to routes in app.rs
-    pub me: Option<PublicUserProfile>,
+    pub me: PublicUserProfile,
 }
 
 pub enum Msg {
@@ -47,12 +46,7 @@ impl Component for ChatPage {
 
         let mut service = ChatService::new(new_messages_callback, other_user_loaded_callback);
 
-        //  When ChatPage is created, `props.me` may be some or none.
-        //  We must start up the chat  (loading other user's profile and
-        //  messages) only when `props.me` is some.
-        if props.me.is_some() {
-            service.load_other_user(&props.chat_with);
-        }
+        service.load_other_user(&props.chat_with);
 
         let state = State::default();
 
@@ -76,12 +70,10 @@ impl Component for ChatPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::OtherUserLoaded(user) => {
-                log::info!("Other user loaded");
-
-                let me = self.props.me.as_ref().unwrap().id;
-
                 if let Some(user) = &user {
-                    let members = vec![user.id, me];
+                    let me = self.props.me.id;
+                    let other = user.id;
+                    let members = vec![other, me];
                     self.service.load_history(members);
                 } else {
                     // TODO Display error
@@ -110,27 +102,13 @@ impl Component for ChatPage {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.me.is_none() && props.me.is_some() {
-            self.service.load_other_user(&props.chat_with);
-        }
-
         self.props = props;
         true
     }
 
     fn view(&self) -> Html {
-        if let Some(me) = &self.props.me {
-            self.view_main(me)
-        } else {
-            html! {}
-        }
-    }
-}
-
-impl ChatPage {
-    fn view_main(&self, me: &PublicUserProfile) -> Html {
         let messages = self.state.messages.iter().map(|msg| {
-            let from_me = msg.author == me.id;
+            let from_me = msg.author == self.props.me.id;
             let from_me_class = if from_me {
                 "devand-from-me"
             } else {

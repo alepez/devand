@@ -104,12 +104,34 @@ impl Component for App {
     }
 
     fn view(&self) -> VNode {
+        if let Some(user) = &self.state.user {
+            self.view_ok(user)
+        } else {
+            view_loading()
+        }
+    }
+}
+
+fn view_loading() -> VNode {
+    html! { <p>{ "Loading..." }</p>}
+}
+
+impl App {
+    fn view_ok(&self, user: &User) -> VNode {
         let on_settings_change = self.link.callback(Msg::UserStore);
-        let user = self.state.user.clone();
+        let user = user.clone();
         let pub_user_profile: Option<PublicUserProfile> = self.state.user.clone().map(|x| x.into());
 
         html! {
             <>
+            { self.view_menu() }
+            { self.view_routes(&user) }
+            </>
+        }
+    }
+
+    fn view_menu(&self) -> VNode {
+        html! {
             <div class=("pure-menu", "pure-menu-horizontal")>
                 <ul class=("pure-menu-list")>
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
@@ -118,6 +140,15 @@ impl Component for App {
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
                 </ul>
             </div>
+        }
+    }
+
+    fn view_routes(&self, user: &User) -> VNode {
+        let on_settings_change = self.link.callback(Msg::UserStore);
+        let pub_user_profile: PublicUserProfile = user.clone().into();
+        let user = user.clone();
+
+        html! {
             <Router<AppRoute>
                 render = Router::render(move |switch: AppRoute| {
                     match switch {
@@ -132,7 +163,6 @@ impl Component for App {
                 })
                 redirect = Router::redirect(|route: Route| { AppRoute::NotFound(Permissive(Some(route.route))) })
             />
-            </>
         }
     }
 }
