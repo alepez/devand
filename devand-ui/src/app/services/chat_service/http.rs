@@ -97,6 +97,14 @@ impl ChatService {
     }
 
     pub fn poll(&mut self, last_message: Option<&ChatMessage>) {
+        if self.task.is_some() {
+            // There can be only one task at a time.
+            // Overwriting the current task makes the http request being
+            // canceled. We want to prevent canceling of `send_message`,
+            // so we just skip polling when there is a pending task.
+            return;
+        }
+
         if let Some(chat_members) = &self.chat_members {
             let url = api_url_poll(chat_members, last_message);
             let req = Request::get(url).body(Nothing).unwrap();
