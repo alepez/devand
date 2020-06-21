@@ -3,10 +3,10 @@ use crate::{CodeNowUsers, PgDevandConn, WeekScheduleMatrix};
 use chrono::prelude::*;
 use chrono::Duration;
 use devand_core::schedule_matcher::find_all_users_matching_in_week;
+use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{User, UserAffinity, UserId};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
-use serde::{Deserialize, Serialize};
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -72,8 +72,7 @@ fn availability_match(
     let User { settings, .. } = user.into();
     let availability = settings.schedule;
     let week_sched_mat = week_sched_matrix.0.read().unwrap();
-    let slots = find_all_users_matching_in_week(next_week, availability, week_sched_mat.get());
-    let res = AvailabilityMatch { slots };
+    let res = find_all_users_matching_in_week(next_week, availability, week_sched_mat.get());
     Json(res)
 }
 
@@ -92,7 +91,7 @@ fn chat_messages_get(
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     let members = parse_members(&members);
 
-    // FIXME Authorize using request guard
+    // TODO [refactoring] Authorize using request guard
     let authorized = members.contains(&user.id);
     if !authorized {
         return None;
@@ -117,7 +116,7 @@ fn chat_messages_post(
 
     let members = parse_members(&members);
 
-    // FIXME Authorize using request guard
+    // TODO [refactoring] Authorize using request guard
     let authorized = members.contains(&user.id);
     if !authorized {
         return None;
@@ -141,13 +140,13 @@ fn chat_messages_poll(
     // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
     let members = parse_members(&members);
 
-    // FIXME Authorize using request guard
+    // TODO [refactoring] Authorize using request guard
     let authorized = members.contains(&user.id);
     if !authorized {
         return None;
     }
 
-    // TODO It could be better loading from db only messages created after the
+    // TODO [optimization] It could be better loading from db only messages created after the
     // threshold, instead of filtering here.
     let result = devand_db::load_chat_history_by_members(&members, &conn)
         .into_iter()
@@ -165,14 +164,9 @@ fn user_public_profile(
     username: String,
     conn: PgDevandConn,
 ) -> Option<Json<devand_core::PublicUserProfile>> {
-    // TODO Load only public profile
+    // TODO [optimization] Load only public profile
     let user = devand_db::load_user_by_username(&username, &conn.0)?;
     Some(Json(user.into()))
-}
-
-#[derive(Serialize, Deserialize)]
-struct AvailabilityMatch {
-    slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
 }
 
 #[cfg(test)]

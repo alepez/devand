@@ -92,7 +92,7 @@ impl From<Vec<(UserId, DaySchedule)>> for DayScheduleMatrix {
             let mut data = Vec::with_capacity(size);
             data.resize_with(size, Default::default);
 
-            for h in 0..24 {
+            for h in 0..DaySchedule::HOURS_IN_DAY {
                 for (UserId(i), day) in us.iter() {
                     let in_schedule = day.hours[h];
                     let p = (*i as usize) * DaySchedule::HOURS_IN_DAY + h;
@@ -151,13 +151,13 @@ impl DayScheduleMatrix {
 // TODO Remove Default
 #[derive(Debug, Default)]
 pub struct WeekScheduleMatrix {
-    pub mon: DayScheduleMatrix,
-    pub tue: DayScheduleMatrix,
-    pub wed: DayScheduleMatrix,
-    pub thu: DayScheduleMatrix,
-    pub fri: DayScheduleMatrix,
-    pub sat: DayScheduleMatrix,
-    pub sun: DayScheduleMatrix,
+    mon: DayScheduleMatrix,
+    tue: DayScheduleMatrix,
+    wed: DayScheduleMatrix,
+    thu: DayScheduleMatrix,
+    fri: DayScheduleMatrix,
+    sat: DayScheduleMatrix,
+    sun: DayScheduleMatrix,
 }
 
 impl std::ops::Index<chrono::Weekday> for WeekScheduleMatrix {
@@ -237,14 +237,22 @@ fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
         .collect()
 }
 
+/// Given `date`, for any hour in the next 7 days, find all users with
+/// matching availability.
 pub fn find_all_users_matching_in_week(
     date: DateTime<Utc>,
     availability: Availability,
     week_sched_matrix: &WeekScheduleMatrix,
-) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
+) -> AvailabilityMatch {
     let days = days_from(7, date);
     let future_availability = attach_schedule(days, availability);
-    match_all_week(&future_availability, week_sched_matrix)
+    let slots = match_all_week(&future_availability, week_sched_matrix);
+    AvailabilityMatch { slots }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AvailabilityMatch {
+    slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
 }
 
 #[cfg(test)]

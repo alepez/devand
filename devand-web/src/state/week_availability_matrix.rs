@@ -12,7 +12,7 @@ impl WeekScheduleMatrixCache {
     }
 
     pub fn init(&mut self, _conn: &diesel::PgConnection) {
-        // TODO Create from database data
+        // FIXME Create from database data
         let wsm = WeekScheduleMatrix::default();
 
         self.data = wsm;
