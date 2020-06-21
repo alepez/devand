@@ -260,7 +260,13 @@ impl WeekScheduleMatrix {
     ) -> AvailabilityMatch {
         let days = days_from(7, date);
         let future_availability = attach_schedule(days, availability);
-        let slots = self.match_all_week(user, &future_availability);
+
+        let slots = self
+            .match_all_week(user, &future_availability)
+            .into_iter()
+            .filter(|(_, users)| !users.is_empty())
+            .collect();
+
         AvailabilityMatch { slots }
     }
 }
