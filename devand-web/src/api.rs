@@ -27,12 +27,22 @@ fn settings(user: LoggedUser) -> Json<User> {
 }
 
 #[put("/settings", data = "<user>")]
-fn settings_put(auth_data: AuthData, user: Json<User>, conn: PgDevandConn) -> Option<Json<User>> {
+fn settings_put(
+    auth_data: AuthData,
+    user: Json<User>,
+    conn: PgDevandConn,
+    wsmc: State<WeekScheduleMatrix>,
+) -> Option<Json<User>> {
     // Note: here we don't need LoggedUser (needs db access) but only
     // auth_data to check if we are modifiyng the right user.
     if !auth_data.matches_user(&user) {
         return None;
     }
+
+    wsmc.0
+        .write()
+        .unwrap()
+        .update(user.id, &user.settings.schedule);
 
     devand_db::save_user(user.0, &conn.0).map(|x| Json(x))
 }
@@ -62,10 +72,7 @@ fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devan
 }
 
 #[get("/availability-match")]
-fn availability_match(
-    user: LoggedUser,
-    wsm: State<WeekScheduleMatrix>,
-) -> Json<AvailabilityMatch> {
+fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<AvailabilityMatch> {
     let now = Utc::now();
     let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
     let User { settings, id, .. } = user.into();

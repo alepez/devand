@@ -1,4 +1,5 @@
 use devand_core::schedule_matcher::WeekScheduleMatrix;
+use devand_core::{Availability, UserId};
 use rocket_contrib::databases::diesel;
 
 #[derive(Default)]
@@ -12,8 +13,6 @@ impl WeekScheduleMatrixCache {
     }
 
     pub fn init(&mut self, conn: &diesel::PgConnection) {
-        use devand_core::Availability;
-
         // TODO [optimization] load only needed data
         let users = devand_db::load_users(&conn).expect("Cannot load users from database");
 
@@ -32,5 +31,11 @@ impl WeekScheduleMatrixCache {
 
         let wsm = WeekScheduleMatrix::from(schedules);
         self.data = Some(wsm);
+    }
+
+    pub fn update(&mut self, user: UserId, availability: &Availability) {
+        if let Some(wsm) = &mut self.data {
+            wsm.update(user, availability);
+        }
     }
 }
