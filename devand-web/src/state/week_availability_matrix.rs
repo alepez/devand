@@ -3,18 +3,34 @@ use rocket_contrib::databases::diesel;
 
 #[derive(Default)]
 pub struct WeekScheduleMatrixCache {
-    data: WeekScheduleMatrix,
+    data: Option<WeekScheduleMatrix>,
 }
 
 impl WeekScheduleMatrixCache {
     pub fn get(&self) -> &WeekScheduleMatrix {
-        &self.data
+        &self.data.as_ref().unwrap()
     }
 
-    pub fn init(&mut self, _conn: &diesel::PgConnection) {
-        // FIXME Create from database data
-        let wsm = WeekScheduleMatrix::default();
+    pub fn init(&mut self, conn: &diesel::PgConnection) {
+        use devand_core::Availability;
 
-        self.data = wsm;
+        // TODO [optimization] load only needed data
+        let users = devand_db::load_users(&conn).expect("Cannot load users from database");
+
+        let schedules: Vec<_> = users
+            .into_iter()
+            .filter_map(|u| {
+                let user_id = u.id;
+                let schedule = u.settings.schedule;
+                if let Availability::Weekly(week_schedule) = schedule {
+                    Some((user_id, week_schedule))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let wsm = WeekScheduleMatrix::from(schedules);
+        self.data = Some(wsm);
     }
 }

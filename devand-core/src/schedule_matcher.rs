@@ -67,8 +67,11 @@ impl ToString for Hour {
     }
 }
 
-// TODO Remove Default
-#[derive(Debug, Default)]
+/// A DayScheduleMatrix contains info about all users state (for example:
+/// availability) in a given hour of the day.
+/// It's useful because, given an hour of the day and an user id, the access
+/// time is constant.
+#[derive(Debug)]
 pub struct DayScheduleMatrix {
     data: Vec<bool>,
     max_user_id: UserId,
@@ -121,12 +124,12 @@ impl DayScheduleMatrix {
             .skip(h.0 as usize)
             .step_by(DaySchedule::HOURS_IN_DAY)
             .enumerate()
-            .filter(|(_, in_schedule)| **in_schedule)
-            .map(|(id, _)| UserId(id as i32))
+            .filter(|(_, available)| **available) // Remove non available users
+            .map(|(id, _)| UserId(id as i32)) // Index is UserId
             .collect()
     }
 
-    /// Return a Vec of all users available in a given dayly schedule
+    /// Return a Vec of all users available in a given daily schedule
     // TODO Cleanup?
     #[allow(dead_code)]
     fn get_available_at_day(&self, day: &DaySchedule) -> Vec<UserId> {
@@ -148,8 +151,9 @@ impl DayScheduleMatrix {
     }
 }
 
-// TODO Remove Default
-#[derive(Debug, Default)]
+/// WeekScheduleMatrix contains a DayScheduleMatrix for each day of the
+/// week.
+#[derive(Debug)]
 pub struct WeekScheduleMatrix {
     mon: DayScheduleMatrix,
     tue: DayScheduleMatrix,
@@ -175,6 +179,92 @@ impl std::ops::Index<chrono::Weekday> for WeekScheduleMatrix {
     }
 }
 
+impl From<Vec<(UserId, WeekSchedule)>> for WeekScheduleMatrix {
+    fn from(v: Vec<(UserId, WeekSchedule)>) -> Self {
+        type UsersDaySchedules = Vec<(UserId, DaySchedule)>;
+
+        let mut mon = UsersDaySchedules::default();
+        let mut tue = UsersDaySchedules::default();
+        let mut wed = UsersDaySchedules::default();
+        let mut thu = UsersDaySchedules::default();
+        let mut fri = UsersDaySchedules::default();
+        let mut sat = UsersDaySchedules::default();
+        let mut sun = UsersDaySchedules::default();
+
+        for (user, week_schedule) in v {
+            mon.push((user, week_schedule[chrono::Weekday::Mon].clone()));
+            tue.push((user, week_schedule[chrono::Weekday::Tue].clone()));
+            wed.push((user, week_schedule[chrono::Weekday::Wed].clone()));
+            thu.push((user, week_schedule[chrono::Weekday::Thu].clone()));
+            fri.push((user, week_schedule[chrono::Weekday::Fri].clone()));
+            sat.push((user, week_schedule[chrono::Weekday::Sat].clone()));
+            sun.push((user, week_schedule[chrono::Weekday::Sun].clone()));
+        }
+
+        Self {
+            mon: DayScheduleMatrix::from(mon),
+            tue: DayScheduleMatrix::from(tue),
+            wed: DayScheduleMatrix::from(wed),
+            thu: DayScheduleMatrix::from(thu),
+            fri: DayScheduleMatrix::from(fri),
+            sat: DayScheduleMatrix::from(sat),
+            sun: DayScheduleMatrix::from(sun),
+        }
+    }
+}
+
+impl WeekScheduleMatrix {
+    /// Return a vector with an item for each hour of the week, each one
+    /// containing all available users at that moment.
+    fn match_all_week(
+        &self,
+        user: UserId,
+        target: &Vec<(Date<Utc>, DaySchedule)>,
+    ) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
+        target
+            .iter()
+            .flat_map(|(date, day_sched)| {
+                let weekday = date.weekday();
+                let day_sched_mat = &self[weekday];
+                let z: Vec<_> = day_sched
+                    .hours
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, is_available)| **is_available)
+                    .map(|(h, _)| {
+                        let t = date.and_hms(h as u32, 0, 0);
+                        let h = Hour(h as i32);
+
+                        // All user available at this hour in the day
+                        let other_users = day_sched_mat
+                            .get_available_at_hour(h)
+                            .into_iter()
+                            .filter(|&user_id| user_id != user) // Remove same user
+                            .collect();
+
+                        (t, other_users)
+                    })
+                    .collect();
+                z
+            })
+            .collect()
+    }
+
+    /// Given `date`, for any hour in the next 7 days, find all users with
+    /// matching availability.
+    pub fn find_all_users_matching_in_week(
+        &self,
+        user: UserId,
+        date: DateTime<Utc>,
+        availability: Availability,
+    ) -> AvailabilityMatch {
+        let days = days_from(7, date);
+        let future_availability = attach_schedule(days, availability);
+        let slots = self.match_all_week(user, &future_availability);
+        AvailabilityMatch { slots }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct DayMatching {
     pub hours: [Vec<UserId>; 24],
@@ -182,35 +272,6 @@ struct DayMatching {
 
 fn get_day_schedule(date: Date<Utc>, week_schedule: &WeekSchedule) -> (Date<Utc>, DaySchedule) {
     (date, week_schedule[date.weekday()].clone())
-}
-
-/// Return a vector with an item for each hour of the week, each one
-/// containing all available users at that moment.
-fn match_all_week(
-    target: &Vec<(Date<Utc>, DaySchedule)>,
-    week_sched_matrix: &WeekScheduleMatrix,
-) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
-    target
-        .iter()
-        .flat_map(|(date, day_sched)| {
-            let weekday = date.weekday();
-            let day_sched_mat = &week_sched_matrix[weekday];
-            let z: Vec<_> = day_sched
-                .hours
-                .iter()
-                .enumerate()
-                .filter(|(_, is_available)| **is_available)
-                .map(|(h, _)| {
-                    let t = date.and_hms(h as u32, 0, 0);
-                    let h = Hour(h as i32);
-                    // All user available at this hour in the day
-                    let other_users = day_sched_mat.get_available_at_hour(h);
-                    (t, other_users)
-                })
-                .collect();
-            z
-        })
-        .collect()
 }
 
 fn attach_schedule(
@@ -235,19 +296,6 @@ fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
         .filter_map(|x| from.checked_add_signed(Duration::days(x as i64)))
         .map(|x| x.date())
         .collect()
-}
-
-/// Given `date`, for any hour in the next 7 days, find all users with
-/// matching availability.
-pub fn find_all_users_matching_in_week(
-    date: DateTime<Utc>,
-    availability: Availability,
-    week_sched_matrix: &WeekScheduleMatrix,
-) -> AvailabilityMatch {
-    let days = days_from(7, date);
-    let future_availability = attach_schedule(days, availability);
-    let slots = match_all_week(&future_availability, week_sched_matrix);
-    AvailabilityMatch { slots }
 }
 
 #[derive(Serialize, Deserialize)]
