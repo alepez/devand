@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
+use crate::app::{AppRoute, RouterButton};
 // use crate::app::components::LanguageTag;
 
 pub struct SchedulePage {
@@ -112,12 +113,14 @@ impl SchedulePage {
 
             let my_aff_params = AffinityParams::new().with_languages(self.props.me.languages.clone());
             let u_aff_params = AffinityParams::new().with_languages(user.languages.clone());
+            let username = user.username.clone();
 
             let affinity = Affinity::from_params(&my_aff_params, &u_aff_params);
 
             html! {
             <>
-                <span>{ &user.visible_name }</span>
+                <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(username)>{ "💬" }</RouterButton></span>
+                <span class="devand-visible-name">{ &user.visible_name }</span>
                 <span class="devand-affinity">{ affinity.to_string() }</span>
                 // <span>{ for lang_tags }</span>
             </>
