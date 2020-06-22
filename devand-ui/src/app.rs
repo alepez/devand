@@ -149,7 +149,7 @@ impl App {
                         AppRoute::Settings=> html!{ <SettingsPage on_change=on_settings_change.clone() user=user.clone() /> },
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
-                        AppRoute::Schedule=> html!{ <SchedulePage/> },
+                        AppRoute::Schedule=> html!{ <SchedulePage me=pub_user_profile.clone()/> },
                         AppRoute::Chat(username) => html!{ <ChatPage chat_with=username me=pub_user_profile.clone() />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                         _ => todo!()

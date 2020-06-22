@@ -1,9 +1,9 @@
 use crate::app::services::{ScheduleService, ScheduleServiceContent};
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
-use devand_core::{PublicUserProfile, UserId};
+use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
-use crate::app::components::LanguageTag;
+// use crate::app::components::LanguageTag;
 
 pub struct SchedulePage {
     props: Props,
@@ -14,7 +14,9 @@ pub struct SchedulePage {
 }
 
 #[derive(Clone, PartialEq, Properties)]
-pub struct Props {}
+pub struct Props {
+    pub me: PublicUserProfile,
+}
 
 pub enum Msg {
     Loaded(Result<ScheduleServiceContent, anyhow::Error>),
@@ -102,15 +104,22 @@ impl SchedulePage {
 
     fn view_user_profile(&self, user_id: UserId) -> Html {
         if let Some(user) = self.state.users.get(&user_id) {
-            let languages = &user.languages;
-            let lang_tags = languages.iter().map(|(lang, pref)| {
-                html! { <LanguageTag lang=lang pref=pref /> }
-            });
+            // TODO Showing languages takes too long
+            // let languages = &user.languages;
+            // let lang_tags = languages.iter().map(|(lang, pref)| {
+            //     html! { <LanguageTag lang=lang pref=pref /> }
+            // });
+
+            let my_aff_params = AffinityParams::new().with_languages(self.props.me.languages.clone());
+            let u_aff_params = AffinityParams::new().with_languages(user.languages.clone());
+
+            let affinity = Affinity::from_params(&my_aff_params, &u_aff_params);
 
             html! {
             <>
                 <span>{ &user.visible_name }</span>
-                <span>{ for lang_tags }</span>
+                <span class="devand-affinity">{ affinity.to_string() }</span>
+                // <span>{ for lang_tags }</span>
             </>
             }
         } else {
