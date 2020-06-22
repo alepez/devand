@@ -1,6 +1,7 @@
 use super::{FetchCallback, ScheduleServiceContent};
 use devand_core::schedule_matcher::AvailabilityMatch;
-use devand_core::{PublicUserProfile, UserId};
+use devand_core::{LanguagePreference, Languages, Level, Priority, PublicUserProfile, UserId, Language};
+use std::collections::BTreeMap;
 
 use chrono::offset::TimeZone;
 use rand::rngs::StdRng;
@@ -16,26 +17,70 @@ impl ScheduleService {
         Self { callback }
     }
 
-    pub fn load(&mut self) {
-        self.callback.emit(Ok(ScheduleServiceContent::AvailabilityMatch(
-            fake_availability_match(),
-        )))
+    pub fn load(&self) {
+        self.callback
+            .emit(Ok(ScheduleServiceContent::AvailabilityMatch(
+                fake_availability_match(),
+            )))
     }
 
-    pub fn load_public_profile(&mut self, user_id: UserId) {
-        self.callback.emit(Ok(ScheduleServiceContent::PublicUserProfile(
-            fake_public_profile(user_id),
-        )))
+    pub fn load_public_profile(&self, user_id: UserId) {
+        self.callback
+            .emit(Ok(ScheduleServiceContent::PublicUserProfile(
+                fake_public_profile(user_id),
+            )))
     }
 }
 
 fn fake_public_profile(id: UserId) -> PublicUserProfile {
     PublicUserProfile {
         id,
-        languages: devand_core::Languages::default(),
+        languages: fake_languages(),
         username: format!("user{}", id.0),
         visible_name: format!("User {}", id.0),
     }
+}
+
+fn fake_languages() -> Languages {
+    let mut languages = BTreeMap::default();
+
+    languages.insert(
+        Language::C,
+        LanguagePreference {
+            level: Level::Expert,
+            priority: Priority::Low,
+        },
+    );
+    languages.insert(
+        Language::JavaScript,
+        LanguagePreference {
+            level: Level::Proficient,
+            priority: Priority::Low,
+        },
+    );
+    languages.insert(
+        Language::CPlusPlus,
+        LanguagePreference {
+            level: Level::Expert,
+            priority: Priority::Low,
+        },
+    );
+    languages.insert(
+        Language::Rust,
+        LanguagePreference {
+            level: Level::Proficient,
+            priority: Priority::High,
+        },
+    );
+    languages.insert(
+        Language::Go,
+        LanguagePreference {
+            level: Level::Novice,
+            priority: Priority::No,
+        },
+    );
+
+    Languages(languages)
 }
 
 fn fake_availability_match() -> AvailabilityMatch {

@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
+use crate::app::components::LanguageTag;
 
 pub struct SchedulePage {
     props: Props,
@@ -92,17 +93,29 @@ impl SchedulePage {
         html! {
             <>
             <span class="devand-slot-time">{ t.to_string() }</span>
-            <span class="devand-slot-users">{ for users.iter().map(|&u| self.view_user_profile(u)) }</span>
+            <span class="devand-slot-users">
+            { for users.iter().map(|&u| self.view_user_profile(u)) }
+            </span>
             </>
         }
     }
 
     fn view_user_profile(&self, user_id: UserId) -> Html {
         if let Some(user) = self.state.users.get(&user_id) {
-            html! { <></> }
+            let languages = &user.languages;
+            let lang_tags = languages.iter().map(|(lang, pref)| {
+                html! { <LanguageTag lang=lang pref=pref /> }
+            });
+
+            html! {
+            <>
+                <span>{ &user.visible_name }</span>
+                <span>{ for lang_tags }</span>
+            </>
+            }
         } else {
             // TODO Trigger loading of user profile
-            // self.service.load_public_profile(user_id);
+            self.service.load_public_profile(user_id);
             html! { <></> }
         }
     }
