@@ -158,7 +158,6 @@ impl DayScheduleMatrix {
         set.into_iter().collect()
     }
 
-    #[cfg(test)]
     fn users_len(&self) -> usize {
         self.data.len() / DaySchedule::HOURS_IN_DAY
     }
@@ -295,7 +294,20 @@ impl WeekScheduleMatrix {
         AvailabilityMatch { slots }
     }
 
+    fn has_user(&self, user: UserId) -> bool {
+        self.mon.users_len() > user.0 as usize
+    }
+
     fn update_week_schedule(&mut self, user: UserId, week_sched: &WeekSchedule) {
+        log::debug!("WeekScheduleMatrix: {:?}", &self);
+        log::debug!("update user: {:?}", &user);
+
+        if !self.has_user(user) {
+            // Not in the matrix, cannot update
+            log::error!("Cannot update wsm");
+            return;
+        }
+
         for h in 0..DaySchedule::HOURS_IN_DAY {
             let i = (user, Hour(h as i32));
             self.mon[&i] = week_sched.mon.hours[h];
@@ -306,48 +318,6 @@ impl WeekScheduleMatrix {
             self.sat[&i] = week_sched.sat.hours[h];
             self.sun[&i] = week_sched.sun.hours[h];
         }
-
-        // type UsersDaySchedules = Vec<(UserId, DaySchedule)>;
-
-        // let max_user_id = v.iter().map(|x| x.0).max().unwrap_or(UserId(0));
-        // let size = max_user_id.0 as usize + 1;
-
-        // let mut mon = UsersDaySchedules::default();
-        // let mut tue = UsersDaySchedules::default();
-        // let mut wed = UsersDaySchedules::default();
-        // let mut thu = UsersDaySchedules::default();
-        // let mut fri = UsersDaySchedules::default();
-        // let mut sat = UsersDaySchedules::default();
-        // let mut sun = UsersDaySchedules::default();
-
-        // mon.resize_with(size, Default::default);
-        // tue.resize_with(size, Default::default);
-        // wed.resize_with(size, Default::default);
-        // thu.resize_with(size, Default::default);
-        // fri.resize_with(size, Default::default);
-        // sat.resize_with(size, Default::default);
-        // sun.resize_with(size, Default::default);
-
-        // for (user, week_schedule) in v {
-        //     let i = user.0 as usize;
-        //     mon[i] = (user, week_schedule[chrono::Weekday::Mon].clone());
-        //     tue[i] = (user, week_schedule[chrono::Weekday::Tue].clone());
-        //     wed[i] = (user, week_schedule[chrono::Weekday::Wed].clone());
-        //     thu[i] = (user, week_schedule[chrono::Weekday::Thu].clone());
-        //     fri[i] = (user, week_schedule[chrono::Weekday::Fri].clone());
-        //     sat[i] = (user, week_schedule[chrono::Weekday::Sat].clone());
-        //     sun[i] = (user, week_schedule[chrono::Weekday::Sun].clone());
-        // }
-
-        // Self {
-        //     mon: DayScheduleMatrix::from(mon),
-        //     tue: DayScheduleMatrix::from(tue),
-        //     wed: DayScheduleMatrix::from(wed),
-        //     thu: DayScheduleMatrix::from(thu),
-        //     fri: DayScheduleMatrix::from(fri),
-        //     sat: DayScheduleMatrix::from(sat),
-        //     sun: DayScheduleMatrix::from(sun),
-        // }
     }
 
     pub fn update(&mut self, user: UserId, availability: &Availability) {
