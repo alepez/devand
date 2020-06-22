@@ -6,7 +6,9 @@ mod not_found;
 mod services;
 mod settings;
 mod style;
+mod elements;
 
+use self::elements::busy_indicator;
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;
 use self::components::{ChatPage, SchedulePage};
@@ -107,13 +109,9 @@ impl Component for App {
         if let Some(user) = &self.state.user {
             self.view_ok(user)
         } else {
-            view_loading()
+            busy_indicator()
         }
     }
-}
-
-fn view_loading() -> VNode {
-    html! { <p>{ "Loading..." }</p>}
 }
 
 impl App {

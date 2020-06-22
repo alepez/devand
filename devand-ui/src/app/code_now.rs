@@ -1,4 +1,5 @@
 use crate::app::components::LanguageTag;
+use crate::app::elements::busy_indicator;
 use crate::app::services::CodeNowService;
 use crate::app::{AppRoute, RouterButton};
 use devand_core::{CodeNow, PublicUserProfile, UserAffinity};
@@ -76,7 +77,7 @@ impl Component for CodeNowPage {
                 if let Some(code_now) = &self.state.code_now {
                     view_code_now_users(code_now)
                 } else {
-                    view_loading()
+                    busy_indicator()
                 }
                 }
             </>
@@ -97,10 +98,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     let user = current_user.into();
     let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
     affinities.sort_unstable_by_key(|x| x.affinity);
-    let affinities = affinities
-        .into_iter()
-        .rev()
-        .map(|a| view_affinity(a));
+    let affinities = affinities.into_iter().rev().map(|a| view_affinity(a));
 
     if affinities.is_empty() {
         html! {
@@ -140,11 +138,5 @@ fn view_affinity(affinity: UserAffinity) -> Html {
             <td class="visible_name">{ visible_name }</td>
             <td class="languages"> { for languages_tags } </td>
         </tr>
-    }
-}
-
-fn view_loading() -> Html {
-    html! {
-        <p>{ "Loading..."}</p>
     }
 }

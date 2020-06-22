@@ -1,5 +1,6 @@
 use crate::app::components::LanguageTag;
 use crate::app::services::AffinitiesService;
+use crate::app::elements::busy_indicator;
 use devand_core::{PublicUserProfile, UserAffinity};
 use yew::{prelude::*, Properties};
 
@@ -75,7 +76,7 @@ impl Component for AffinitiesPage {
                 if let Some(affinities) = &self.state.affinities {
                     view_affinities(affinities)
                 } else {
-                    view_loading()
+                    busy_indicator()
                 }
                 }
             </>
@@ -119,12 +120,6 @@ fn view_affinity(affinity: &UserAffinity) -> Html {
             <td class="visible_name">{ visible_name }</td>
             <td class="languages"> { for languages_tags } </td>
         </tr>
-    }
-}
-
-fn view_loading() -> Html {
-    html! {
-        <p>{ "Loading..."}</p>
     }
 }
 

@@ -1,4 +1,5 @@
 use crate::app::components::ChatInput;
+use crate::app::elements::busy_indicator;
 use crate::app::services::ChatService;
 use devand_core::chat::ChatMessage;
 use devand_core::{PublicUserProfile, UserId};
@@ -122,7 +123,7 @@ impl Component for ChatPage {
         if let Some(other_user) = &self.state.other_user {
             self.view_messages(other_user)
         } else {
-            html! { <div>{"Loading..."} </div> }
+            busy_indicator()
         }
     }
 }
