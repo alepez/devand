@@ -367,7 +367,7 @@ fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
 
 #[derive(Serialize, Deserialize)]
 pub struct AvailabilityMatch {
-    slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
+    pub slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
 }
 
 #[cfg(test)]

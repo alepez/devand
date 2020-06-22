@@ -21,12 +21,7 @@ impl ChatService {
         new_messages_callback: NewMessagesCallback,
         other_user_loaded_callback: OtherUserLoadedCallback,
     ) -> Self {
-        let seed = [
-            1, 0, 0, 0, 23, 0, 0, 0, 200, 1, 0, 0, 210, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0,
-        ];
-
-        let rng = StdRng::from_seed(seed);
+        let rng = StdRng::seed_from_u64(42);
 
         Self {
             chat_members: None,
