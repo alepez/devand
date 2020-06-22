@@ -8,4 +8,4 @@ pub use user_service::UserService;
 pub use affinities_service::AffinitiesService;
 pub use code_now_service::CodeNowService;
 pub use chat_service::ChatService;
-pub use schedule_service::ScheduleService;
+pub use schedule_service::{ScheduleService, ScheduleServiceContent};

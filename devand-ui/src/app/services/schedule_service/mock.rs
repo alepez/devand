@@ -1,5 +1,6 @@
-use super::FetchCallback;
+use super::{FetchCallback, ScheduleServiceContent};
 use devand_core::schedule_matcher::AvailabilityMatch;
+use devand_core::{PublicUserProfile, UserId};
 
 use chrono::offset::TimeZone;
 use rand::rngs::StdRng;
@@ -16,7 +17,24 @@ impl ScheduleService {
     }
 
     pub fn load(&mut self) {
-        self.callback.emit(Ok(fake_availability_match()))
+        self.callback.emit(Ok(ScheduleServiceContent::AvailabilityMatch(
+            fake_availability_match(),
+        )))
+    }
+
+    pub fn load_public_profile(&mut self, user_id: UserId) {
+        self.callback.emit(Ok(ScheduleServiceContent::PublicUserProfile(
+            fake_public_profile(user_id),
+        )))
+    }
+}
+
+fn fake_public_profile(id: UserId) -> PublicUserProfile {
+    PublicUserProfile {
+        id,
+        languages: devand_core::Languages::default(),
+        username: format!("user{}", id.0),
+        visible_name: format!("User {}", id.0),
     }
 }
 

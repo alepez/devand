@@ -1,7 +1,7 @@
-use crate::app::services::ScheduleService;
+use crate::app::services::{ScheduleService, ScheduleServiceContent};
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
-use devand_core::UserId;
+use devand_core::{PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
 
 pub struct SchedulePage {
@@ -16,12 +16,13 @@ pub struct SchedulePage {
 pub struct Props {}
 
 pub enum Msg {
-    ScheduleLoaded(Result<AvailabilityMatch, anyhow::Error>),
+    Loaded(Result<ScheduleServiceContent, anyhow::Error>),
 }
 
 #[derive(Default)]
 struct State {
     schedule: Option<AvailabilityMatch>,
+    users: std::collections::BTreeMap<UserId, PublicUserProfile>,
 }
 
 impl Component for SchedulePage {
@@ -30,7 +31,7 @@ impl Component for SchedulePage {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
-        let schedule_loaded = link.callback(Msg::ScheduleLoaded);
+        let schedule_loaded = link.callback(Msg::Loaded);
         let mut service = ScheduleService::new(schedule_loaded);
         service.load();
 
@@ -44,8 +45,15 @@ impl Component for SchedulePage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::ScheduleLoaded(result) => match result {
-                Ok(schedule) => self.state.schedule = Some(schedule),
+            Msg::Loaded(result) => match result {
+                Ok(content) => match content {
+                    ScheduleServiceContent::AvailabilityMatch(schedule) => {
+                        self.state.schedule = Some(schedule);
+                    }
+                    ScheduleServiceContent::PublicUserProfile(user) => {
+                        self.state.users.insert(user.id, user);
+                    }
+                },
                 Err(err) => log::error!("Error: {:?}", err),
             },
         }
@@ -84,7 +92,18 @@ impl SchedulePage {
         html! {
             <>
             <span class="devand-slot-time">{ t.to_string() }</span>
+            <span class="devand-slot-users">{ for users.iter().map(|&u| self.view_user_profile(u)) }</span>
             </>
+        }
+    }
+
+    fn view_user_profile(&self, user_id: UserId) -> Html {
+        if let Some(user) = self.state.users.get(&user_id) {
+            html! { <></> }
+        } else {
+            // TODO Trigger loading of user profile
+            // self.service.load_public_profile(user_id);
+            html! { <></> }
         }
     }
 }
