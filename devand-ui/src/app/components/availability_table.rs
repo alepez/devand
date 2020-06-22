@@ -65,7 +65,7 @@ impl AvailabilityTable {
         html! {
             <fieldset>
                 <legend>{ "Your current weekly schedule. Check your available hours. All hours are in UTC" }</legend>
-                <div class="schedule-table-wrapper">
+                <div class="devand-schedule-table-wrapper">
                     { self.view_days(schedule) }
                 </div>
             </fieldset>
@@ -74,7 +74,7 @@ impl AvailabilityTable {
 
     fn view_days(&self, schedule: &WeekSchedule) -> Html {
         html! {
-            <ul class="availability-week">
+            <ul class="devand-availability-week">
                 { self.view_day(&schedule.mon, Weekday::Mon) }
                 { self.view_day(&schedule.tue, Weekday::Tue) }
                 { self.view_day(&schedule.wed, Weekday::Wed) }
@@ -102,9 +102,9 @@ impl AvailabilityTable {
         });
 
         html! {
-            <li class="availability-day">
-                <h3 class="availability-day-header">{ format!("{:?}", day) }</h3>
-                <div class="availability-day-column">
+            <li class="devand-availability-day">
+                <h3 class="devand-availability-day-header">{ format!("{:?}", day) }</h3>
+                <div class="devand-availability-day-column">
                     { for hours }
                 </div>
             </li>

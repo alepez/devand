@@ -30,7 +30,7 @@ impl Component for LanguageTag {
 
     fn view(&self) -> Html {
         html! {
-            <span class="language-tag">
+            <span class="devand-language-tag">
                 <span>{ self.props.lang }</span>
                 { view_language_level(self.props.pref.level) }
                 { view_language_priority(self.props.pref.priority) }
@@ -46,8 +46,8 @@ pub fn view_language_priority(priority: Priority) -> Html {
         Priority::High => ":)",
     };
     let title = format!("{}", priority);
-    let priority_class = format!("language-priority-tag-{}", priority).to_lowercase();
-    let class = vec!["language-priority-tag", &priority_class];
+    let priority_class = format!("devand-language-priority-tag-{}", priority).to_lowercase();
+    let class = vec!["devand-language-priority-tag", &priority_class];
 
     html! {
         <span class=class title=title>{ icon }</span>
@@ -58,8 +58,8 @@ pub fn view_language_level(level: Level) -> Html {
     let stars = (1..=3).map(|x| x <= level.as_number());
     let icon = |on| if on { "★" } else { "☆" };
     let title = format!("{}", level);
-    let level_class = format!("language-level-tag-{}", level).to_lowercase();
-    let class = vec!["language-level-tag", &level_class];
+    let level_class = format!("devand-language-level-tag-{}", level).to_lowercase();
+    let class = vec!["devand-language-level-tag", &level_class];
 
     html! {
         <span class=class title=title>
