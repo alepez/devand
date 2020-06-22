@@ -142,3 +142,26 @@
   flex: 1;
   margin: 0.5em;
 }
+
+.devand-schedule-slots {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.devand-schedule-slots li {
+  margin: 0 0 1em 0;
+}
+
+.devand-slot-user {
+  margin-right: 1em;
+  display: inline-block;
+}
+
+.devand-slot-user span {
+  margin-right: 0.5em;
+}
+
+.devand-slot-time {
+  display: block;
+}

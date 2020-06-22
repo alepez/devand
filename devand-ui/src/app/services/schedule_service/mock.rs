@@ -1,6 +1,8 @@
 use super::{FetchCallback, ScheduleServiceContent};
 use devand_core::schedule_matcher::AvailabilityMatch;
-use devand_core::{LanguagePreference, Languages, Level, Priority, PublicUserProfile, UserId, Language};
+use devand_core::{
+    Language, LanguagePreference, Languages, Level, Priority, PublicUserProfile, UserId,
+};
 use std::collections::BTreeMap;
 
 use chrono::offset::TimeZone;
@@ -86,7 +88,7 @@ fn fake_languages() -> Languages {
 fn fake_availability_match() -> AvailabilityMatch {
     let mut rng = StdRng::seed_from_u64(42);
 
-    let start_t: i64 = 1592475298;
+    let start_t: i64 = 1592474400;
 
     let mut slots = Vec::new();
 
@@ -95,7 +97,7 @@ fn fake_availability_match() -> AvailabilityMatch {
         let available = rng.gen_range(0, 10) < 1;
         if available {
             let t = chrono::Utc.timestamp(start_t + t_diff, 0);
-            let users_count = rng.gen_range(0, 7);
+            let users_count = rng.gen_range(1, 7);
             let mut users = Vec::new();
             for _ in 0..users_count {
                 users.push(devand_core::UserId(rng.gen_range(0, 5)));

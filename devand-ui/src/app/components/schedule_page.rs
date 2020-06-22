@@ -11,6 +11,7 @@ pub struct SchedulePage {
     #[allow(dead_code)]
     service: ScheduleService,
     state: State,
+    #[allow(dead_code)]
     link: ComponentLink<Self>,
 }
 
@@ -36,7 +37,7 @@ impl Component for SchedulePage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
         let schedule_loaded = link.callback(Msg::Loaded);
-        let mut service = ScheduleService::new(schedule_loaded);
+        let service = ScheduleService::new(schedule_loaded);
         service.load();
 
         Self {
@@ -83,16 +84,16 @@ impl SchedulePage {
         let slots = schedule
             .slots
             .iter()
-            .map(|(t, users)| html! { <li> { self.view_item(t, users) } </li> });
+            .map(|(t, users)| html! { <li> { self.view_slot(t, users) } </li> });
 
         html! {
-            <ul>
+            <ul class="devand-schedule-slots">
                 { for slots }
             </ul>
         }
     }
 
-    fn view_item(&self, t: &DateTime<Utc>, users: &Vec<UserId>) -> Html {
+    fn view_slot(&self, t: &DateTime<Utc>, users: &Vec<UserId>) -> Html {
         html! {
             <>
             <span class="devand-slot-time">{ t.to_string() }</span>
@@ -118,12 +119,12 @@ impl SchedulePage {
             let affinity = Affinity::from_params(&my_aff_params, &u_aff_params);
 
             html! {
-            <>
+            <span class="devand-slot-user">
                 <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(username)>{ "💬" }</RouterButton></span>
                 <span class="devand-visible-name">{ &user.visible_name }</span>
                 <span class="devand-affinity">{ affinity.to_string() }</span>
                 // <span>{ for lang_tags }</span>
-            </>
+            </span>
             }
         } else {
             // TODO Trigger loading of user profile
