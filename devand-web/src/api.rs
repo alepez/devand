@@ -18,6 +18,7 @@ pub fn routes() -> Vec<Route> {
         chat_messages_post,
         chat_messages_poll,
         user_public_profile,
+        user_public_profile_by_id,
     ]
 }
 
@@ -162,10 +163,24 @@ fn chat_messages_poll(
     Some(Json(result))
 }
 
+/// Load user public profile, given the user id. Note that this api is
+/// accessible only by authenticated users, this is why we have the LoggedUser
+/// guard, even if it is unused.
+#[get("/u/<user_id>")]
+fn user_public_profile_by_id(
+    _user: LoggedUser,
+    user_id: i32,
+    conn: PgDevandConn,
+) -> Option<Json<devand_core::PublicUserProfile>> {
+    // TODO [optimization] Load only public profile
+    let user = devand_db::load_user_by_id(UserId(user_id), &conn.0)?;
+    Some(Json(user.into()))
+}
+
 /// Load user public profile, given the username. Note that this api is
 /// accessible only by authenticated users, this is why we have the LoggedUser
 /// guard, even if it is unused.
-#[get("/u/<username>")]
+#[get("/u/<username>", rank = 2)]
 fn user_public_profile(
     _user: LoggedUser,
     username: String,
