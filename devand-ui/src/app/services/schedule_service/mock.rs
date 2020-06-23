@@ -12,17 +12,19 @@ use rand::SeedableRng;
 
 pub struct ScheduleService {
     callback: FetchCallback,
+    rng: StdRng,
 }
 
 impl ScheduleService {
     pub fn new(callback: FetchCallback) -> Self {
-        Self { callback }
+        let rng = StdRng::seed_from_u64(42);
+        Self { callback, rng }
     }
 
     pub fn load(&mut self) {
         self.callback
             .emit(Ok(ScheduleServiceContent::AvailabilityMatch(
-                fake_availability_match(),
+                fake_availability_match(&mut self.rng),
             )))
     }
 
@@ -85,9 +87,7 @@ fn fake_languages() -> Languages {
     Languages(languages)
 }
 
-fn fake_availability_match() -> AvailabilityMatch {
-    let mut rng = StdRng::seed_from_u64(42);
-
+fn fake_availability_match(rng: &mut StdRng) -> AvailabilityMatch {
     let start_t: i64 = 1592474400;
 
     let mut slots = Vec::new();
