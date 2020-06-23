@@ -1,10 +1,4 @@
-use crate::app::components::EditableLanguageTag;
-use crate::app::elements::busy_indicator;
-use crate::app::languages::AddLanguageComponent;
-use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
-
-use crate::app::components::AvailabilityTable;
 
 pub struct SecuritySettingsPage {
     props: Props,
