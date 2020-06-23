@@ -76,13 +76,15 @@ impl Component for SecuritySettingsPage {
         let new_password_feedback =
             check_new_password(&self.state.new_password, &self.state.repeat_new_password);
 
+        let alert = new_password_feedback;
+
         html! {
         <>
         <h1>{ "Security" }</h1>
-        <h2>{ "Password" }</h2>
         <div class="pure-form pure-form-stacked">
             <fieldset>
-                <legend>{ "Profile" }</legend>
+                <legend>{ "Password" }</legend>
+
                 <div class="pure-control-group">
                     <label for="old_password">{ "Old password:" }</label>
                     <input
@@ -92,6 +94,7 @@ impl Component for SecuritySettingsPage {
                         onblur=self.link.callback(|_| Msg::CheckOldPassword)
                         oninput=self.link.callback(|e: InputData| Msg::SetOldPassword(e.value)) />
                 </div>
+
                 <div class="pure-control-group">
                     <label for="new_password">{ "New password:" }</label>
                     <input
@@ -100,6 +103,7 @@ impl Component for SecuritySettingsPage {
                         id="new_password"
                         oninput=self.link.callback(|e: InputData| Msg::SetNewPassword(e.value)) />
                 </div>
+
                 <div class="pure-control-group">
                     <label for="repeat_new_password">{ "Repeat new password:" }</label>
                     <input
@@ -107,8 +111,10 @@ impl Component for SecuritySettingsPage {
                         name="repeat_new_password"
                         id="repeat_new_password"
                         oninput=self.link.callback(|e: InputData| Msg::SetRepeatNewPassword(e.value)) />
-                    <span class="pure-form-message-inline">{ new_password_feedback}</span>
                 </div>
+
+                { view_alert(alert) }
+
                 <button
                     class="pure-button"
                     onclick=self.link.callback(|_| Msg::ChangePassword)>
@@ -121,18 +127,26 @@ impl Component for SecuritySettingsPage {
     }
 }
 
-fn check_new_password(new_password: &str, repeat_new_password: &str) -> &'static str {
+fn check_new_password(new_password: &str, repeat_new_password: &str) -> Option<&'static str> {
     if new_password.is_empty() && repeat_new_password.is_empty() {
-        return " ";
+        return None;
     }
 
     if new_password != repeat_new_password {
-        return "Password mismatch";
+        return Some("Password mismatch");
     }
 
     if !devand_core::auth::is_valid_password(new_password) {
-        return "Password is too unsecure";
+        return Some("Password is too unsecure");
     }
 
-    "Ok"
+    None
+}
+
+fn view_alert(msg: Option<&str>) -> Html {
+    if let Some(msg) = msg {
+        html!{ <div class=("alert", "alert-danger")>{ msg }</div> }
+    } else {
+        html!{  }
+    }
 }
