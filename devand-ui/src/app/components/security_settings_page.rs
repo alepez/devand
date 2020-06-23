@@ -1,15 +1,18 @@
+use crate::app::services::{SecurityService, SecurityServiceContent};
 use yew::{prelude::*, Properties};
 
 pub struct SecuritySettingsPage {
     props: Props,
     state: State,
     link: ComponentLink<Self>,
+    service: SecurityService,
 }
 
 #[derive(Clone, Properties)]
 pub struct Props {}
 
 pub enum Msg {
+    ServiceResponse(Result<SecurityServiceContent, anyhow::Error>),
     ChangePassword,
     SetOldPassword(String),
     SetNewPassword(String),
@@ -22,6 +25,7 @@ struct State {
     old_password: String,
     new_password: String,
     repeat_new_password: String,
+    old_password_ok: Option<bool>,
 }
 
 impl Component for SecuritySettingsPage {
@@ -30,13 +34,21 @@ impl Component for SecuritySettingsPage {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
-        SecuritySettingsPage { props, link, state }
+        let service_callback = link.callback(Msg::ServiceResponse);
+        let service = SecurityService::new(service_callback);
+        SecuritySettingsPage {
+            props,
+            link,
+            state,
+            service,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::SetOldPassword(s) => {
                 self.state.old_password = s;
+                self.state.old_password_ok = None;
                 // TODO Check old password is valid (needs access to db)
                 true
             }
@@ -51,12 +63,24 @@ impl Component for SecuritySettingsPage {
                 true
             }
             Msg::CheckOldPassword => {
+                log::debug!("Check old password");
                 // TODO
+                self.service.check_old_password(&self.state.old_password);
                 false
             }
             Msg::ChangePassword => {
                 // TODO
                 false
+            }
+            Msg::ServiceResponse(res) => {
+                match res {
+                    Ok(SecurityServiceContent::OldPasswordCheck(ok)) => {
+                        log::debug!("Old password checked: {}", ok);
+                        self.state.old_password_ok = Some(ok);
+                    }
+                    _ => todo!(),
+                };
+                true
             }
         }
     }
@@ -67,10 +91,11 @@ impl Component for SecuritySettingsPage {
     }
 
     fn view(&self) -> Html {
-        let new_password_feedback =
-            check_new_password(&self.state.new_password, &self.state.repeat_new_password);
+        let old_password_alert =
+            check_old_password(&self.state.old_password, self.state.old_password_ok);
 
-        let alert = new_password_feedback;
+        let new_password_alert =
+            check_new_password(&self.state.new_password, &self.state.repeat_new_password);
 
         html! {
         <>
@@ -107,7 +132,8 @@ impl Component for SecuritySettingsPage {
                         oninput=self.link.callback(|e: InputData| Msg::SetRepeatNewPassword(e.value)) />
                 </div>
 
-                { view_alert(alert) }
+                { view_alert(old_password_alert) }
+                { view_alert(new_password_alert) }
 
                 <button
                     class="pure-button"
@@ -121,26 +147,44 @@ impl Component for SecuritySettingsPage {
     }
 }
 
-fn check_new_password(new_password: &str, repeat_new_password: &str) -> Option<&'static str> {
+fn check_new_password(
+    new_password: &str,
+    repeat_new_password: &str,
+) -> Result<&'static str, &'static str> {
     if new_password.is_empty() && repeat_new_password.is_empty() {
-        return None;
-    }
-
-    if new_password != repeat_new_password {
-        return Some("Password mismatch");
+        return Ok("");
     }
 
     if !devand_core::auth::is_valid_password(new_password) {
-        return Some("Password is too unsecure");
+        return Err("Password is too unsecure");
     }
 
-    None
+    if new_password != repeat_new_password {
+        return Err("Password mismatch");
+    }
+
+    Ok("New password ok")
 }
 
-fn view_alert(msg: Option<&str>) -> Html {
-    if let Some(msg) = msg {
-        html!{ <div class=("alert", "alert-danger")>{ msg }</div> }
+fn check_old_password(
+    old_password: &str,
+    old_password_ok: Option<bool>,
+) -> Result<&'static str, &'static str> {
+    if old_password.is_empty() {
+        Ok("")
+    } else if old_password_ok == Some(false) {
+        Err("Old password is wrong")
+    } else if old_password_ok == Some(true) {
+        Ok("Old password ok")
     } else {
-        html!{  }
+        Ok("")
+    }
+}
+
+fn view_alert(msg: Result<&str, &str>) -> Html {
+    match msg {
+        Ok(msg) if !msg.is_empty() => html! { <div class=("alert", "alert-success")>{ msg }</div> },
+        Err(msg) if !msg.is_empty() => html! { <div class=("alert", "alert-danger")>{ msg }</div> },
+        _ => html! {},
     }
 }
