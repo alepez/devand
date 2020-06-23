@@ -2,6 +2,7 @@ use yew::prelude::Callback;
 
 pub enum SecurityServiceContent {
     OldPasswordCheck(bool),
+    PasswordChanged,
 }
 
 type FetchCallback = Callback<Result<SecurityServiceContent, anyhow::Error>>;

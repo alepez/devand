@@ -13,11 +13,11 @@ pub struct Props {}
 
 pub enum Msg {
     ServiceResponse(Result<SecurityServiceContent, anyhow::Error>),
-    ChangePassword,
     SetOldPassword(String),
     SetNewPassword(String),
     SetRepeatNewPassword(String),
     CheckOldPassword,
+    ChangePassword,
 }
 
 #[derive(Default)]
@@ -26,6 +26,8 @@ struct State {
     new_password: String,
     repeat_new_password: String,
     old_password_ok: Option<bool>,
+    password_changed: Option<bool>,
+    generic_alert: Option<String>,
 }
 
 impl Component for SecuritySettingsPage {
@@ -49,36 +51,39 @@ impl Component for SecuritySettingsPage {
             Msg::SetOldPassword(s) => {
                 self.state.old_password = s;
                 self.state.old_password_ok = None;
-                // TODO Check old password is valid (needs access to db)
+                self.state.generic_alert = None;
                 true
             }
             Msg::SetNewPassword(s) => {
                 self.state.new_password = s;
-                // TODO Check if new password is valid (just pre-check length etc...)
+                self.state.generic_alert = None;
                 true
             }
             Msg::SetRepeatNewPassword(s) => {
                 self.state.repeat_new_password = s;
-                // TODO
                 true
             }
             Msg::CheckOldPassword => {
                 log::debug!("Check old password");
-                // TODO
                 self.service.check_old_password(&self.state.old_password);
                 false
             }
             Msg::ChangePassword => {
-                // TODO
+                self.service
+                    .submit_new_password(&self.state.old_password, &self.state.new_password);
                 false
             }
             Msg::ServiceResponse(res) => {
                 match res {
                     Ok(SecurityServiceContent::OldPasswordCheck(ok)) => {
-                        log::debug!("Old password checked: {}", ok);
                         self.state.old_password_ok = Some(ok);
                     }
-                    _ => todo!(),
+                    Ok(SecurityServiceContent::PasswordChanged) => {
+                        self.state.password_changed = Some(true);
+                    }
+                    Err(e) => {
+                        self.state.generic_alert = Some(e.to_string());
+                    }
                 };
                 true
             }
@@ -96,6 +101,12 @@ impl Component for SecuritySettingsPage {
 
         let new_password_alert =
             check_new_password(&self.state.new_password, &self.state.repeat_new_password);
+
+        let password_changed_alert = match self.state.password_changed {
+            Some(true) => Ok("Password has been changed successfully."),
+            Some(false) => Err("An error occurred while changing password. Please, retry."),
+            None => Ok(""),
+        };
 
         html! {
         <>
@@ -140,6 +151,15 @@ impl Component for SecuritySettingsPage {
                     onclick=self.link.callback(|_| Msg::ChangePassword)>
                     { "Change password" }
                 </button>
+
+                { view_alert(password_changed_alert) }
+                {
+                    if let Some(msg) = &self.state.generic_alert {
+                        html!{ <div class=("alert", "alert-danger")>{ msg }</div> }
+                    } else {
+                        html!{}
+                    }
+                }
             </fieldset>
         </div>
         </>
