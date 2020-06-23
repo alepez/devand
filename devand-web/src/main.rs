@@ -31,7 +31,7 @@ fn static_files(rocket: Rocket) -> Result<Rocket, Rocket> {
 
     let static_files = StaticFiles::from(dir.clone());
 
-    let rocket = rocket.manage(StaticDir(dir)).mount("/public", static_files);
+    let rocket = rocket.manage(StaticDir(dir)).mount("/static", static_files);
 
     Ok(rocket)
 }
