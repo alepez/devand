@@ -11,7 +11,7 @@ mod elements;
 use self::elements::busy_indicator;
 use self::affinities::AffinitiesPage;
 use self::code_now::CodeNowPage;
-use self::components::{ChatPage, SchedulePage};
+use self::components::{ChatPage, SchedulePage, SecuritySettingsPage};
 use self::not_found::NotFoundPage;
 use self::services::UserService;
 use self::settings::SettingsPage;
@@ -37,6 +37,8 @@ pub enum AppRoute {
     NotFound(Permissive<String>),
     #[to = "/dashboard"]
     Settings,
+    #[to = "/settings/password"]
+    SecuritySettings,
     #[to = "/chat/{username}"]
     Chat(String),
 }
@@ -132,6 +134,7 @@ impl App {
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
                     <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
+                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
                 </ul>
             </div>
         }
@@ -152,7 +155,7 @@ impl App {
                         AppRoute::Schedule=> html!{ <SchedulePage me=pub_user_profile.clone()/> },
                         AppRoute::Chat(username) => html!{ <ChatPage chat_with=username me=pub_user_profile.clone() />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
-                        _ => todo!()
+                        AppRoute::SecuritySettings => html!{ <SecuritySettingsPage /> },
                     }
                 })
                 redirect = Router::redirect(|route: Route| { AppRoute::NotFound(Permissive(Some(route.route))) })
