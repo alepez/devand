@@ -20,6 +20,7 @@ pub enum Msg {
     SetOldPassword(String),
     SetNewPassword(String),
     SetRepeatNewPassword(String),
+    CheckOldPassword,
 }
 
 #[derive(Default)]
@@ -55,6 +56,10 @@ impl Component for SecuritySettingsPage {
                 // TODO
                 true
             }
+            Msg::CheckOldPassword => {
+                // TODO
+                false
+            }
             Msg::ChangePassword => {
                 // TODO
                 false
@@ -68,6 +73,9 @@ impl Component for SecuritySettingsPage {
     }
 
     fn view(&self) -> Html {
+        let new_password_feedback =
+            check_new_password(&self.state.new_password, &self.state.repeat_new_password);
+
         html! {
         <>
         <h1>{ "Security" }</h1>
@@ -77,29 +85,54 @@ impl Component for SecuritySettingsPage {
                 <legend>{ "Profile" }</legend>
                 <div class="pure-control-group">
                     <label for="old_password">{ "Old password:" }</label>
-                    <input type="password" name="old_password" id="old_password" oninput=self.link.callback(move |e: InputData| Msg::SetOldPassword(e.value)) />
+                    <input
+                        type="password"
+                        name="old_password"
+                        id="old_password"
+                        onblur=self.link.callback(|_| Msg::CheckOldPassword)
+                        oninput=self.link.callback(|e: InputData| Msg::SetOldPassword(e.value)) />
                 </div>
                 <div class="pure-control-group">
                     <label for="new_password">{ "New password:" }</label>
-                    <input type="password" name="new_password" id="new_password" oninput=self.link.callback(move |e: InputData| Msg::SetNewPassword(e.value)) />
+                    <input
+                        type="password"
+                        name="new_password"
+                        id="new_password"
+                        oninput=self.link.callback(|e: InputData| Msg::SetNewPassword(e.value)) />
                 </div>
                 <div class="pure-control-group">
                     <label for="repeat_new_password">{ "Repeat new password:" }</label>
-                    <input type="password" name="repeat_new_password" id="repeat_new_password" oninput=self.link.callback(move |e: InputData| Msg::SetRepeatNewPassword(e.value)) />
-                    <span class="pure-form-message-inline">
-                    {
-                        if &self.state.new_password != &self.state.repeat_new_password {
-                            "Password mismatch"
-                        } else {
-                            "Ok"
-                        }
-                    }
-                    </span>
+                    <input
+                        type="password"
+                        name="repeat_new_password"
+                        id="repeat_new_password"
+                        oninput=self.link.callback(|e: InputData| Msg::SetRepeatNewPassword(e.value)) />
+                    <span class="pure-form-message-inline">{ new_password_feedback}</span>
                 </div>
-                <button class="pure-button" onclick=self.link.callback(move |_| Msg::ChangePassword)>{ "Change password" }</button>
+                <button
+                    class="pure-button"
+                    onclick=self.link.callback(|_| Msg::ChangePassword)>
+                    { "Change password" }
+                </button>
             </fieldset>
         </div>
         </>
         }
     }
+}
+
+fn check_new_password(new_password: &str, repeat_new_password: &str) -> &'static str {
+    if new_password.is_empty() && repeat_new_password.is_empty() {
+        return " ";
+    }
+
+    if new_password != repeat_new_password {
+        return "Password mismatch";
+    }
+
+    if !devand_core::auth::is_valid_password(new_password) {
+        return "Password is too unsecure";
+    }
+
+    "Ok"
 }
