@@ -14,7 +14,9 @@ pub struct ScheduleService {
     callback: FetchCallback,
 
     service: FetchService,
-    task: Option<FetchTask>,
+
+    // TODO Possible memory leak (tasks can grow forever)
+    tasks: Vec<FetchTask>,
 }
 
 impl ScheduleService {
@@ -22,7 +24,7 @@ impl ScheduleService {
         Self {
             callback,
             service: FetchService::new(),
-            task: None,
+            tasks: Vec::new(),
         }
     }
 
@@ -42,7 +44,8 @@ impl ScheduleService {
             }
         };
 
-        self.task = self.service.fetch(req, handler.into()).ok();
+        let task = self.service.fetch(req, handler.into()).ok();
+        self.enqueue_task(task);
     }
 
     pub fn load_public_profile(&mut self, user_id: UserId) {
@@ -62,6 +65,13 @@ impl ScheduleService {
             }
         };
 
-        self.task = self.service.fetch(req, handler.into()).ok();
+        let task = self.service.fetch(req, handler.into()).ok();
+        self.enqueue_task(task);
+    }
+
+    fn enqueue_task(&mut self, task: Option<FetchTask>) {
+        if let Some(task) = task {
+            self.tasks.push(task);
+        }
     }
 }
