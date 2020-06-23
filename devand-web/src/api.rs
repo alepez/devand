@@ -2,11 +2,10 @@ use crate::auth::{AuthData, LoggedUser};
 use crate::{CodeNowUsers, PgDevandConn, WeekScheduleMatrix};
 use chrono::prelude::*;
 use chrono::Duration;
-use devand_core::schedule_matcher::find_all_users_matching_in_week;
+use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{User, UserAffinity, UserId};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
-use serde::{Deserialize, Serialize};
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -19,6 +18,7 @@ pub fn routes() -> Vec<Route> {
         chat_messages_post,
         chat_messages_poll,
         user_public_profile,
+        user_public_profile_by_id,
     ]
 }
 
@@ -28,12 +28,22 @@ fn settings(user: LoggedUser) -> Json<User> {
 }
 
 #[put("/settings", data = "<user>")]
-fn settings_put(auth_data: AuthData, user: Json<User>, conn: PgDevandConn) -> Option<Json<User>> {
+fn settings_put(
+    auth_data: AuthData,
+    user: Json<User>,
+    conn: PgDevandConn,
+    wsmc: State<WeekScheduleMatrix>,
+) -> Option<Json<User>> {
     // Note: here we don't need LoggedUser (needs db access) but only
     // auth_data to check if we are modifiyng the right user.
     if !auth_data.matches_user(&user) {
         return None;
     }
+
+    wsmc.0
+        .write()
+        .unwrap()
+        .update(user.id, &user.settings.schedule);
 
     devand_db::save_user(user.0, &conn.0).map(|x| Json(x))
 }
@@ -63,17 +73,14 @@ fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devan
 }
 
 #[get("/availability-match")]
-fn availability_match(
-    user: LoggedUser,
-    week_sched_matrix: State<WeekScheduleMatrix>,
-) -> Json<AvailabilityMatch> {
+fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<AvailabilityMatch> {
     let now = Utc::now();
     let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
-    let User { settings, .. } = user.into();
+    let User { settings, id, .. } = user.into();
     let availability = settings.schedule;
-    let week_sched_mat = week_sched_matrix.0.read().unwrap();
-    let slots = find_all_users_matching_in_week(next_week, availability, week_sched_mat.get());
-    let res = AvailabilityMatch { slots };
+    let wsm = wsm.0.read().unwrap();
+    let wsm = wsm.get();
+    let res = wsm.find_all_users_matching_in_week(id, next_week, availability);
     Json(res)
 }
 
@@ -92,7 +99,7 @@ fn chat_messages_get(
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     let members = parse_members(&members);
 
-    // FIXME Authorize using request guard
+    // TODO [refactoring] Authorize using request guard
     let authorized = members.contains(&user.id);
     if !authorized {
         return None;
@@ -117,7 +124,7 @@ fn chat_messages_post(
 
     let members = parse_members(&members);
 
-    // FIXME Authorize using request guard
+    // TODO [refactoring] Authorize using request guard
     let authorized = members.contains(&user.id);
     if !authorized {
         return None;
@@ -141,13 +148,13 @@ fn chat_messages_poll(
     // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
     let members = parse_members(&members);
 
-    // FIXME Authorize using request guard
+    // TODO [refactoring] Authorize using request guard
     let authorized = members.contains(&user.id);
     if !authorized {
         return None;
     }
 
-    // TODO It could be better loading from db only messages created after the
+    // TODO [optimization] It could be better loading from db only messages created after the
     // threshold, instead of filtering here.
     let result = devand_db::load_chat_history_by_members(&members, &conn)
         .into_iter()
@@ -156,23 +163,32 @@ fn chat_messages_poll(
     Some(Json(result))
 }
 
+/// Load user public profile, given the user id. Note that this api is
+/// accessible only by authenticated users, this is why we have the LoggedUser
+/// guard, even if it is unused.
+#[get("/u/<user_id>")]
+fn user_public_profile_by_id(
+    _user: LoggedUser,
+    user_id: i32,
+    conn: PgDevandConn,
+) -> Option<Json<devand_core::PublicUserProfile>> {
+    // TODO [optimization] Load only public profile
+    let user = devand_db::load_user_by_id(UserId(user_id), &conn.0)?;
+    Some(Json(user.into()))
+}
+
 /// Load user public profile, given the username. Note that this api is
 /// accessible only by authenticated users, this is why we have the LoggedUser
 /// guard, even if it is unused.
-#[get("/u/<username>")]
+#[get("/u/<username>", rank = 2)]
 fn user_public_profile(
     _user: LoggedUser,
     username: String,
     conn: PgDevandConn,
 ) -> Option<Json<devand_core::PublicUserProfile>> {
-    // TODO Load only public profile
+    // TODO [optimization] Load only public profile
     let user = devand_db::load_user_by_username(&username, &conn.0)?;
     Some(Json(user.into()))
-}
-
-#[derive(Serialize, Deserialize)]
-struct AvailabilityMatch {
-    slots: Vec<(DateTime<Utc>, Vec<UserId>)>,
 }
 
 #[cfg(test)]

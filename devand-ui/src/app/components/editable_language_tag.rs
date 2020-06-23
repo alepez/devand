@@ -42,7 +42,7 @@ impl Component for EditableLanguageTag {
 
     fn view(&self) -> Html {
         html! {
-            <span class="editable-language-tag language-tag">
+            <span class="devand-editable-language-tag devand-language-tag">
                 <button class="pure-button" onclick=self.link.callback(move |_| Msg::Remove)>{ "✖" }</button>
                 <span>{ self.props.lang }</span>
                 { view_language_level(self.props.pref.level) }

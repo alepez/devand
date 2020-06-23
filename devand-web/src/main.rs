@@ -62,6 +62,8 @@ struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>);
 
 fn main() {
+    env_logger::init();
+
     rocket::ignite()
         .manage(CodeNowUsers::default())
         .manage(WeekScheduleMatrix::default())

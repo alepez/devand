@@ -1,5 +1,6 @@
 use crate::app::components::EditableLanguageTag;
 use crate::app::languages::AddLanguageComponent;
+use crate::app::elements::busy_indicator;
 use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
 
@@ -79,17 +80,11 @@ impl Component for SettingsPage {
                 if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)
                 } else {
-                    view_loading()
+                    busy_indicator()
                 }
                 }
             </div>
         }
-    }
-}
-
-fn view_loading() -> Html {
-    html! {
-        <p>{ "Loading..."}</p>
     }
 }
 

@@ -1,4 +1,4 @@
-.language-tag {
+.devand-language-tag {
     margin-left: 0.4em;
     margin-bottom: 0.4em;
     display: inline-block;
@@ -7,33 +7,33 @@
     padding: 0.2em 0.4em;
 }
 
-.language-tag .pure-button {
+.devand-language-tag .pure-button {
     margin-right: 0.5rem;
 }
 
-.language-level-tag,
-.language-priority-tag {
+.devand-language-level-tag,
+.devand-language-priority-tag {
   margin-left: 0.5em;
 }
 
-.language-level-tag-expert {
+.devand-language-level-tag-expert {
   color: #e5c100;
 }
 
-.language-level-tag-proficient {
+.devand-language-level-tag-proficient {
   color: #999999;
 }
 
-.language-level-tag-novice {
+.devand-language-level-tag-novice {
   color: #cd7f32;
 }
 
-.schedule-table-wrapper {
+.devand-schedule-table-wrapper {
   overflow-x:auto;
   width: 800px;
 }
 
-.availability-week {
+.devand-availability-week {
   display: flex;
   flex-direction: row;
   margin: 0;
@@ -41,24 +41,24 @@
   list-style: none;
 }
 
-.availability-day {
+.devand-availability-day {
   display: flex;
   flex-direction: column;
   width: 14.28%;
 }
 
-.availability-day-header {
+.devand-availability-day-header {
   text-align: center;
 }
 
-.availability-day-column {
+.devand-availability-day-column {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
   height: 40em;
 }
 
-.availability-day button {
+.devand-availability-day button {
   display: block;
   padding: 5px;
   width: 3em;
@@ -141,4 +141,27 @@
 .devand-chat-footer input {
   flex: 1;
   margin: 0.5em;
+}
+
+.devand-schedule-slots {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.devand-schedule-slots li {
+  margin: 0 0 1em 0;
+}
+
+.devand-slot-user {
+  margin-right: 1em;
+  display: inline-block;
+}
+
+.devand-slot-user span {
+  margin-right: 0.5em;
+}
+
+.devand-slot-time {
+  display: block;
 }

@@ -13,7 +13,10 @@ pub fn is_valid_password(s: &str) -> bool {
 }
 
 pub fn is_valid_username(s: &str) -> bool {
-    s.len() >= 3 && s.chars().all(|x| x.is_ascii_lowercase() || x.is_ascii_digit())
+    const MIN_LEN: usize = 3;
+    let is_valid_char = |x: char| x.is_ascii_lowercase() || x.is_ascii_digit();
+    let is_lowercase = |x: char| x.is_ascii_lowercase();
+    s.len() >= MIN_LEN && s.chars().take(1).all(is_lowercase) && s.chars().all(is_valid_char)
 }
 
 #[cfg(test)]
