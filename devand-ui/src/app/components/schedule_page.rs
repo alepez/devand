@@ -1,9 +1,9 @@
 use crate::app::services::{ScheduleService, ScheduleServiceContent};
+use crate::app::{AppRoute, RouterButton};
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
-use crate::app::{AppRoute, RouterButton};
 // use crate::app::components::LanguageTag;
 
 pub struct SchedulePage {
@@ -22,6 +22,7 @@ pub struct Props {
 
 pub enum Msg {
     Loaded(Result<ScheduleServiceContent, anyhow::Error>),
+    LoadUser(UserId),
 }
 
 #[derive(Default)]
@@ -37,7 +38,7 @@ impl Component for SchedulePage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
         let schedule_loaded = link.callback(Msg::Loaded);
-        let service = ScheduleService::new(schedule_loaded);
+        let mut service = ScheduleService::new(schedule_loaded);
         service.load();
 
         Self {
@@ -50,19 +51,25 @@ impl Component for SchedulePage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Loaded(result) => match result {
-                Ok(content) => match content {
-                    ScheduleServiceContent::AvailabilityMatch(schedule) => {
-                        self.state.schedule = Some(schedule);
-                    }
-                    ScheduleServiceContent::PublicUserProfile(user) => {
-                        self.state.users.insert(user.id, user);
-                    }
-                },
-                Err(err) => log::error!("Error: {:?}", err),
-            },
+            Msg::Loaded(result) => {
+                match result {
+                    Ok(content) => match content {
+                        ScheduleServiceContent::AvailabilityMatch(schedule) => {
+                            self.state.schedule = Some(schedule);
+                        }
+                        ScheduleServiceContent::PublicUserProfile(user) => {
+                            self.state.users.insert(user.id, user);
+                        }
+                    },
+                    Err(err) => log::error!("Error: {:?}", err),
+                };
+                true
+            }
+            Msg::LoadUser(user_id) => {
+                self.service.load_public_profile(user_id);
+                false
+            }
         }
-        true
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
@@ -81,8 +88,15 @@ impl Component for SchedulePage {
 
 impl SchedulePage {
     fn view_schedule(&self, schedule: &AvailabilityMatch) -> Html {
-        let slots = schedule
-            .slots
+        if schedule.slots.is_empty() {
+            html! { <p>{"No results"}</p> }
+        } else {
+            self.view_slots(&schedule.slots)
+        }
+    }
+
+    fn view_slots(&self, slots: &Vec<(DateTime<Utc>, Vec<UserId>)>) -> Html {
+        let slots = slots
             .iter()
             .map(|(t, users)| html! { <li> { self.view_slot(t, users) } </li> });
 
@@ -112,7 +126,8 @@ impl SchedulePage {
             //     html! { <LanguageTag lang=lang pref=pref /> }
             // });
 
-            let my_aff_params = AffinityParams::new().with_languages(self.props.me.languages.clone());
+            let my_aff_params =
+                AffinityParams::new().with_languages(self.props.me.languages.clone());
             let u_aff_params = AffinityParams::new().with_languages(user.languages.clone());
             let username = user.username.clone();
 
@@ -127,8 +142,7 @@ impl SchedulePage {
             </span>
             }
         } else {
-            // TODO Trigger loading of user profile
-            self.service.load_public_profile(user_id);
+            self.link.send_message(Msg::LoadUser(user_id));
             html! { <></> }
         }
     }

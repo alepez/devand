@@ -19,14 +19,14 @@ impl ScheduleService {
         Self { callback }
     }
 
-    pub fn load(&self) {
+    pub fn load(&mut self) {
         self.callback
             .emit(Ok(ScheduleServiceContent::AvailabilityMatch(
                 fake_availability_match(),
             )))
     }
 
-    pub fn load_public_profile(&self, user_id: UserId) {
+    pub fn load_public_profile(&mut self, user_id: UserId) {
         self.callback
             .emit(Ok(ScheduleServiceContent::PublicUserProfile(
                 fake_public_profile(user_id),

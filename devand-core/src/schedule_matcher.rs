@@ -326,7 +326,7 @@ impl WeekScheduleMatrix {
                 self.update_week_schedule(user, week_schedule);
             }
             Availability::Never => {
-                todo!();
+                self.update_week_schedule(user, &WeekSchedule::default());
             }
         }
     }
