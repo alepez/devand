@@ -1,20 +1,13 @@
-mod affinities;
-mod code_now;
 mod components;
-mod languages;
-mod not_found;
-mod services;
-mod settings;
-mod style;
 mod elements;
+mod services;
 
+use self::components::{
+    AffinitiesPage, ChatPage, CodeNowPage, NotFoundPage, SchedulePage, SecuritySettingsPage,
+    SettingsPage,
+};
 use self::elements::busy_indicator;
-use self::affinities::AffinitiesPage;
-use self::code_now::CodeNowPage;
-use self::components::{ChatPage, SchedulePage, SecuritySettingsPage};
-use self::not_found::NotFoundPage;
 use self::services::UserService;
-use self::settings::SettingsPage;
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;

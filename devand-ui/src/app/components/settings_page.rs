@@ -1,5 +1,5 @@
 use crate::app::components::EditableLanguageTag;
-use crate::app::languages::AddLanguageComponent;
+use crate::app::components::AddLanguageComponent;
 use crate::app::elements::busy_indicator;
 use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
