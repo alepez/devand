@@ -21,7 +21,8 @@ impl SecurityService {
         }
     }
 
-    pub fn submit_new_password(&mut self, old_password: &str, new_password: &str) {
+    pub fn edit_password(&mut self, old_password: &str, new_password: &str) {
+        log::debug!("Edit password (service)");
         let body = PasswordEdit {
             old_password: old_password.to_string(),
             new_password: new_password.to_string(),
@@ -29,7 +30,7 @@ impl SecurityService {
         let callback = self.callback.clone();
         let json = serde_json::to_string(&body).map_err(|_| anyhow::anyhow!("bo!"));
         let url = API_PASSWORD_EDIT_URL;
-        let req = Request::get(url).body(json).unwrap();
+        let req = Request::post(url).body(json).unwrap();
         let handler = move |response: Response<Json<Result<(), anyhow::Error>>>| {
             let (meta, ..) = response.into_parts();
             if meta.status.is_success() {
@@ -43,6 +44,7 @@ impl SecurityService {
     }
 
     pub fn check_old_password(&mut self, old_password: &str) {
+        log::debug!("Check old password (service)");
         let body = PasswordEdit {
             old_password: old_password.to_string(),
             new_password: String::default(),
@@ -50,7 +52,7 @@ impl SecurityService {
         let callback = self.callback.clone();
         let json = serde_json::to_string(&body).map_err(|_| anyhow::anyhow!("bo!"));
         let url = API_PASSWORD_CHECK_URL;
-        let req = Request::get(url).body(json).unwrap();
+        let req = Request::post(url).body(json).unwrap();
         let handler = move |response: Response<Json<Result<bool, anyhow::Error>>>| {
             let (meta, Json(data)) = response.into_parts();
             if let Ok(password_matches) = data {

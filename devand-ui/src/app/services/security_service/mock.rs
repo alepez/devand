@@ -9,7 +9,7 @@ impl SecurityService {
         Self { callback }
     }
 
-    pub fn submit_new_password(&mut self, old_password: &str, new_password: &str) {
+    pub fn edit_password(&mut self, old_password: &str, new_password: &str) {
         let old_password_ok = old_password == "oldpassword";
         let new_password_ok = devand_core::auth::is_valid_password(new_password);
 

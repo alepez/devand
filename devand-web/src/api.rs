@@ -6,7 +6,6 @@ use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{User, UserAffinity, UserId};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
-use std::collections::BTreeMap;
 
 pub fn routes() -> Vec<Route> {
     routes![

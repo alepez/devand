@@ -49,31 +49,42 @@ impl Component for SecuritySettingsPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::SetOldPassword(s) => {
+                log::debug!("set old password: {}", &s);
                 self.state.old_password = s;
                 self.state.old_password_ok = None;
                 self.state.generic_alert = None;
                 true
             }
             Msg::SetNewPassword(s) => {
+                log::debug!("set new password: {}", &s);
                 self.state.new_password = s;
                 self.state.generic_alert = None;
                 true
             }
             Msg::SetRepeatNewPassword(s) => {
+                log::debug!("set repeat password: {}", &s);
                 self.state.repeat_new_password = s;
                 true
             }
             Msg::CheckOldPassword => {
                 log::debug!("Check old password");
-                self.service.check_old_password(&self.state.old_password);
+                if !self.state.old_password.is_empty() {
+                    self.service.check_old_password(&self.state.old_password);
+                }
                 false
             }
             Msg::ChangePassword => {
+                log::debug!(
+                    "change password: {} {}",
+                    &self.state.old_password,
+                    &self.state.new_password
+                );
                 self.service
-                    .submit_new_password(&self.state.old_password, &self.state.new_password);
+                    .edit_password(&self.state.old_password, &self.state.new_password);
                 false
             }
             Msg::ServiceResponse(res) => {
+                log::debug!("service response");
                 match res {
                     Ok(SecurityServiceContent::OldPasswordCheck(ok)) => {
                         self.state.old_password_ok = Some(ok);
