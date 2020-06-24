@@ -103,7 +103,7 @@ impl Component for SecuritySettingsPage {
             check_new_password(&self.state.new_password, &self.state.repeat_new_password);
 
         let password_changed_alert = match self.state.password_changed {
-            Some(true) => Ok("Password has been changed successfully."),
+            Some(true) => Ok("Password changed successfully."),
             Some(false) => Err("An error occurred while changing password. Please, retry."),
             None => Ok(""),
         };
