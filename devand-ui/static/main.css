@@ -55,5 +55,8 @@
     border-color: #c3e6cb;
 }
 
-
-
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}

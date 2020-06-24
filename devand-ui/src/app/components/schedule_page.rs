@@ -5,6 +5,7 @@ use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
 // use crate::app::components::LanguageTag;
+use crate::app::RouterAnchor;
 
 pub struct SchedulePage {
     props: Props,
@@ -78,10 +79,19 @@ impl Component for SchedulePage {
     }
 
     fn view(&self) -> Html {
+        html! {
+        <>
+        <h1>{ "Schedule" }</h1>
+        <p>{ "Here you find a list of users available at the same time as you." }</p>
+        <p>{ "Just choose someone to pair-program with and start chatting" }</p>
+        {
         if let Some(schedule) = &self.state.schedule {
             self.view_schedule(schedule)
         } else {
             crate::app::elements::busy_indicator()
+        }
+        }
+        </>
         }
     }
 }
@@ -89,7 +99,11 @@ impl Component for SchedulePage {
 impl SchedulePage {
     fn view_schedule(&self, schedule: &AvailabilityMatch) -> Html {
         if schedule.slots.is_empty() {
-            html! { <p>{"No results"}</p> }
+            html! {
+                <div class=("alert", "alert-warning")>
+                    {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your availability." }</RouterAnchor>
+                </div>
+            }
         } else {
             self.view_slots(&schedule.slots)
         }
