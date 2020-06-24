@@ -56,28 +56,12 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
         .values(&new_user)
         .get_result(conn)
         .map_err(|err| {
+            // TODO Use anyhow to propagate the error message
             dbg!(err);
             Error::Unknown
         })?;
 
-    let enc_password = encode_password(&password);
-
-    let new_auth = models::NewAuth {
-        user_id: user.id,
-        enc_password,
-    };
-
-    let ok = diesel::insert_into(auth::table)
-        .values(&new_auth)
-        .execute(conn)
-        .map_err(|err| {
-            dbg!(err);
-            Error::Unknown
-        })?;
-
-    assert_eq!(ok, 1);
-
-    Ok(())
+    set_password(UserId(user.id), &password, conn)
 }
 
 pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<UserId, Error> {
@@ -93,6 +77,43 @@ pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<UserId, Er
     } else {
         Err(Error::Unknown)
     }
+}
+
+pub fn check_password(user_id: UserId, password: &str, conn: &PgConnection) -> Result<bool, Error> {
+    let enc_password: String = schema::auth::table
+        .filter(schema::auth::dsl::user_id.eq(user_id.0))
+        .select(schema::auth::enc_password)
+        .first(conn)
+        .map_err(|_| Error::Unknown)?;
+    Ok(verify_password(&enc_password, &password))
+}
+
+pub fn set_password(
+    user_id: devand_core::UserId,
+    password: &str,
+    conn: &PgConnection,
+) -> Result<(), Error> {
+    use schema::auth;
+
+    let enc_password = encode_password(password);
+
+    let new_auth = models::NewAuth {
+        user_id: user_id.0,
+        enc_password,
+    };
+
+    let ok = diesel::insert_into(auth::table)
+        .values(&new_auth)
+        .execute(conn)
+        .map_err(|err| {
+            // TODO Use anyhow to propagate the error message
+            dbg!(err);
+            Error::Unknown
+        })?;
+
+    assert_eq!(ok, 1);
+
+    Ok(())
 }
 
 #[cfg(test)]

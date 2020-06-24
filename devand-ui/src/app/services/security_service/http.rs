@@ -1,6 +1,6 @@
 use super::{FetchCallback, SecurityServiceContent};
-use yew::format::{Json, Nothing};
-use yew::prelude::*;
+use devand_core::PasswordEdit;
+use yew::format::Json;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 const API_PASSWORD_CHECK_URL: &'static str = "/api/password-check";
@@ -22,9 +22,9 @@ impl SecurityService {
     }
 
     pub fn submit_new_password(&mut self, old_password: &str, new_password: &str) {
-        let body = maplit::btreemap! {
-            "old" => old_password,
-            "new" => new_password,
+        let body = PasswordEdit {
+            old_password: old_password.to_string(),
+            new_password: new_password.to_string(),
         };
         let callback = self.callback.clone();
         let json = serde_json::to_string(&body).map_err(|_| anyhow::anyhow!("bo!"));
@@ -43,8 +43,9 @@ impl SecurityService {
     }
 
     pub fn check_old_password(&mut self, old_password: &str) {
-        let body = maplit::btreemap! {
-            "old" => old_password,
+        let body = PasswordEdit {
+            old_password: old_password.to_string(),
+            new_password: String::default(),
         };
         let callback = self.callback.clone();
         let json = serde_json::to_string(&body).map_err(|_| anyhow::anyhow!("bo!"));
