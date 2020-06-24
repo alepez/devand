@@ -19,6 +19,8 @@ pub fn routes() -> Vec<Route> {
         chat_messages_poll,
         user_public_profile,
         user_public_profile_by_id,
+        password_edit,
+        password_check,
     ]
 }
 
@@ -189,6 +191,33 @@ fn user_public_profile(
     // TODO [optimization] Load only public profile
     let user = devand_db::load_user_by_username(&username, &conn.0)?;
     Some(Json(user.into()))
+}
+
+#[post("/password-check", data = "<passwords>")]
+fn password_check(
+    auth_data: AuthData,
+    conn: PgDevandConn,
+    passwords: Json<devand_core::PasswordEdit>,
+) -> Option<Json<bool>> {
+    let ok = devand_db::auth::check_password(auth_data.user_id, &passwords.0.old_password, &conn)
+        .ok()?;
+    Some(Json(ok))
+}
+
+#[post("/password-edit", data = "<passwords>")]
+fn password_edit(
+    auth_data: AuthData,
+    conn: PgDevandConn,
+    passwords: Json<devand_core::PasswordEdit>,
+) -> Option<()> {
+    let ok = devand_db::auth::check_password(auth_data.user_id, &passwords.0.old_password, &conn)
+        .ok()?;
+
+    if !ok {
+        return None;
+    }
+
+    devand_db::auth::set_password(auth_data.user_id, &passwords.0.new_password, &conn).ok()
 }
 
 #[cfg(test)]

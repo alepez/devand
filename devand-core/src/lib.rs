@@ -258,6 +258,13 @@ pub struct CodeNow {
     pub all_users: Vec<PublicUserProfile>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct PasswordEdit {
+    pub old_password: String,
+    pub new_password: String,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
