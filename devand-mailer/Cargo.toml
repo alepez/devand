@@ -1,0 +1,29 @@
+[package]
+name = "devand-mailer"
+version = "0.1.0"
+authors = ["Alessandro Pezzato <alessandro@pezzato.net>"]
+edition = "2018"
+
+[dependencies]
+env_logger = "0.7"
+log = "0.4"
+jsonrpc-derive = "14.2"
+jsonrpc-core = "14.2"
+jsonrpc-http-server = { version = "14.2", optional = true }
+jsonrpc-core-client = { version = "14.2", features = ["http"], optional = true }
+tokio = { version = "0.1", optional = true }
+lettre = "0.9"
+lettre_email = "0.9"
+dotenv = "0.15.0"
+
+[features]
+server = ["jsonrpc-http-server"]
+client = ["jsonrpc-core-client", "tokio"]
+
+[[example]]
+name = "client"
+required-features = ["client"]
+
+[[bin]]
+name = "devand-mailer"
+required-features = ["server"]

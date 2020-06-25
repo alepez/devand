@@ -1,12 +1,11 @@
-name: "devand-web-builder docker image"
+name: "devand-run-env docker image"
 
 on:
   push:
     paths:
-      - docker/devand-web-builder/Dockerfile
+      - docker/devand-run-env/Dockerfile
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -16,6 +15,6 @@ jobs:
         username: alepez
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
-        image_name: devand-web-builder
-        dockerfile: docker/devand-web-builder/Dockerfile
+        image_name: devand-run-env
+        dockerfile: docker/devand-run-env/Dockerfile
         push_image_and_stages: false

@@ -23,3 +23,8 @@ RUN apt-get update && \
 USER builder
 RUN yarn global add wasm-pack
 
+# Update cargo index, so it is ready for images extending this one
+RUN cargo search --limit 0
+
+USER builder
+RUN mkdir /home/builder/project

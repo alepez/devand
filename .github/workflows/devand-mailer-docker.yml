@@ -1,9 +1,13 @@
-name: "devand-web-builder docker image"
+name: "devand-mailer docker image"
 
 on:
   push:
+    # branches:
+    #   - master
     paths:
-      - docker/devand-web-builder/Dockerfile
+      - docker/devand-mailer/Dockerfile
+      - devand-core/**
+      - devand-mailer/**
 
 jobs:
 
@@ -16,6 +20,6 @@ jobs:
         username: alepez
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
-        image_name: devand-web-builder
-        dockerfile: docker/devand-web-builder/Dockerfile
+        image_name: devand-mailer
+        dockerfile: docker/devand-mailer/Dockerfile
         push_image_and_stages: false
