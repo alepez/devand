@@ -17,4 +17,3 @@ jobs:
         registry: docker.pkg.github.com
         image_name: devand-run-env
         dockerfile: docker/devand-run-env/Dockerfile
-        push_image_and_stages: false

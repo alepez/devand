@@ -22,4 +22,3 @@ jobs:
         registry: docker.pkg.github.com
         image_name: devand-mailer
         dockerfile: docker/devand-mailer/Dockerfile
-        push_image_and_stages: false
