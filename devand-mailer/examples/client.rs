@@ -10,7 +10,7 @@ fn main() {
     let client = Client::new(conf);
 
     client.send_email(
-        "admin@devand.dev".to_string(),
+        vec!["admin@devand.dev".to_string()],
         "Hei".to_string(),
         "Ciao!".to_string(),
     );

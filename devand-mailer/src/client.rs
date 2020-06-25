@@ -17,7 +17,7 @@ impl Client {
         Self { url: conf.url }
     }
 
-    pub fn send_email(&self, recipient: String, subject: String, text: String) {
+    pub fn send_email(&self, recipients: Vec<String>, subject: String, text: String) {
         let mut rt = Runtime::new().unwrap();
 
         let client_url = &self.url;
@@ -27,7 +27,7 @@ impl Client {
 
         client
             .clone()
-            .send_email(recipient, subject, text)
+            .send_email(recipients, subject, text)
             .map(|_| println!("OK"))
             .wait()
             .unwrap();

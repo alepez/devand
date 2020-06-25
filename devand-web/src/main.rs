@@ -15,6 +15,8 @@ use rocket_contrib::databases::diesel;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 
+use devand_mailer::Client as Mailer;
+
 #[database("pg_devand")]
 struct PgDevandConn(diesel::PgConnection);
 
@@ -55,6 +57,14 @@ fn init_wsmc(rocket: Rocket) -> Result<Rocket, Rocket> {
     Ok(rocket)
 }
 
+fn create_mailer() -> Mailer {
+    let conf = devand_mailer::ClientConf {
+        url: std::env::var("DEVAND_MAILER_SERVER_URL").unwrap(),
+    };
+
+    Mailer::new(conf)
+}
+
 #[derive(Default)]
 struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 
@@ -63,8 +73,10 @@ struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>)
 
 fn main() {
     env_logger::init();
+    dotenv::dotenv().ok();
 
     rocket::ignite()
+        .manage(create_mailer())
         .manage(CodeNowUsers::default())
         .manage(WeekScheduleMatrix::default())
         .attach(Template::fairing())

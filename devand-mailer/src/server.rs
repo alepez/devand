@@ -8,8 +8,10 @@ struct RpcImpl {
 }
 
 impl Rpc for RpcImpl {
-    fn send_email(&self, recipient: String, subject: String, text: String) -> Result<()> {
-        self.mailer.send_email(&recipient, &subject, &text);
+    fn send_email(&self, recipients: Vec<String>, subject: String, text: String) -> Result<()> {
+        for recipient in recipients {
+            self.mailer.send_email(&recipient, &subject, &text);
+        }
         Ok(())
     }
 }

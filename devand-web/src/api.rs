@@ -1,5 +1,5 @@
 use crate::auth::{AuthData, LoggedUser};
-use crate::{CodeNowUsers, PgDevandConn, WeekScheduleMatrix};
+use crate::{CodeNowUsers, Mailer, PgDevandConn, WeekScheduleMatrix};
 use chrono::prelude::*;
 use chrono::Duration;
 use devand_core::schedule_matcher::AvailabilityMatch;
@@ -116,6 +116,7 @@ fn chat_messages_post(
     user: LoggedUser,
     members: String,
     txt: Json<String>,
+    mailer: State<Mailer>,
     conn: PgDevandConn,
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     let new_message = devand_core::chat::ChatMessage {
@@ -131,6 +132,17 @@ fn chat_messages_post(
     if !authorized {
         return None;
     }
+
+    let subject = format!("DevAndDev - {} sent you a new message", &user.visible_name);
+    let text = format!("You have a message from {}. View on DevAndDev: {}", &user.visible_name, "https://devand.dev/dashboard");
+
+    let recipients: Vec<_> = members
+        .iter()
+        .filter(|&&u| u != user.id)
+        .filter_map(|&user_id| devand_db::load_user_by_id(user_id, &conn).map(|u| u.email))
+        .collect();
+
+    mailer.send_email(recipients, subject.to_string(), text.to_string());
 
     if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
     {
