@@ -7,6 +7,7 @@ mod api;
 mod auth;
 mod pages;
 mod state;
+mod notifications;
 
 use rocket::fairing::AdHoc;
 use rocket::Rocket;

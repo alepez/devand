@@ -133,16 +133,7 @@ fn chat_messages_post(
         return None;
     }
 
-    let subject = format!("DevAndDev - {} sent you a new message", &user.visible_name);
-    let text = format!("You have a message from {}. View on DevAndDev: {}", &user.visible_name, "https://devand.dev/dashboard");
-
-    let recipients: Vec<_> = members
-        .iter()
-        .filter(|&&u| u != user.id)
-        .filter_map(|&user_id| devand_db::load_user_by_id(user_id, &conn).map(|u| u.email))
-        .collect();
-
-    mailer.send_email(recipients, subject.to_string(), text.to_string());
+    crate::notifications::notify_chat_members(&mailer, &conn, &user, &members);
 
     if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
     {
