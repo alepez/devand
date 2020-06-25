@@ -39,8 +39,6 @@ impl Server {
     }
 
     pub fn new(conf: ServerConf) -> Self {
-        env_logger::init();
-
         let ServerConf {
             smtp_server,
             smtp_username,

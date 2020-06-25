@@ -17,6 +17,7 @@ uuid = { version = "0.8", features = ["v4"] }
 time = "0.1.43"
 chrono = { version = "0.4", features = ["serde"] }
 env_logger = "0.7"
+log = "0.4"
 dotenv = "0.15.0"
 
 [dependencies.rocket]

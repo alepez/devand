@@ -467,6 +467,7 @@ dependencies = [
  "devand-mailer",
  "dotenv",
  "env_logger",
+ "log 0.4.8",
  "rocket",
  "rocket_contrib",
  "serde",
