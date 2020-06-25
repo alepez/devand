@@ -5,6 +5,7 @@ ADD --chown=builder ./devand-core ./devand-core
 ADD --chown=builder ./devand-db ./devand-db
 ADD --chown=builder ./devand-ui ./devand-ui
 ADD --chown=builder ./devand-web ./devand-web
+ADD --chown=builder ./devand-mailer ./devand-mailer
 
 USER builder
 WORKDIR /home/builder/project/devand-ui

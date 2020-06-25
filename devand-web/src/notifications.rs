@@ -18,5 +18,7 @@ pub(crate) fn notify_chat_members(mailer: &Mailer, conn: &PgDevandConn, from: &U
         .filter(|&&u| u != from.id)
         .filter_map(|&user_id| devand_db::load_user_by_id(user_id, &conn).map(|u| u.email))
         .collect();
+
+    // TODO This call is blocking and takes too much time. Just send and forget
     mailer.send_email(recipients, subject.to_string(), text.to_string());
 }
