@@ -171,8 +171,19 @@ pub fn reset_password(
     password: String,
     conn: &PgConnection,
 ) -> Result<(), Error> {
+    use chrono::Duration;
+    use chrono::Utc;
+
+    // TODO Test expiration
+    let token_duration = Duration::hours(3);
+    let expiration = Utc::now()
+        .checked_add_signed(-token_duration)
+        .unwrap()
+        .naive_utc();
+
     let user_id: i32 = schema::password_reset::table
         .filter(schema::password_reset::dsl::token.eq(token.0))
+        .filter(schema::password_reset::dsl::created_at.gt(expiration))
         .select(schema::password_reset::user_id)
         .first(conn)
         .map_err(|_| Error::Unknown)?;
