@@ -96,7 +96,10 @@ fn password_reset(
     let PasswordReset { email } = password_reset.0;
 
     if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
-        let url = "https://devand.dev/FIXME";
+        let token = devand_db::create_password_reset_token(user.id)
+            .expect("Cannot create password reset token");
+
+        let url = format!("https://devand.dev/password_reset/{}", token.0);
         crate::notifications::password_reset(&mailer, user.email, url.to_string());
         // TODO Send email
         Ok(Flash::success(redirect, ok_msg))

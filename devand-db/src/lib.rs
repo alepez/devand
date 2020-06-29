@@ -206,6 +206,12 @@ pub fn add_chat_message_by_members(
     }
 }
 
+pub struct PasswordResetToken(pub String);
+
+pub fn create_password_reset_token(user: devand_core::UserId) -> Option<PasswordResetToken> {
+    Some(PasswordResetToken("FIXME".to_string()))
+}
+
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
     embedded_migrations::run(&*conn)
 }
