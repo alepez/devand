@@ -139,7 +139,21 @@ pub fn set_password(
 pub struct PasswordResetToken(pub String);
 
 pub fn create_password_reset_token(user: devand_core::UserId) -> Option<PasswordResetToken> {
-    Some(PasswordResetToken("FIXME".to_string()))
+    use rand::distributions::Alphanumeric;
+    use rand::{thread_rng, Rng};
+
+    let token: String = { thread_rng().sample_iter(&Alphanumeric).take(176).collect() };
+
+    // let user: models::User = diesel::insert_into(users::table)
+    //     .values(&new_user)
+    //     .get_result(conn)
+    //     .map_err(|err| {
+    //         // TODO Use anyhow to propagate the error message
+    //         dbg!(err);
+    //         Error::Unknown
+    //     })?;
+
+    Some(PasswordResetToken(token))
 }
 
 #[cfg(test)]
