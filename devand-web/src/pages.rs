@@ -38,13 +38,15 @@ fn login_page(flash: Option<FlashMessage>) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
-        flash: Option<String>,
+        flash_msg: Option<String>,
+        flash_name: Option<String>,
         authenticated: bool,
     }
 
     let context = Context {
         title: "Sign in to DevAndDev",
-        flash: flash.map(|x| x.msg().to_string()),
+        flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
+        flash_name: flash.as_ref().map(|x| x.name().to_string()),
         authenticated: false,
     };
 
@@ -110,11 +112,7 @@ fn password_reset(
 }
 
 #[get("/password_reset/<token>")]
-fn password_reset_token_page(
-    token: String,
-    flash: Option<FlashMessage>,
-    conn: PgDevandConn,
-) -> Template {
+fn password_reset_token_page(token: String, flash: Option<FlashMessage>) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
@@ -148,13 +146,13 @@ fn password_reset_token(
     conn: PgDevandConn,
 ) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let ok_msg = "Your password has been changed! You can now sign in with your new password.";
-    let redirect = Redirect::to(uri!(password_reset_token_page: token.clone()));
+    let redirect_err = Redirect::to(uri!(password_reset_token_page: token.clone()));
 
     let PasswordReset2 { password } = password_reset.0;
 
     if !devand_core::auth::is_valid_password(&password) {
         let err_msg = "Invalid password";
-        return Err(Flash::error(redirect, err_msg));
+        return Err(Flash::error(redirect_err, err_msg));
     }
 
     let token = devand_db::auth::PasswordResetToken(token);
@@ -164,8 +162,9 @@ fn password_reset_token(
     if let Err(err) = result {
         log_fail(real_ip.0);
         let err_msg = err.to_string();
-        Err(Flash::error(redirect, err_msg))
+        Err(Flash::error(redirect_err, err_msg))
     } else {
+        let redirect = Redirect::to(uri!(login_page));
         Ok(Flash::success(redirect, ok_msg))
     }
 }
