@@ -17,6 +17,7 @@ impl Client {
         Self { url: conf.url }
     }
 
+    #[cfg(not(feature = "mock"))]
     pub fn send_email(&self, recipients: Vec<String>, subject: String, text: String) {
         let mut rt = Runtime::new().unwrap();
 
@@ -33,5 +34,10 @@ impl Client {
             .unwrap();
 
         rt.shutdown_now().wait().unwrap();
+    }
+
+    #[cfg(feature = "mock")]
+    pub fn send_email(&self, recipients: Vec<String>, subject: String, text: String) {
+        dbg!((recipients, subject, text));
     }
 }

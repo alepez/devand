@@ -19,6 +19,7 @@ dotenv = "0.15.0"
 [features]
 server = ["jsonrpc-http-server"]
 client = ["jsonrpc-core-client", "tokio"]
+mock = []
 
 [[example]]
 name = "client"

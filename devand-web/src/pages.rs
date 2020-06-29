@@ -1,9 +1,9 @@
 use crate::auth::{self, AuthData, ExpectedCaptcha};
-use crate::PgDevandConn;
+use crate::{Mailer, PgDevandConn};
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Content, Flash, Redirect};
-use rocket::Route;
+use rocket::{Route, State};
 use rocket_contrib::templates::Template;
 use serde::Serialize;
 
@@ -87,6 +87,7 @@ pub struct PasswordReset {
 fn password_reset(
     password_reset: Form<PasswordReset>,
     real_ip: auth::RealIp,
+    mailer: State<Mailer>,
     conn: PgDevandConn,
 ) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let ok_msg = "Check your email for a link to reset your password. If it doesn’t appear within a few minutes, check your spam folder.";
@@ -95,6 +96,8 @@ fn password_reset(
     let PasswordReset { email } = password_reset.0;
 
     if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
+        let url = "https://devand.dev/FIXME";
+        crate::notifications::password_reset(&mailer, user.email, url.to_string());
         // TODO Send email
         Ok(Flash::success(redirect, ok_msg))
     } else {
