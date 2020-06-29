@@ -1,9 +1,9 @@
 use crate::auth::{self, AuthData, ExpectedCaptcha};
-use crate::PgDevandConn;
+use crate::{Mailer, PgDevandConn};
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Content, Flash, Redirect};
-use rocket::Route;
+use rocket::{Route, State};
 use rocket_contrib::templates::Template;
 use serde::Serialize;
 
@@ -38,13 +38,15 @@ fn login_page(flash: Option<FlashMessage>) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
-        flash: Option<String>,
+        flash_msg: Option<String>,
+        flash_name: Option<String>,
         authenticated: bool,
     }
 
     let context = Context {
         title: "Sign in to DevAndDev",
-        flash: flash.map(|x| x.msg().to_string()),
+        flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
+        flash_name: flash.as_ref().map(|x| x.name().to_string()),
         authenticated: false,
     };
 
@@ -56,6 +58,115 @@ fn login_page(flash: Option<FlashMessage>) -> Template {
 fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     auth::logout(&mut cookies);
     Flash::success(Redirect::to(uri!(login_page)), "Successfully logged out.")
+}
+
+#[get("/password_reset")]
+fn password_reset_page(flash: Option<FlashMessage>) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        flash_msg: Option<String>,
+        flash_name: Option<String>,
+        authenticated: bool,
+    }
+
+    let context = Context {
+        title: "Reset your password",
+        flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
+        flash_name: flash.as_ref().map(|x| x.name().to_string()),
+        authenticated: false,
+    };
+
+    Template::render("password_reset", &context)
+}
+
+#[derive(FromForm)]
+pub struct PasswordReset1 {
+    email: String,
+}
+
+#[post("/password_reset", data = "<password_reset>")]
+fn password_reset(
+    password_reset: Form<PasswordReset1>,
+    real_ip: auth::RealIp,
+    mailer: State<Mailer>,
+    conn: PgDevandConn,
+) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    let ok_msg = "Check your email for a link to reset your password. If it doesn’t appear within a few minutes, check your spam folder.";
+    let err_msg = "That address is not associated with a personal user account.";
+    let redirect = Redirect::to(uri!(password_reset_page));
+    let PasswordReset1 { email } = password_reset.0;
+
+    if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
+        let token = devand_db::auth::create_password_reset_token(user.id, &conn)
+            .expect("Cannot create password reset token");
+
+        let url = format!("https://devand.dev/password_reset/{}", token.0);
+        crate::notifications::password_reset(&mailer, user.email, url.to_string());
+        // TODO Send email
+        Ok(Flash::success(redirect, ok_msg))
+    } else {
+        log_fail(real_ip.0);
+        Err(Flash::error(redirect, err_msg))
+    }
+}
+
+#[get("/password_reset/<token>")]
+fn password_reset_token_page(token: String, flash: Option<FlashMessage>) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        token: String,
+        flash_msg: Option<String>,
+        flash_name: Option<String>,
+        authenticated: bool,
+    }
+
+    let context = Context {
+        title: "Reset your password",
+        token,
+        flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
+        flash_name: flash.as_ref().map(|x| x.name().to_string()),
+        authenticated: false,
+    };
+
+    Template::render("password_reset_2", &context)
+}
+
+#[derive(FromForm)]
+pub struct PasswordReset2 {
+    password: String,
+}
+
+#[post("/password_reset/<token>", data = "<password_reset>")]
+fn password_reset_token(
+    real_ip: auth::RealIp,
+    token: String,
+    password_reset: Form<PasswordReset2>,
+    conn: PgDevandConn,
+) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    let ok_msg = "Your password has been changed! You can now sign in with your new password.";
+    let redirect_err = Redirect::to(uri!(password_reset_token_page: token.clone()));
+
+    let PasswordReset2 { password } = password_reset.0;
+
+    if !devand_core::auth::is_valid_password(&password) {
+        let err_msg = "Invalid password";
+        return Err(Flash::error(redirect_err, err_msg));
+    }
+
+    let token = devand_db::auth::PasswordResetToken(token);
+    let result =
+        devand_db::auth::reset_password(token, password, &conn).map_err(|_| "Invalid token");
+
+    if let Err(err) = result {
+        log_fail(real_ip.0);
+        let err_msg = err.to_string();
+        Err(Flash::error(redirect_err, err_msg))
+    } else {
+        let redirect = Redirect::to(uri!(login_page));
+        Ok(Flash::success(redirect, ok_msg))
+    }
 }
 
 // Handle join request
@@ -233,6 +344,10 @@ pub fn routes() -> Vec<Route> {
         login,
         login_authenticated,
         login_page,
+        password_reset,
+        password_reset_page,
+        password_reset_token,
+        password_reset_token_page,
         logout,
         dashboard_index,
         dashboard_affinities,

@@ -1,0 +1,6 @@
+CREATE TABLE password_reset (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  token VARCHAR(176) UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL
+)

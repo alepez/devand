@@ -53,6 +53,16 @@ pub fn load_user_by_username(username: &str, conn: &PgConnection) -> Option<deva
     user.try_into().map_err(|e| dbg!(e)).ok()
 }
 
+pub fn load_user_by_email(email: &str, conn: &PgConnection) -> Option<devand_core::User> {
+    log::debug!("Load user by email {}", email);
+    let user: models::User = schema::users::table
+        .filter(schema::users::dsl::email.eq(email))
+        .first(conn)
+        .ok()?;
+
+    user.try_into().map_err(|e| dbg!(e)).ok()
+}
+
 pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table
         .filter(schema::users::dsl::id.eq(id.0))
