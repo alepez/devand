@@ -436,6 +436,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "dotenv",
+ "log 0.4.8",
  "rand 0.7.3",
  "rust-argon2",
  "serde_json",

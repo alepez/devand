@@ -1,7 +1,7 @@
 {{#*inline "body"}}
 
     {{#if flash}}
-    <div class="alert alert-danger">{{ flash }}</div>
+    <div class="alert alert-error">{{ flash }}</div>
     {{/if}}
 
     <form action="/login" method="post" accept-charset="utf-8" class="pure-form pure-form-stacked">
@@ -12,7 +12,7 @@
         </div>
 
         <div class="pure-control-group">
-          <label for="password">Password</label>
+          <label for="password">Password <small><a href="/password_reset">Forgot password?</a></small></label>
           <input type="password" name="password" id="password" value="" placeholder="password" />
         </div>
 

@@ -58,6 +58,51 @@ fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     Flash::success(Redirect::to(uri!(login_page)), "Successfully logged out.")
 }
 
+#[get("/password_reset")]
+fn password_reset_page(flash: Option<FlashMessage>) -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        flash_msg: Option<String>,
+        flash_name: Option<String>,
+        authenticated: bool,
+    }
+
+    let context = Context {
+        title: "Reset your password",
+        flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
+        flash_name: flash.as_ref().map(|x| x.name().to_string()),
+        authenticated: false,
+    };
+
+    Template::render("password_reset", &context)
+}
+
+#[derive(FromForm)]
+pub struct PasswordReset {
+    email: String,
+}
+
+#[post("/password_reset", data = "<password_reset>")]
+fn password_reset(
+    password_reset: Form<PasswordReset>,
+    real_ip: auth::RealIp,
+    conn: PgDevandConn,
+) -> Result<Flash<Redirect>, Flash<Redirect>> {
+    let ok_msg = "Check your email for a link to reset your password. If it doesn’t appear within a few minutes, check your spam folder.";
+    let err_msg = "That address is not associated with a personal user account.";
+    let redirect = Redirect::to(uri!(password_reset_page));
+    let PasswordReset { email } = password_reset.0;
+
+    if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
+        // TODO Send email
+        Ok(Flash::success(redirect, ok_msg))
+    } else {
+        log_fail(real_ip.0);
+        Err(Flash::error(redirect, err_msg))
+    }
+}
+
 // Handle join request
 // Note: cookies must be after expected_captcha, due to One-At-A-Time cookies
 // restriction
@@ -233,6 +278,8 @@ pub fn routes() -> Vec<Route> {
         login,
         login_authenticated,
         login_page,
+        password_reset,
+        password_reset_page,
         logout,
         dashboard_index,
         dashboard_affinities,
