@@ -136,6 +136,12 @@ pub fn set_password(
     Ok(())
 }
 
+pub struct PasswordResetToken(pub String);
+
+pub fn create_password_reset_token(user: devand_core::UserId) -> Option<PasswordResetToken> {
+    Some(PasswordResetToken("FIXME".to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

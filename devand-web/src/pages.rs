@@ -96,7 +96,7 @@ fn password_reset(
     let PasswordReset { email } = password_reset.0;
 
     if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
-        let token = devand_db::create_password_reset_token(user.id)
+        let token = devand_db::auth::create_password_reset_token(user.id)
             .expect("Cannot create password reset token");
 
         let url = format!("https://devand.dev/password_reset/{}", token.0);
