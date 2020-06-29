@@ -106,5 +106,5 @@ pub enum Error {
 pub struct NewPasswordReset {
     pub user_id: i32,
     pub token: String,
-    pub created_at: chrono::NaiveDateTime,
+    pub expires_at: chrono::NaiveDateTime,
 }

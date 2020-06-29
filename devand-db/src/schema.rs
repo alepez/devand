@@ -27,7 +27,7 @@ table! {
         id -> Int4,
         user_id -> Int4,
         token -> Varchar,
-        created_at -> Timestamp,
+        expires_at -> Timestamp,
     }
 }
 

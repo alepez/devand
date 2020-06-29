@@ -148,9 +148,16 @@ pub fn create_password_reset_token(
 
     let token: String = { thread_rng().sample_iter(&Alphanumeric).take(176).collect() };
 
+    let token_duration = chrono::Duration::hours(3);
+
+    let expires_at = Utc::now()
+        .checked_add_signed(token_duration)
+        .unwrap()
+        .naive_utc();
+
     let new_password_reset = models::NewPasswordReset {
         user_id: user.0,
-        created_at: Utc::now().naive_utc(),
+        expires_at,
         token: token.clone(),
     };
 
@@ -171,23 +178,26 @@ pub fn reset_password(
     password: String,
     conn: &PgConnection,
 ) -> Result<(), Error> {
-    use chrono::Duration;
     use chrono::Utc;
 
     // TODO Test expiration
-    let token_duration = Duration::hours(3);
-    let expiration = Utc::now()
-        .checked_add_signed(-token_duration)
-        .unwrap()
-        .naive_utc();
+    let now = Utc::now();
 
-    let user_id: i32 = schema::password_reset::table
+    let (user_id, expires_at): (i32, chrono::NaiveDateTime) = schema::password_reset::table
         .filter(schema::password_reset::dsl::token.eq(token.0))
-        .filter(schema::password_reset::dsl::created_at.gt(expiration))
-        .select(schema::password_reset::user_id)
+        .select((
+            schema::password_reset::user_id,
+            schema::password_reset::expires_at,
+        ))
         .first(conn)
         .map_err(|_| Error::Unknown)?;
 
+    if expires_at < now.naive_utc() {
+        // TODO Return Expired error (or use anyhow)
+        return Err(Error::Unknown);
+    }
+
+    // Token is ok, we can change the password
     set_password(UserId(user_id), &password, conn)?;
 
     Ok(())
