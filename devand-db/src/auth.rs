@@ -138,22 +138,48 @@ pub fn set_password(
 
 pub struct PasswordResetToken(pub String);
 
-pub fn create_password_reset_token(user: devand_core::UserId) -> Option<PasswordResetToken> {
+pub fn create_password_reset_token(
+    user: devand_core::UserId,
+    conn: &PgConnection,
+) -> Option<PasswordResetToken> {
+    use chrono::Utc;
     use rand::distributions::Alphanumeric;
     use rand::{thread_rng, Rng};
 
     let token: String = { thread_rng().sample_iter(&Alphanumeric).take(176).collect() };
 
-    // let user: models::User = diesel::insert_into(users::table)
-    //     .values(&new_user)
-    //     .get_result(conn)
-    //     .map_err(|err| {
-    //         // TODO Use anyhow to propagate the error message
-    //         dbg!(err);
-    //         Error::Unknown
-    //     })?;
+    let new_password_reset = models::NewPasswordReset {
+        user_id: user.0,
+        created_at: Utc::now().naive_utc(),
+        token: token.clone(),
+    };
+
+    diesel::insert_into(schema::password_reset::table)
+        .values(&new_password_reset)
+        .execute(conn)
+        .map_err(|err| {
+            // TODO Use anyhow to propagate the error message
+            dbg!(err);
+        })
+        .ok();
 
     Some(PasswordResetToken(token))
+}
+
+pub fn reset_password(
+    token: PasswordResetToken,
+    password: String,
+    conn: &PgConnection,
+) -> Result<(), Error> {
+    let user_id: i32 = schema::password_reset::table
+        .filter(schema::password_reset::dsl::token.eq(token.0))
+        .select(schema::password_reset::user_id)
+        .first(conn)
+        .map_err(|_| Error::Unknown)?;
+
+    set_password(UserId(user_id), &password, conn)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
