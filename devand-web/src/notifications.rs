@@ -3,14 +3,14 @@ use crate::PgDevandConn;
 use devand_core::{User, UserId};
 
 pub(crate) fn notify_chat_members(
+    base_url: &str,
     mailer: &Mailer,
     conn: &PgDevandConn,
     from: &User,
     to: &[UserId],
 ) {
-    // TODO Base url from configuration
     // TODO Chat can have more than one user by design, but the url is for just two users
-    let chat_url = format!("https://devand.dev/chat/{}", &from.username);
+    let chat_url = format!("{}/chat/{}", base_url, &from.username);
 
     let subject = format!("DevAndDev - {} sent you a new message", &from.visible_name);
     let text = format!(
@@ -28,7 +28,14 @@ pub(crate) fn notify_chat_members(
     mailer.send_email(recipients, subject.to_string(), text.to_string());
 }
 
-pub(crate) fn password_reset(mailer: &Mailer, recipient: String, url: String) {
+pub(crate) fn password_reset(
+    base_url: &str,
+    mailer: &Mailer,
+    recipient: String,
+    token: devand_db::auth::PasswordResetToken,
+) {
+    let token_url = format!("{}/password_reset/{}", base_url, token.0);
+    let retry_url = format!("{}/password_reset", base_url);
     let subject = "DevAndDev - Please reset your password";
     let text = format!(
 "We heard that you lost your DevAndDev password. Sorry about that!\n
@@ -37,10 +44,10 @@ But don’t worry! You can use the following link to reset your password:\n
 \n
 {}\n
 \n
-If you don’t use this link within 3 hours, it will expire. To get a new password reset link, visit https://devand.dev/password_reset\n
+If you don’t use this link within 3 hours, it will expire. To get a new password reset link, visit {}\n
 \n
 Thanks,\n
-The DevAndDev team\n", url);
+The DevAndDev team\n", token_url, retry_url);
 
     mailer.send_email(vec![recipient], subject.to_string(), text);
 }

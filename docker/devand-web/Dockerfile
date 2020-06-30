@@ -14,6 +14,7 @@ RUN bash setup.sh && \
     yarn run build
 
 WORKDIR /home/builder/project/devand-web
+ENV DEVAND_BASE_URL=https://devand.dev
 RUN cargo -Z no-index-update build --release
 
 # Set up the run environment.

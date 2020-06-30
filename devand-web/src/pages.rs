@@ -7,6 +7,9 @@ use rocket::{Route, State};
 use rocket_contrib::templates::Template;
 use serde::Serialize;
 
+const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
+const DEFAULT_BASE_URL: &'static str = "https://localhost:8000";
+
 // Handle authentication request
 #[post("/login", data = "<credentials>")]
 fn login(
@@ -99,8 +102,12 @@ fn password_reset(
         let token = devand_db::auth::create_password_reset_token(user.id, &conn)
             .expect("Cannot create password reset token");
 
-        let url = format!("https://devand.dev/password_reset/{}", token.0);
-        crate::notifications::password_reset(&mailer, user.email, url.to_string());
+        crate::notifications::password_reset(
+            BASE_URL.unwrap_or(DEFAULT_BASE_URL),
+            &mailer,
+            user.email,
+            token,
+        );
 
         Ok(Redirect::to(uri!(password_reset_wait_page)))
     } else {

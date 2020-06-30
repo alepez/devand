@@ -7,6 +7,9 @@ use devand_core::{User, UserAffinity, UserId};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
 
+const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
+const DEFAULT_BASE_URL: &'static str = "https://localhost:8000";
+
 pub fn routes() -> Vec<Route> {
     routes![
         settings,
@@ -133,7 +136,13 @@ fn chat_messages_post(
         return None;
     }
 
-    crate::notifications::notify_chat_members(&mailer, &conn, &user, &members);
+    crate::notifications::notify_chat_members(
+        BASE_URL.unwrap_or(DEFAULT_BASE_URL),
+        &mailer,
+        &conn,
+        &user,
+        &members,
+    );
 
     if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
     {
