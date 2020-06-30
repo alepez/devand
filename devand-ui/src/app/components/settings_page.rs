@@ -119,6 +119,23 @@ impl SettingsPage {
         }
     }
 
+    fn view_verify_email_button(&self, user: &User) -> Html {
+        if !user.email_verified {
+            html! {
+                <span class="pure-form-message-inline">
+                    <button
+                        class=("pure-button", "button-warning", "pure-button-primary")
+                        onclick=self.link.callback(|_| Msg::VerifyAddress)
+                        >{ "Verify" }
+                    </button>
+                    { " This address is not verified." }
+                </span>
+            }
+        } else {
+            html! {}
+        }
+    }
+
     fn view_profile_panel(&self, user: &User) -> Html {
         html! {
             <fieldset>
@@ -131,22 +148,7 @@ impl SettingsPage {
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
                     <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
-                    {
-                    if !user.email_verified {
-                        html! {
-                            <span class="pure-form-message-inline">
-                                <button
-                                    class=("pure-button", "button-warning", "pure-button-primary")
-                                    onclick=self.link.callback(|_| Msg::VerifyAddress)
-                                    >{ "Verify" }
-                                </button>
-                                { " This address is not verified." }
-                            </span>
-                        }
-                    } else {
-                        html! {}
-                    }
-                    }
+                    { self.view_verify_email_button(user) }
                 </div>
                 <div class="pure-control-group">
                     <label for="visible_name">{ "Visible name:" }</label>
