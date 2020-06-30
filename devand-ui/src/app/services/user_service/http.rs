@@ -12,6 +12,7 @@ use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 const DELAY_MS: u32 = 2_000;
 const API_URL: &'static str = "/api/settings";
+const API_URL_VERIFY_EMAIL: &'static str = "/api/verify_email";
 
 pub struct UserService {
     // put_handler is wrapped in Arc<Mutex> so it can be passed to Timeout
@@ -150,7 +151,14 @@ impl UserService {
     }
 
     pub fn verify_email(&mut self) {
-        // TODO
+        let url = API_URL_VERIFY_EMAIL;
+        let req = Request::post(url).body(Nothing).unwrap();
+
+        let handler = move |_response: Response<Json<Result<(), anyhow::Error>>>| {
+            // Just ignore the response
+        };
+
+        self.get_handler.task = self.get_handler.service.fetch(req, handler.into()).ok();
     }
 }
 
