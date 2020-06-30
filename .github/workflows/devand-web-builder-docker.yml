@@ -2,8 +2,8 @@ name: "devand-web-builder docker image"
 
 on:
   push:
-    paths:
-      - docker/devand-web-builder/Dockerfile
+    branches:
+      - master
   schedule:
     - cron:  '0 4 * * *'
 
