@@ -29,11 +29,19 @@ impl Mailer {
 
         let (tx, rx): (mpsc::Sender<Email>, mpsc::Receiver<Email>) = mpsc::channel();
 
+        let conn = devand_db::establish_connection();
+
         let thread = std::thread::spawn(move || {
             rx.iter()
                 .filter(|email| {
-                    // TODO Filter verified emails
-                    true
+                    let verified = devand_db::is_verified_email(&email.recipient, &conn);
+                    if !verified {
+                        log::debug!(
+                            "Not sending email to {} because it is not a verified address",
+                            &email.recipient
+                        );
+                    }
+                    verified
                 })
                 .map(|email| create_email(from.clone(), email.recipient, email.subject, email.text))
                 .map(|email| transport.send(email.into()))

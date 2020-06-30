@@ -206,6 +206,14 @@ pub fn add_chat_message_by_members(
     }
 }
 
+pub fn is_verified_email(email_addr: &str, conn: &PgConnection) -> bool {
+    schema::users::table
+        .filter(schema::users::dsl::email.eq(email_addr))
+        .select(schema::users::dsl::email_verified)
+        .first(conn)
+        .unwrap_or(false)
+}
+
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
     embedded_migrations::run(&*conn)
 }
