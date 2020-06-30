@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-    # paths:
-    #   - docker/devand-run-env/Dockerfile
+    paths:
+      - docker/devand-run-env/Dockerfile
   schedule:
     - cron:  '0 4 * * *'
 
@@ -19,6 +19,8 @@ jobs:
         username: alepez
         password: "${{ secrets.GITHUB_TOKEN }}"
         registry: docker.pkg.github.com
-        image_name: devand-run-env
         dockerfile: docker/devand-run-env/Dockerfile
+        image_name: devand-run-env
+        image_tag: latest
         push_image_and_stages: true
+        pull_image_and_stages: false

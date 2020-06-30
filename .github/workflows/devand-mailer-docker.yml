@@ -6,10 +6,10 @@ on:
   push:
     branches:
       - master
-    # paths:
-    #   - docker/devand-mailer/Dockerfile
-    #   - devand-core/**
-    #   - devand-mailer/**
+    paths:
+      - docker/devand-mailer/Dockerfile
+      - devand-core/**
+      - devand-mailer/**
 
 jobs:
 
