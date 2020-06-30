@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - docker/devand-web-builder/Dockerfile
   schedule:
     - cron:  '0 4 * * *'
 
@@ -20,3 +22,4 @@ jobs:
         registry: docker.pkg.github.com
         image_name: devand-web-builder
         dockerfile: docker/devand-web-builder/Dockerfile
+        push_image_and_stages: true

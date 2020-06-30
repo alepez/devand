@@ -4,6 +4,8 @@ on:
   schedule:
     - cron:  '0 5 * * *'
   push:
+    branches:
+      - master
     paths:
       - docker/devand-mailer/Dockerfile
       - devand-core/**
