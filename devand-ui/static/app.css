@@ -28,23 +28,10 @@
   color: #cd7f32;
 }
 
-.devand-schedule-table-wrapper {
-  /* overflow-x:auto; */
-  /* max-width: 800px; */
-}
-
 .devand-availability-week {
-  /* display: flex; */
-  /* flex-direction: row; */
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.devand-availability-day {
-  /* width: 100%; */
-  /* display: flex; */
-  /* flex-direction: column; */
 }
 
 @media screen and (min-width: 64em) {

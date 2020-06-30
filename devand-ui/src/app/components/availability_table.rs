@@ -65,9 +65,7 @@ impl AvailabilityTable {
         html! {
             <fieldset>
                 <legend>{ "Your current weekly schedule. Check your available hours. All hours are in UTC" }</legend>
-                <div class="devand-schedule-table-wrapper">
-                    { self.view_days(schedule) }
-                </div>
+                { self.view_days(schedule) }
             </fieldset>
         }
     }
