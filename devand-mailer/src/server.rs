@@ -11,10 +11,11 @@ struct RpcImpl {
 impl Rpc for RpcImpl {
     fn send_email(&self, recipients: Vec<String>, subject: String, text: String) -> Result<()> {
         for recipient in recipients {
-            self.mailer
-                .lock()
-                .unwrap()
-                .send_email(&recipient, &subject, &text);
+            self.mailer.lock().unwrap().send_email(
+                recipient.clone(),
+                subject.clone(),
+                text.clone(),
+            );
         }
         Ok(())
     }
