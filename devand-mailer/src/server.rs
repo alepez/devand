@@ -2,15 +2,19 @@ use crate::api::Rpc;
 use crate::mailer::Mailer;
 use jsonrpc_core::{IoHandler, Result};
 use jsonrpc_http_server::*;
+use std::sync::{Arc, Mutex};
 
 struct RpcImpl {
-    mailer: Mailer,
+    mailer: Arc<Mutex<Mailer>>,
 }
 
 impl Rpc for RpcImpl {
     fn send_email(&self, recipients: Vec<String>, subject: String, text: String) -> Result<()> {
         for recipient in recipients {
-            self.mailer.send_email(&recipient, &subject, &text);
+            self.mailer
+                .lock()
+                .unwrap()
+                .send_email(&recipient, &subject, &text);
         }
         Ok(())
     }
@@ -18,7 +22,9 @@ impl Rpc for RpcImpl {
 
 impl RpcImpl {
     fn new(mailer: Mailer) -> Self {
-        Self { mailer }
+        Self {
+            mailer: Arc::new(Mutex::new(mailer)),
+        }
     }
 }
 
