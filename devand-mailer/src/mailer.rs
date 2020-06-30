@@ -1,10 +1,16 @@
 use lettre::smtp::authentication::Credentials;
 use lettre::{SmtpClient, Transport};
-use lettre_email::{Email, Mailbox};
+use lettre_email::Mailbox;
 use std::sync::mpsc;
 
+#[derive(Debug)]
+struct Email {
+    recipient: String,
+    subject: String,
+    text: String,
+}
+
 pub struct Mailer {
-    from: Mailbox,
     tx: mpsc::Sender<Email>,
     #[allow(dead_code)]
     thread: std::thread::JoinHandle<()>,
@@ -27,6 +33,8 @@ impl Mailer {
             for email in rx {
                 log::debug!("Email: {:?}", email);
 
+                let email = create_email(from.clone(), email.recipient, email.subject, email.text);
+
                 let result = transport.send(email.into());
 
                 if result.is_err() {
@@ -35,11 +43,15 @@ impl Mailer {
             }
         });
 
-        Self { from, thread, tx }
+        Self { thread, tx }
     }
 
     pub fn send_email(&self, recipient: &str, subject: &str, text: &str) {
-        let email = create_email(&self.from, recipient, subject, text);
+        let email = Email {
+            recipient: recipient.to_string(),
+            subject: subject.to_string(),
+            text: text.to_string(),
+        };
 
         match self.tx.send(email) {
             Ok(_) => {
@@ -52,12 +64,17 @@ impl Mailer {
     }
 }
 
-fn create_email(from: &Mailbox, recipient: &str, subject: &str, text: &str) -> Email {
-    let html = comrak::markdown_to_html(text, &comrak::ComrakOptions::default());
+fn create_email(
+    from: Mailbox,
+    recipient: String,
+    subject: String,
+    text: String,
+) -> lettre_email::Email {
+    let html = comrak::markdown_to_html(&text, &comrak::ComrakOptions::default());
 
-    Email::builder()
+    lettre_email::Email::builder()
         .to(recipient)
-        .from(from.clone())
+        .from(from)
         .subject(subject)
         .text(text)
         .html(html)
