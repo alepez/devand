@@ -1,8 +1,9 @@
 use crate::auth::{self, AuthData, ExpectedCaptcha};
+use crate::StaticDir;
 use crate::{Mailer, PgDevandConn};
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
-use rocket::response::{Content, Flash, Redirect};
+use rocket::response::{Content, Flash, NamedFile, Redirect};
 use rocket::{Route, State};
 use rocket_contrib::templates::Template;
 use serde::Serialize;
@@ -356,6 +357,11 @@ fn help(auth_data: Option<AuthData>) -> Template {
     Template::render("help", &context)
 }
 
+#[get("/favicon.ico")]
+fn favicon(static_dir: State<StaticDir>) -> Option<NamedFile> {
+    NamedFile::open(std::path::Path::new(&static_dir.0).join("favicon.ico")).ok()
+}
+
 pub fn routes() -> Vec<Route> {
     routes![
         index,
@@ -381,6 +387,7 @@ pub fn routes() -> Vec<Route> {
         privacy,
         code_of_conduct,
         help,
+        favicon,
     ]
 }
 

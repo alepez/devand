@@ -21,7 +21,7 @@ use devand_mailer::Client as Mailer;
 #[database("pg_devand")]
 struct PgDevandConn(diesel::PgConnection);
 
-struct StaticDir(String);
+pub struct StaticDir(pub String);
 
 fn static_files(rocket: Rocket) -> Result<Rocket, Rocket> {
     const DEFAULT_DIR: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
