@@ -74,7 +74,7 @@ impl Mailer {
     }
 
     pub fn verify_address(&self, recipient: String) {
-        // FIXME
+        // FIXME Generate an url token (using db or signed message) to be sent
         let subject = "FIXME Email verification";
         let text = "FIXME";
 
