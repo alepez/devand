@@ -1,6 +1,8 @@
 name: "devand-run-env docker image"
 
 on:
+  schedule:
+    - cron:  '0 4 * * *'
   push:
     paths:
       - docker/devand-run-env/Dockerfile

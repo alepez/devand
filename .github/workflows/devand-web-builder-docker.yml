@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - docker/devand-web-builder/Dockerfile
+  schedule:
+    - cron:  '0 4 * * *'
 
 jobs:
 
