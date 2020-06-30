@@ -8,6 +8,7 @@ use crate::app::components::AvailabilityTable;
 
 pub enum Msg {
     UpdateVisibleName(String),
+    UpdateEmail(String),
     ToggleVacationMode,
     AddLanguage((Language, LanguagePreference)),
     RemoveLanguage(Language),
@@ -23,7 +24,9 @@ pub struct SettingsPage {
 #[derive(Clone, Properties)]
 pub struct Props {
     pub on_change: Callback<User>,
+    pub on_verify_email: Callback<()>,
     pub user: Option<User>,
+    pub verifying_email: bool,
 }
 
 impl Component for SettingsPage {
@@ -53,6 +56,12 @@ impl Component for SettingsPage {
                     user.visible_name = s;
                 });
             }
+            Msg::UpdateEmail(s) => {
+                self.update_user(move |user| {
+                    // TODO Check if address is valid
+                    user.email = s;
+                });
+            }
             Msg::ToggleVacationMode => {
                 self.update_user(move |user| {
                     user.settings.vacation_mode ^= true;
@@ -64,7 +73,7 @@ impl Component for SettingsPage {
                 });
             }
             Msg::VerifyAddress => {
-                log::debug!("Verify address");
+                self.props.on_verify_email.emit(());
             }
         }
 
@@ -120,7 +129,7 @@ impl SettingsPage {
     }
 
     fn view_verify_email_button(&self, user: &User) -> Html {
-        if !user.email_verified {
+        if !user.email_verified && !self.props.verifying_email {
             html! {
                 <span class="pure-form-message-inline">
                     <button
@@ -129,6 +138,12 @@ impl SettingsPage {
                         >{ "Verify" }
                     </button>
                     { " This address is not verified." }
+                </span>
+            }
+        } else if !user.email_verified && self.props.verifying_email {
+            html! {
+                <span class=("pure-form-message-inline", "alert", "alert-success")>
+                    { "Check your email for a link to verify your email address. If it doesn’t appear within a few minutes, check your spam folder." }
                 </span>
             }
         } else {
@@ -147,7 +162,7 @@ impl SettingsPage {
                 </div>
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
-                    <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
+                    <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) />
                     { self.view_verify_email_button(user) }
                 </div>
                 <div class="pure-control-group">

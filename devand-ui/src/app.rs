@@ -46,12 +46,14 @@ pub struct App {
 pub struct State {
     user: Option<User>,
     pending_save: bool,
+    verifying_email: bool,
 }
 
 pub enum Msg {
     UserStore(User),
     UserFetchOk(User),
     UserFetchErr,
+    VerifyEmail,
 }
 
 impl Component for App {
@@ -97,6 +99,12 @@ impl Component for App {
                 log::error!("User fetch error");
                 false
             }
+            Msg::VerifyEmail => {
+                log::debug!("Verify address");
+                self.user_service.verify_email();
+                self.state.verifying_email = true;
+                true
+            }
         }
     }
 
@@ -121,14 +129,16 @@ impl App {
 
     fn view_routes(&self, user: &User) -> VNode {
         let on_settings_change = self.link.callback(Msg::UserStore);
+        let on_verify_email = self.link.callback(|_| Msg::VerifyEmail);
         let pub_user_profile: PublicUserProfile = user.clone().into();
         let user = user.clone();
+        let verifying_email = self.state.verifying_email;
 
         html! {
             <Router<AppRoute>
                 render = Router::render(move |switch: AppRoute| {
                     match switch {
-                        AppRoute::Settings=> html!{ <SettingsPage on_change=on_settings_change.clone() user=user.clone() /> },
+                        AppRoute::Settings=> html!{ <SettingsPage on_change=on_settings_change.clone() user=user.clone() on_verify_email=on_verify_email.clone() verifying_email=verifying_email /> },
                         AppRoute::Affinities=> html!{ <AffinitiesPage/> },
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
                         AppRoute::Schedule=> html!{ <SchedulePage me=pub_user_profile.clone()/> },
