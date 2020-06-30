@@ -74,7 +74,7 @@ impl AvailabilityTable {
 
     fn view_days(&self, schedule: &WeekSchedule) -> Html {
         html! {
-            <ul class="devand-availability-week">
+            <ul class="devand-availability-week pure-g">
                 { self.view_day(&schedule.mon, Weekday::Mon) }
                 { self.view_day(&schedule.tue, Weekday::Tue) }
                 { self.view_day(&schedule.wed, Weekday::Wed) }
@@ -89,9 +89,9 @@ impl AvailabilityTable {
     fn view_day(&self, schedule: &DaySchedule, day: Weekday) -> Html {
         let hours = schedule.hours.iter().enumerate().map(|(h, &on)| {
             let active = if on {
-                Some("pure-button-active pure-button-primary")
+                vec!["pure-button-active", "pure-button-primary"]
             } else {
-                None
+                vec![]
             };
 
             html! {
@@ -102,9 +102,9 @@ impl AvailabilityTable {
         });
 
         html! {
-            <li class="devand-availability-day">
-                <h3 class="devand-availability-day-header">{ format!("{:?}", day) }</h3>
-                <div class="devand-availability-day-column">
+            <li class="devand-availability-day pure-u-1 pure-u-sm-1-3 pure-u-md-1-4">
+                <h3>{ format!("{:?}", day) }</h3>
+                <div class="devand-availability-day-hours">
                     { for hours }
                 </div>
             </li>
