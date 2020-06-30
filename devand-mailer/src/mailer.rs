@@ -8,6 +8,7 @@ struct Email {
     recipient: String,
     subject: String,
     text: String,
+    address_must_be_verified: bool,
 }
 
 pub struct Mailer {
@@ -34,14 +35,18 @@ impl Mailer {
         let thread = std::thread::spawn(move || {
             rx.iter()
                 .filter(|email| {
-                    let verified = devand_db::is_verified_email(&email.recipient, &conn);
-                    if !verified {
-                        log::debug!(
-                            "Not sending email to {} because it is not a verified address",
-                            &email.recipient
-                        );
+                    if !email.address_must_be_verified {
+                        true
+                    } else {
+                        let verified = devand_db::is_verified_email(&email.recipient, &conn);
+                        if !verified {
+                            log::debug!(
+                                "Not sending email to {} because it is not a verified address",
+                                &email.recipient
+                            );
+                        }
+                        verified
                     }
-                    verified
                 })
                 .map(|email| create_email(from.clone(), email.recipient, email.subject, email.text))
                 .map(|email| transport.send(email.into()))
@@ -55,21 +60,33 @@ impl Mailer {
         Self { thread, tx }
     }
 
+    // TODO [optimize] pass String
     pub fn send_email(&self, recipient: &str, subject: &str, text: &str) {
         let email = Email {
             recipient: recipient.to_string(),
             subject: subject.to_string(),
             text: text.to_string(),
+            address_must_be_verified: true,
         };
 
-        match self.tx.send(email) {
-            Ok(_) => {
-                log::debug!("Email sent");
-            }
-            Err(_) => {
-                log::debug!("Error sending email");
-            }
-        }
+        // Note: an error here can only be caused by problem on channel
+        self.tx.send(email).expect("Sending email");
+    }
+
+    pub fn verify_address(&self, recipient: String) {
+        // FIXME
+        let subject = "FIXME Email verification";
+        let text = "FIXME";
+
+        let email = Email {
+            recipient,
+            subject: subject.to_string(),
+            text: text.to_string(),
+            address_must_be_verified: false,
+        };
+
+        // Note: an error here can only be caused by problem on channel
+        self.tx.send(email).expect("Sending email");
     }
 }
 
