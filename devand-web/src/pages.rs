@@ -91,10 +91,8 @@ fn password_reset(
     real_ip: auth::RealIp,
     mailer: State<Mailer>,
     conn: PgDevandConn,
-) -> Result<Flash<Redirect>, Flash<Redirect>> {
-    let ok_msg = "Check your email for a link to reset your password. If it doesn’t appear within a few minutes, check your spam folder.";
+) -> Result<Redirect, Flash<Redirect>> {
     let err_msg = "That address is not associated with a personal user account.";
-    let redirect = Redirect::to(uri!(password_reset_page));
     let PasswordReset1 { email } = password_reset.0;
 
     if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
@@ -103,10 +101,11 @@ fn password_reset(
 
         let url = format!("https://devand.dev/password_reset/{}", token.0);
         crate::notifications::password_reset(&mailer, user.email, url.to_string());
-        // TODO Send email
-        Ok(Flash::success(redirect, ok_msg))
+
+        Ok(Redirect::to(uri!(password_reset_wait_page)))
     } else {
         log_fail(real_ip.0);
+        let redirect = Redirect::to(uri!(password_reset_page));
         Err(Flash::error(redirect, err_msg))
     }
 }
@@ -130,7 +129,23 @@ fn password_reset_token_page(token: String, flash: Option<FlashMessage>) -> Temp
         authenticated: false,
     };
 
-    Template::render("password_reset_2", &context)
+    Template::render("password_reset_new", &context)
+}
+
+#[get("/password_reset/wait")]
+fn password_reset_wait_page() -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        authenticated: bool,
+    }
+
+    let context = Context {
+        title: "Check your email",
+        authenticated: false,
+    };
+
+    Template::render("password_reset_wait", &context)
 }
 
 #[derive(FromForm)]
@@ -348,6 +363,7 @@ pub fn routes() -> Vec<Route> {
         password_reset_page,
         password_reset_token,
         password_reset_token_page,
+        password_reset_wait_page,
         logout,
         dashboard_index,
         dashboard_affinities,
