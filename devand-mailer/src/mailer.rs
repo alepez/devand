@@ -60,12 +60,11 @@ impl Mailer {
         Self { thread, tx }
     }
 
-    // TODO [optimize] pass String
-    pub fn send_email(&self, recipient: &str, subject: &str, text: &str) {
+    pub fn send_email(&self, recipient: String, subject: String, text: String) {
         let email = Email {
-            recipient: recipient.to_string(),
-            subject: subject.to_string(),
-            text: text.to_string(),
+            recipient,
+            subject,
+            text,
             address_must_be_verified: true,
         };
 
