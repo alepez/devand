@@ -78,7 +78,6 @@ a:hover {
 }
 
 .devand-menu {
-  display: none;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -92,4 +91,10 @@ a:hover {
   .devand-menu-item {
     display: inline-block;
   }
+}
+
+.main-header .pure-menu-link img {
+  display: inline-block;
+  height: 2em;
+  width: 2em;
 }
