@@ -14,6 +14,7 @@ pub fn routes() -> Vec<Route> {
     routes![
         settings,
         settings_put,
+        verify_email,
         affinities,
         code_now,
         availability_match,
@@ -51,6 +52,12 @@ fn settings_put(
         .update(user.id, &user.settings.schedule);
 
     devand_db::save_user(user.0, &conn.0).map(|x| Json(x))
+}
+
+#[post("/verify_email")]
+fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
+    mailer.verify_address(user.email.clone());
+    Json(())
 }
 
 #[get("/affinities")]
