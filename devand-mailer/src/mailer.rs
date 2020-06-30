@@ -1,17 +1,19 @@
 use lettre::smtp::authentication::Credentials;
 use lettre::{SmtpClient, Transport};
-use lettre_email::Email;
+use lettre_email::{Email, Mailbox};
 use std::sync::mpsc;
 
 pub struct Mailer {
-    from: String,
-    thread: std::thread::JoinHandle<()>,
+    from: Mailbox,
     tx: mpsc::Sender<Email>,
+    #[allow(dead_code)]
+    thread: std::thread::JoinHandle<()>,
 }
 
 impl Mailer {
-    pub fn new(server: String, username: String, password: String) -> Self {
-        let from = username.clone();
+    pub fn new(server: String, username: String, password: String, from_name: String) -> Self {
+        let from = Mailbox::new_with_name(from_name, username.clone());
+
         let creds = Credentials::new(username, password);
 
         let mut transport = SmtpClient::new_simple(server.as_str())
@@ -37,16 +39,21 @@ impl Mailer {
     }
 
     pub fn send_email(&self, recipient: &str, subject: &str, text: &str) {
-        let from = self.from.as_str();
-
         let email = Email::builder()
             .to(recipient)
-            .from(from)
+            .from(self.from.clone())
             .subject(subject)
             .text(text)
             .build()
             .unwrap();
 
-        self.tx.send(email);
+        match self.tx.send(email) {
+            Ok(_) => {
+                log::debug!("Email sent");
+            }
+            Err(_) => {
+                log::debug!("Error sending email");
+            }
+        }
     }
 }

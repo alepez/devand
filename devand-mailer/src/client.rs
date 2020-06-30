@@ -1,9 +1,3 @@
-use jsonrpc_core::futures::future::Future;
-use jsonrpc_core_client::transports::http;
-use tokio::runtime::Runtime;
-
-use crate::api::GenClient;
-
 pub struct Client {
     url: String,
 }
@@ -19,6 +13,11 @@ impl Client {
 
     #[cfg(not(feature = "mock"))]
     pub fn send_email(&self, recipients: Vec<String>, subject: String, text: String) {
+        use crate::api::GenClient;
+        use jsonrpc_core::futures::future::Future;
+        use jsonrpc_core_client::transports::http;
+        use tokio::runtime::Runtime;
+
         let mut rt = Runtime::new().unwrap();
 
         let client_url = &self.url;

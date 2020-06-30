@@ -37,6 +37,7 @@ pub struct ServerConf {
     pub smtp_username: String,
     pub smtp_password: String,
     pub rpc_http_addr: std::net::SocketAddr,
+    pub from_name: String,
 }
 
 impl Server {
@@ -46,6 +47,7 @@ impl Server {
 
     pub fn new(conf: ServerConf) -> Self {
         let ServerConf {
+            from_name,
             smtp_server,
             smtp_username,
             smtp_password,
@@ -53,7 +55,7 @@ impl Server {
             ..
         } = conf;
 
-        let mailer = Mailer::new(smtp_server, smtp_username, smtp_password);
+        let mailer = Mailer::new(smtp_server, smtp_username, smtp_password, from_name);
 
         let mut io = IoHandler::default();
         let rpc = RpcImpl::new(mailer);
