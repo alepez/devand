@@ -18,6 +18,11 @@ impl Rpc for RpcImpl {
         }
         Ok(())
     }
+
+    fn verify_address(&self, address: String) -> Result<()> {
+        self.mailer.lock().unwrap().verify_address(address);
+        Ok(())
+    }
 }
 
 impl RpcImpl {
