@@ -6,12 +6,12 @@ on:
   push:
     branches:
       - master
-    paths:
-      - docker/devand-web/Dockerfile
-      - devand-core/**
-      - devand-db/**
-      - devand-ui/**
-      - devand-web/**
+    # paths:
+    #   - docker/devand-web/Dockerfile
+    #   - devand-core/**
+    #   - devand-db/**
+    #   - devand-ui/**
+    #   - devand-web/**
 
 jobs:
 

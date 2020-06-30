@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-    paths:
-      - docker/devand-run-env/Dockerfile
+    # paths:
+    #   - docker/devand-run-env/Dockerfile
   schedule:
     - cron:  '0 4 * * *'
 
