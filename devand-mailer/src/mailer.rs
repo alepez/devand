@@ -39,13 +39,7 @@ impl Mailer {
     }
 
     pub fn send_email(&self, recipient: &str, subject: &str, text: &str) {
-        let email = Email::builder()
-            .to(recipient)
-            .from(self.from.clone())
-            .subject(subject)
-            .text(text)
-            .build()
-            .unwrap();
+        let email = create_email(&self.from, recipient, subject, text);
 
         match self.tx.send(email) {
             Ok(_) => {
@@ -56,4 +50,18 @@ impl Mailer {
             }
         }
     }
+}
+
+fn create_email(from: &Mailbox, recipient: &str, subject: &str, text: &str) -> Email {
+    let html = comrak::markdown_to_html(text, &comrak::ComrakOptions::default());
+
+    Email::builder()
+        .to(recipient)
+        .from(from.clone())
+        .subject(subject)
+        .text(text)
+        .html(html)
+        .message_type(lettre_email::MimeMultipartType::Alternative)
+        .build()
+        .unwrap()
 }

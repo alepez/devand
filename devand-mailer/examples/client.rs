@@ -12,6 +12,6 @@ fn main() {
     client.send_email(
         vec!["admin@devand.dev".to_string()],
         "Hei".to_string(),
-        "Ciao!".to_string(),
+        "Hello!\n\nThis is a **markdown** message.\n\n## This is a title".to_string(),
     );
 }

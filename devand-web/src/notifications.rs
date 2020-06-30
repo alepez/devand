@@ -39,10 +39,8 @@ But don’t worry! You can use the following link to reset your password:\n
 \n
 If you don’t use this link within 3 hours, it will expire. To get a new password reset link, visit https://devand.dev/password_reset\n
 \n
-\n
 Thanks,\n
 The DevAndDev team\n", url);
 
-    // TODO This call is blocking and takes too much time. Just send and forget
     mailer.send_email(vec![recipient], subject.to_string(), text);
 }
