@@ -148,6 +148,10 @@ impl UserService {
             }));
         }
     }
+
+    pub fn verify_email(&mut self) {
+        // TODO
+    }
 }
 
 fn make_on_unload_callback(

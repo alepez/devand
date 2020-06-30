@@ -15,6 +15,8 @@ impl UserService {
     }
 
     pub fn store(&mut self, _user: &User) {}
+
+    pub fn verify_email(&mut self) {}
 }
 
 fn mock_user() -> devand_core::User {

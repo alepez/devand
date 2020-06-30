@@ -100,7 +100,7 @@ impl AvailabilityTable {
         });
 
         html! {
-            <li class="devand-availability-day pure-u-1 pure-u-sm-1-3 pure-u-md-1-4">
+            <li class="devand-availability-day pure-u-1 pure-u-sm-1-3 pure-u-xl-1-4">
                 <h3>{ format!("{:?}", day) }</h3>
                 <div class="devand-availability-day-hours">
                     { for hours }
