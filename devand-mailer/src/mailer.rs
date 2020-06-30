@@ -30,17 +30,18 @@ impl Mailer {
         let (tx, rx): (mpsc::Sender<Email>, mpsc::Receiver<Email>) = mpsc::channel();
 
         let thread = std::thread::spawn(move || {
-            for email in rx {
-                log::debug!("Email: {:?}", email);
-
-                let email = create_email(from.clone(), email.recipient, email.subject, email.text);
-
-                let result = transport.send(email.into());
-
-                if result.is_err() {
-                    log::error!("Could not send email: {:?}", result);
-                }
-            }
+            rx.iter()
+                .filter(|email| {
+                    // TODO Filter verified emails
+                    true
+                })
+                .map(|email| create_email(from.clone(), email.recipient, email.subject, email.text))
+                .map(|email| transport.send(email.into()))
+                .for_each(|result| {
+                    if result.is_err() {
+                        log::error!("Could not send email: {:?}", result);
+                    }
+                })
         });
 
         Self { thread, tx }
