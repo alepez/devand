@@ -1,4 +1,9 @@
+body {
+    background: #e0e0e0;
+}
+
 .container {
+    background: #ffffff;
     position: relative;
     min-height: 100vh;
 }
@@ -6,7 +11,7 @@
 .content {
     margin: 0 auto;
     padding: 0 2em;
-    max-width: 800px;
+    max-width: 1400px;
     line-height: 1.6em;
     padding-bottom: 5rem;
 }
@@ -18,7 +23,7 @@
 
 .main-header-content {
     margin: 0 auto;
-    max-width: 800px;
+    max-width: 1400px;
 }
 
 .main-footer {
@@ -31,7 +36,7 @@
 
 .main-footer-content {
     margin: 0 auto;
-    max-width: 800px;
+    max-width: 1400px;
 }
 
 .alert {
@@ -59,4 +64,14 @@
     color: #856404;
     background-color: #fff3cd;
     border-color: #ffeeba;
+}
+
+a {
+    color: #586069!important;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0366d6!important;
+    text-decoration: underline;
 }
