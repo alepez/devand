@@ -32,6 +32,8 @@ pub struct User {
     pub visible_name: String,
     /// All user settings are here
     pub settings: UserSettings,
+    /// Email must be verified to enable some feature (notifications, ...)
+    pub email_verified: bool,
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]

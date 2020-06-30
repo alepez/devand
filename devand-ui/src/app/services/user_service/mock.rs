@@ -67,6 +67,7 @@ fn mock_user() -> devand_core::User {
         username: "alepez".into(),
         visible_name: "Alessandro Pezzato".into(),
         email: "alessandro@pezzato.net".into(),
+        email_verified: false,
         settings: UserSettings {
             languages,
             vacation_mode: false,

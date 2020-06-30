@@ -8,6 +8,7 @@ pub fn user() -> User {
         username: "alepez".into(),
         visible_name: "Alessandro Pezzato".into(),
         email: "alessandro@pezzato.net".into(),
+        email_verified: true,
         settings: UserSettings {
             languages: Languages(btreemap! {
                 Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low },

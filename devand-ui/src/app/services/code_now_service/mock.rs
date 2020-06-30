@@ -80,6 +80,7 @@ fn mock_user(name: &str) -> devand_core::User {
             .filter(|x| x.is_alphabetic())
             .collect(),
         email: "a@b.c".to_string(),
+        email_verified: true,
         visible_name: name.to_string(),
         settings: devand_core::UserSettings {
             languages: Languages(languages),

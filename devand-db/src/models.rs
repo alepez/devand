@@ -49,6 +49,7 @@ impl TryInto<devand_core::User> for User {
             id: devand_core::UserId(self.id),
             username: self.username,
             email: self.email,
+            email_verified: self.email_verified,
             visible_name,
             settings,
         };

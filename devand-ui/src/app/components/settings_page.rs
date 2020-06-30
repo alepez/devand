@@ -1,5 +1,5 @@
-use crate::app::components::EditableLanguageTag;
 use crate::app::components::AddLanguageComponent;
+use crate::app::components::EditableLanguageTag;
 use crate::app::elements::busy_indicator;
 use devand_core::{Availability, Language, LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
@@ -12,6 +12,7 @@ pub enum Msg {
     AddLanguage((Language, LanguagePreference)),
     RemoveLanguage(Language),
     UpdateSchedule(Availability),
+    VerifyAddress,
 }
 
 pub struct SettingsPage {
@@ -61,6 +62,9 @@ impl Component for SettingsPage {
                 self.update_user(move |user| {
                     user.settings.schedule = schedule;
                 });
+            }
+            Msg::VerifyAddress => {
+                log::debug!("Verify address");
             }
         }
 
@@ -127,6 +131,22 @@ impl SettingsPage {
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
                     <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
+                    {
+                    if !user.email_verified {
+                        html! {
+                            <span class="pure-form-message-inline">
+                                <button
+                                    class=("pure-button", "button-warning", "pure-button-primary")
+                                    onclick=self.link.callback(|_| Msg::VerifyAddress)
+                                    >{ "Verify" }
+                                </button>
+                                { " This address is not verified." }
+                            </span>
+                        }
+                    } else {
+                        html! {}
+                    }
+                    }
                 </div>
                 <div class="pure-control-group">
                     <label for="visible_name">{ "Visible name:" }</label>
