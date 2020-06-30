@@ -488,6 +488,7 @@ name = "devand-mailer"
 version = "0.1.0"
 dependencies = [
  "comrak",
+ "devand-db",
  "dotenv",
  "env_logger",
  "jsonrpc-core",
