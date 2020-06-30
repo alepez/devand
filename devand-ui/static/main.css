@@ -9,6 +9,7 @@ body {
 }
 
 .content {
+    background: #ffffff;
     margin: 0 auto;
     padding: 0 2em;
     max-width: 1400px;
@@ -74,4 +75,20 @@ a {
 a:hover {
     color: #0366d6!important;
     text-decoration: underline;
+}
+
+.devand-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.devand-menu-item {
+  display: block;
+}
+
+@media screen and (min-width: 64em) {
+  .devand-menu-item {
+    display: inline-block;
+  }
 }

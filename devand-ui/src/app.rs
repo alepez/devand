@@ -113,23 +113,9 @@ impl App {
     fn view_ok(&self, user: &User) -> VNode {
         html! {
             <>
-            { self.view_menu() }
+            { view_menu() }
             { self.view_routes(&user) }
             </>
-        }
-    }
-
-    fn view_menu(&self) -> VNode {
-        html! {
-            <div class=("pure-menu", "pure-menu-horizontal")>
-                <ul class=("pure-menu-list")>
-                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
-                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
-                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
-                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
-                    <li class=("pure-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
-                </ul>
-            </div>
         }
     }
 
@@ -154,5 +140,17 @@ impl App {
                 redirect = Router::redirect(|route: Route| { AppRoute::NotFound(Permissive(Some(route.route))) })
             />
         }
+    }
+}
+
+fn view_menu() -> VNode {
+    html! {
+    <ul class=("devand-menu")>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
+    </ul>
     }
 }
