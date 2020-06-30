@@ -10,6 +10,5 @@ RUN cargo -Z no-index-update build --release --bin=devand-mailer --features=serv
 
 # Set up the run environment.
 FROM docker.pkg.github.com/alepez/devand/devand-run-env
-RUN mkdir /app
 COPY --from=builder /home/builder/project/devand-mailer/target/release/devand-mailer /app/devand-mailer
 ENTRYPOINT ["/app/devand-mailer"]

@@ -19,7 +19,6 @@ RUN cargo -Z no-index-update build --release
 
 # Set up the run environment.
 FROM docker.pkg.github.com/alepez/devand/devand-run-env
-RUN mkdir /app
 COPY --from=builder /home/builder/project/devand-web/static /app/static
 COPY --from=builder /home/builder/project/devand-web/templates /app/templates
 COPY --from=builder /home/builder/project/devand-web/target/release/devand-web /app/devand-web
