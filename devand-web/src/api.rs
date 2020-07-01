@@ -60,6 +60,11 @@ fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
     Json(())
 }
 
+#[get("/verify_email/<token>")]
+fn verify_email_token(_token: String) -> Json<()> {
+    Json(())
+}
+
 #[get("/affinities")]
 fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
     let users = devand_db::load_users(&conn.0)?;

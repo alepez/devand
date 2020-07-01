@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct PasswordReset {
-    user_id: i32,
+    pub user_id: i32,
 }
 
 impl signed_token::Signable for PasswordReset {

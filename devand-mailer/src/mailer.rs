@@ -1,3 +1,4 @@
+use devand_crypto::{EmailVerification, EmailVerificationToken};
 use lettre::smtp::authentication::Credentials;
 use lettre::{SmtpClient, Transport};
 use lettre_email::Mailbox;
@@ -15,10 +16,17 @@ pub struct Mailer {
     tx: mpsc::Sender<Email>,
     #[allow(dead_code)]
     thread: std::thread::JoinHandle<()>,
+    encoder: devand_crypto::Encoder,
 }
 
 impl Mailer {
-    pub fn new(server: String, username: String, password: String, from_name: String) -> Self {
+    pub fn new(
+        server: String,
+        username: String,
+        password: String,
+        from_name: String,
+        encoder: devand_crypto::Encoder,
+    ) -> Self {
         let from = Mailbox::new_with_name(from_name, username.clone());
 
         let creds = Credentials::new(username, password);
@@ -57,7 +65,11 @@ impl Mailer {
                 })
         });
 
-        Self { thread, tx }
+        Self {
+            thread,
+            tx,
+            encoder,
+        }
     }
 
     pub fn send_email(&self, recipient: String, subject: String, text: String) {
@@ -73,14 +85,30 @@ impl Mailer {
     }
 
     pub fn verify_address(&self, recipient: String) {
-        // FIXME Generate an url token (using db or signed message) to be sent
-        let subject = "FIXME Email verification";
-        let text = "FIXME";
+        let data = EmailVerification {
+            address: recipient.clone(),
+        };
+
+        let token: String = EmailVerificationToken::new(&data, &self.encoder).into();
+
+        // FIXME Base url
+        let url = format!("https://devand.dev/verify_email/{}", token);
+
+        let subject = "Verify Email Address for DevAndDev";
+        let text = format!(
+            "
+Thanks for registering for an account on *DevAndDev*!\n\n
+Before we get started, we just need to confirm that this is you.\n\n
+Click below to verify your email address:\n\n
+{}
+",
+            url
+        );
 
         let email = Email {
             recipient,
             subject: subject.to_string(),
-            text: text.to_string(),
+            text,
             address_must_be_verified: false,
         };
 

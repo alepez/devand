@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 devand-db = { path = "../devand-db" }
+devand-crypto = { path = "../devand-crypto" }
 env_logger = "0.7"
 log = "0.4"
 jsonrpc-derive = "14.2"

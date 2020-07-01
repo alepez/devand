@@ -39,6 +39,7 @@ pub struct Server {
 }
 
 pub struct ServerConf {
+    pub secret: String,
     pub smtp_server: String,
     pub smtp_username: String,
     pub smtp_password: String,
@@ -53,15 +54,23 @@ impl Server {
 
     pub fn new(conf: ServerConf) -> Self {
         let ServerConf {
+            secret,
             from_name,
             smtp_server,
             smtp_username,
             smtp_password,
             rpc_http_addr,
-            ..
         } = conf;
 
-        let mailer = Mailer::new(smtp_server, smtp_username, smtp_password, from_name);
+        let encoder = devand_crypto::Encoder::new_from_secret(&secret.as_bytes());
+
+        let mailer = Mailer::new(
+            smtp_server,
+            smtp_username,
+            smtp_password,
+            from_name,
+            encoder,
+        );
 
         let mut io = IoHandler::default();
         let rpc = RpcImpl::new(mailer);
