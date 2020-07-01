@@ -10,6 +10,8 @@ on:
       - docker/devand-mailer/Dockerfile
       - devand-core/**
       - devand-mailer/**
+      - devand-crypto/**
+      - devand-db/**
 
 jobs:
 

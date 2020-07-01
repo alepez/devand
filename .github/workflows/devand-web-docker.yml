@@ -13,6 +13,7 @@ on:
       - devand-ui/**
       - devand-web/**
       - devand-mailer/**
+      - devand-crypto/**
 
 jobs:
 
