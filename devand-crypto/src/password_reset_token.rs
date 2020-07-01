@@ -4,12 +4,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
-    // aud: String, // Optional. Audience
     exp: usize, // Expiration time (as UTC timestamp)
-    // iat: usize,  // Optional. Issued at (as UTC timestamp)
-    // iss: String, // Optional. Issuer
-    // nbf: usize,  // Optional. Not Before (as UTC timestamp)
-    sub: String, // Optional. Subject (whom token refers to)
+    sub: String,
 }
 
 struct Token(String);
@@ -49,6 +45,40 @@ impl<'a> Decoder<'a> {
     }
 }
 
+struct DataVerifier<'a> {
+    encoder: Encoder,
+    decoder: Decoder<'a>,
+}
+
+impl<'a> DataVerifier<'a> {
+    fn new_from_secret(secret: &'a [u8]) -> Self {
+        Self {
+            encoder: Encoder::new_from_secret(secret),
+            decoder: Decoder::new_from_secret(secret),
+        }
+    }
+
+    fn encode<T>(&self, data: &T) -> Option<Token>
+    where
+        T: serde::ser::Serialize,
+    {
+        let encoded_data = serde_json::to_string(data).ok()?;
+        let claims = Claims {
+            exp: 9999999999,
+            sub: encoded_data,
+        };
+        self.encoder.encode(claims)
+    }
+
+    fn decode<T>(&self, token: Token) -> Option<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let decoded: Claims = self.decoder.decode(token)?;
+        serde_json::from_str(&decoded.sub).ok()?
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -70,5 +100,23 @@ mod test {
         let data = decoder.decode(token).unwrap();
 
         assert!(sub == &data.sub);
+    }
+
+    #[test]
+    fn verifier() {
+        let key = b"secret";
+        let verifier = DataVerifier::new_from_secret(key);
+
+        #[derive(Serialize, Deserialize, Debug)]
+        struct Data {
+            x: u32,
+        };
+
+        let data = Data { x: 42 };
+
+        let token = verifier.encode(&data).unwrap();
+        let decoded: Data = verifier.decode(token).unwrap();
+
+        assert_eq!(decoded.x, data.x);
     }
 }
