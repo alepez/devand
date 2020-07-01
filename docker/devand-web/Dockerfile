@@ -2,10 +2,11 @@ FROM docker.pkg.github.com/alepez/devand/devand-web-builder as builder
 
 WORKDIR /home/builder/project
 ADD --chown=builder ./devand-core ./devand-core
+ADD --chown=builder ./devand-crypto ./devand-crypto
 ADD --chown=builder ./devand-db ./devand-db
+ADD --chown=builder ./devand-mailer ./devand-mailer
 ADD --chown=builder ./devand-ui ./devand-ui
 ADD --chown=builder ./devand-web ./devand-web
-ADD --chown=builder ./devand-mailer ./devand-mailer
 
 USER builder
 WORKDIR /home/builder/project/devand-ui
