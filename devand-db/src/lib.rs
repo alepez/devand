@@ -214,6 +214,14 @@ pub fn is_verified_email(email_addr: &str, conn: &PgConnection) -> bool {
         .unwrap_or(false)
 }
 
+pub fn set_verified_email(email_addr: &str, conn: &PgConnection) -> Result<(), Error> {
+    diesel::update(schema::users::table.filter(schema::users::dsl::email.eq(email_addr)))
+        .set((schema::users::dsl::email_verified.eq(true),))
+        .execute(conn)
+        .map(|_| ())
+        .map_err(|_| Error::Unknown)
+}
+
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
     embedded_migrations::run(&*conn)
 }
