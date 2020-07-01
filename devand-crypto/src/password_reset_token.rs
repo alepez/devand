@@ -6,8 +6,10 @@ pub struct PasswordReset {
     user_id: i32,
 }
 
+#[derive(Clone)]
 pub struct PasswordResetToken(signed_token::SignedToken);
 
+// TODO Use traits/derive/macro to automatically implement this
 impl PasswordResetToken {
     pub fn new(data: &PasswordReset, encoder: &signed_token::Encoder) -> Self {
         let token = encoder.encode(data).expect("Token is encoded");
@@ -16,6 +18,13 @@ impl PasswordResetToken {
 
     pub fn decode(&self, decoder: &signed_token::Decoder) -> Option<PasswordReset> {
         decoder.decode(&self.0)
+    }
+}
+
+// TODO Use traits/derive/macro to automatically implement this
+impl Into<String> for PasswordResetToken {
+    fn into(self) -> String {
+        self.0.into()
     }
 }
 
@@ -31,7 +40,9 @@ mod test {
 
         let data = PasswordReset { user_id: 42 };
         let token = PasswordResetToken::new(&data, &encoder);
+        let token_string: String = token.clone().into();
         let decoded = token.decode(&decoder).unwrap();
         assert_eq!(data.user_id, decoded.user_id);
+        assert!(token_string.len() < 200);
     }
 }
