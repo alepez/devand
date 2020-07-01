@@ -525,6 +525,7 @@ dependencies = [
  "captcha",
  "chrono",
  "devand-core",
+ "devand-crypto",
  "devand-db",
  "devand-mailer",
  "dotenv",

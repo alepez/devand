@@ -20,6 +20,12 @@ impl Into<String> for SignedToken {
     }
 }
 
+impl From<String> for SignedToken {
+    fn from(s: String) -> Self {
+        Self(s)
+    }
+}
+
 pub struct Encoder {
     encoding_key: EncodingKey,
 }

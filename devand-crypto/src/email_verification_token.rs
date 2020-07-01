@@ -1,7 +1,7 @@
 use crate::signed_token;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct EmailVerification {
     pub address: String,
 }
@@ -29,5 +29,12 @@ impl EmailVerificationToken {
 impl Into<String> for EmailVerificationToken {
     fn into(self) -> String {
         self.0.into()
+    }
+}
+
+// TODO Use traits/derive/macro to automatically implement this
+impl From<String> for EmailVerificationToken {
+    fn from(s: String) -> Self {
+        EmailVerificationToken(signed_token::SignedToken::from(s))
     }
 }

@@ -8,6 +8,7 @@ edition = "2018"
 devand-core = { path = "../devand-core" }
 devand-db = { path = "../devand-db" }
 devand-mailer = { path = "../devand-mailer", features = ["client"] }
+devand-crypto = { path = "../devand-crypto" }
 serde = "1"
 serde_json = "1"
 validator = "0.10"
