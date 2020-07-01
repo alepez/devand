@@ -6,6 +6,10 @@ pub struct PasswordReset {
     user_id: i32,
 }
 
+impl signed_token::Signable for PasswordReset {
+    const EXP_SECONDS: i64 = 3600;
+}
+
 #[derive(Clone)]
 pub struct PasswordResetToken(signed_token::SignedToken);
 
