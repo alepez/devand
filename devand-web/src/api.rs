@@ -4,6 +4,7 @@ use chrono::prelude::*;
 use chrono::Duration;
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{User, UserAffinity, UserId};
+use devand_crypto::{EmailVerification, EmailVerificationToken};
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
 
@@ -62,12 +63,15 @@ fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
 }
 
 #[get("/verify_email/<token>")]
-fn verify_email_token(token: String, crypto_decoder: State<devand_crypto::Decoder>) -> Json<()> {
-    let token = devand_crypto::EmailVerificationToken::from(token);
-    let data = token.decode(&crypto_decoder);
-    // FIXME
-    dbg!(data);
-    Json(())
+fn verify_email_token(
+    token: String,
+    crypto_decoder: State<devand_crypto::Decoder>,
+    conn: PgDevandConn,
+) -> Option<Json<()>> {
+    let token = EmailVerificationToken::from(token);
+    let EmailVerification { address } = token.decode(&crypto_decoder)?;
+    devand_db::set_verified_email(&address, &conn).ok()?;
+    Some(Json(()))
 }
 
 #[get("/affinities")]
