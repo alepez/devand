@@ -8,7 +8,7 @@ struct Claims {
 }
 
 #[derive(Clone)]
-pub struct SignedToken(String);
+pub(crate) struct SignedToken(String);
 
 impl Into<String> for SignedToken {
     fn into(self) -> String {
@@ -32,7 +32,7 @@ impl Encoder {
             .map(|x| SignedToken(x))
     }
 
-    pub fn encode<T>(&self, data: &T) -> Option<SignedToken>
+    pub(crate) fn encode<T>(&self, data: &T) -> Option<SignedToken>
     where
         T: serde::ser::Serialize,
     {
@@ -62,7 +62,7 @@ impl<'a> Decoder<'a> {
             .ok()
     }
 
-    pub fn decode<T>(&self, token: &SignedToken) -> Option<T>
+    pub(crate) fn decode<T>(&self, token: &SignedToken) -> Option<T>
     where
         T: serde::de::DeserializeOwned,
     {
