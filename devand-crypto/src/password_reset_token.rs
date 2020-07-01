@@ -7,7 +7,7 @@ pub struct PasswordReset {
 }
 
 impl signed_token::Signable for PasswordReset {
-    const EXP_SECONDS: i64 = 3600;
+    const EXP_SECONDS: i64 = 3 * 60 * 60;
 }
 
 #[cfg(test)]
