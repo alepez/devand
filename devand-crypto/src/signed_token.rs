@@ -1,7 +1,10 @@
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
+/// Implement this trait for all types that needs to be converted to a SignedToken
 pub trait Signable {
+    /// Identifies the expiration (in seconds since encoding) after which the
+    /// JWT must not be accepted for processing.
     const EXP_SECONDS: i64;
 }
 
@@ -31,6 +34,7 @@ pub struct Encoder {
 }
 
 impl Encoder {
+    /// Creates an HMAC encoder from a secret key
     pub fn new_from_secret(secret: &[u8]) -> Self {
         let encoding_key = EncodingKey::from_secret(secret);
         Self { encoding_key }
@@ -42,6 +46,7 @@ impl Encoder {
             .map(|x| SignedToken(x))
     }
 
+    /// Encode any Signable type
     pub(crate) fn encode<T>(&self, data: &T) -> Option<SignedToken>
     where
         T: serde::ser::Serialize + Signable,
@@ -67,6 +72,7 @@ pub struct Decoder {
 }
 
 impl Decoder {
+    /// Creates an HMAC decoder from a secret key
     pub fn new_from_secret(secret: &[u8]) -> Self {
         let secret = secret.to_owned();
         Self { secret }
@@ -80,6 +86,7 @@ impl Decoder {
             .ok()
     }
 
+    /// Decode any deserializable type from a SignedToken
     pub(crate) fn decode<T>(&self, token: &SignedToken) -> Option<T>
     where
         T: serde::de::DeserializeOwned,
