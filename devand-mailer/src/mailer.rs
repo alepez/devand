@@ -56,7 +56,9 @@ impl Mailer {
                         verified
                     }
                 })
-                .map(|email| create_email(from.clone(), email.recipient, email.subject, email.text))
+                .filter_map(|email| {
+                    create_email(from.clone(), email.recipient, email.subject, email.text)
+                })
                 .map(|email| transport.send(email.into()))
                 .for_each(|result| {
                     if result.is_err() {
@@ -122,16 +124,23 @@ fn create_email(
     recipient: String,
     subject: String,
     text: String,
-) -> lettre_email::Email {
+) -> Option<lettre_email::Email> {
     let html = comrak::markdown_to_html(&text, &comrak::ComrakOptions::default());
 
-    lettre_email::Email::builder()
+    let result = lettre_email::Email::builder()
         .to(recipient)
         .from(from)
         .subject(subject)
         .text(text)
         .html(html)
         .message_type(lettre_email::MimeMultipartType::Alternative)
-        .build()
-        .unwrap()
+        .build();
+
+    match result {
+        Err(err) => {
+            log::error!("Error while creating email: {:?}", err);
+            None
+        }
+        Ok(email) => Some(email),
+    }
 }
