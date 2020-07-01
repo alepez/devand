@@ -43,6 +43,12 @@ impl From<String> for SignedToken {
     }
 }
 
+impl std::fmt::Display for SignedToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 pub struct Encoder {
     encoding_key: EncodingKey,
 }

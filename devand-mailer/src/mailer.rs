@@ -1,4 +1,4 @@
-use devand_crypto::{EmailVerification, EmailVerificationToken};
+use devand_crypto::{EmailVerification, Signable};
 use lettre::smtp::authentication::Credentials;
 use lettre::{SmtpClient, Transport};
 use lettre_email::Mailbox;
@@ -89,7 +89,7 @@ impl Mailer {
             address: recipient.clone(),
         };
 
-        let token: String = EmailVerificationToken::new(&data, &self.encoder).into();
+        let token = data.sign(&self.encoder);
 
         // FIXME Base url
         let url = format!("https://devand.dev/verify_email/{}", token);

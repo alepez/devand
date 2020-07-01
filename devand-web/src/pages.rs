@@ -1,7 +1,7 @@
 use crate::auth::{self, AuthData, ExpectedCaptcha};
 use crate::StaticDir;
 use crate::{Mailer, PgDevandConn};
-use devand_crypto::{EmailVerification, EmailVerificationToken};
+use devand_crypto::{EmailVerification, Signable, SignedToken};
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Content, Flash, NamedFile, Redirect};
@@ -370,9 +370,10 @@ fn verify_email_token(
     crypto_decoder: State<devand_crypto::Decoder>,
     conn: PgDevandConn,
 ) -> Template {
-    let token = EmailVerificationToken::from(token);
+    let token = SignedToken::from(token);
+    let verified_data = EmailVerification::try_from_token(&token, &crypto_decoder);
 
-    let verified = if let Some(EmailVerification { address }) = token.decode(&crypto_decoder) {
+    let verified = if let Some(EmailVerification { address }) = verified_data {
         devand_db::set_verified_email(&address, &conn)
             .ok()
             .expect("Email can be verified");
