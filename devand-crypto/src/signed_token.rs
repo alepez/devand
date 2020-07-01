@@ -7,7 +7,14 @@ struct Claims {
     sub: String,
 }
 
+#[derive(Clone)]
 pub struct SignedToken(String);
+
+impl Into<String> for SignedToken {
+    fn into(self) -> String {
+        self.0
+    }
+}
 
 pub struct Encoder {
     encoding_key: EncodingKey,
