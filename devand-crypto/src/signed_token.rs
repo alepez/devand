@@ -1,6 +1,10 @@
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
+pub trait Signable {
+    const EXP_SECONDS: i64;
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
     exp: usize, // Expiration time (as UTC timestamp)
@@ -34,11 +38,14 @@ impl Encoder {
 
     pub(crate) fn encode<T>(&self, data: &T) -> Option<SignedToken>
     where
-        T: serde::ser::Serialize,
+        T: serde::ser::Serialize + Signable,
     {
         let encoded_data = serde_json::to_string(data).ok()?;
+        let now = chrono::Utc::now();
+        let exp = now.checked_add_signed(chrono::Duration::seconds(T::EXP_SECONDS))?;
+        let exp = exp.timestamp() as usize;
         let claims = Claims {
-            exp: 9999999999,
+            exp,
             sub: encoded_data,
         };
         self.encode_claims(claims)
@@ -104,6 +111,10 @@ mod test {
         struct Data {
             x: u32,
         };
+
+        impl Signable for Data {
+            const EXP_SECONDS: i64 = 3600;
+        }
 
         let data = Data { x: 42 };
 

@@ -54,6 +54,7 @@ dependencies = [
 name = "devand-crypto"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "jsonwebtoken",
  "log",
  "serde",
