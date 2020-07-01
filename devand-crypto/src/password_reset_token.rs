@@ -9,16 +9,17 @@ pub struct PasswordReset {
 pub struct PasswordResetToken(signed_token::SignedToken);
 
 impl PasswordResetToken {
-    fn new(data: &PasswordReset, encoder: &signed_token::Encoder) -> Self {
+    pub fn new(data: &PasswordReset, encoder: &signed_token::Encoder) -> Self {
         let token = encoder.encode(data).expect("Token is encoded");
         Self(token)
     }
 
-    fn decode(&self, decoder: &signed_token::Decoder) -> Option<PasswordReset> {
+    pub fn decode(&self, decoder: &signed_token::Decoder) -> Option<PasswordReset> {
         decoder.decode(&self.0)
     }
 }
 
+#[cfg(test)]
 mod test {
     use super::*;
 
