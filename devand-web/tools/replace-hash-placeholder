@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+calculate_hash() {
+  # TODO Generate hash of files instead of using timestamp
+  date +%s  | sha1sum | cut -c1-8
+}
+
+replace_placeholder() {
+  local code=$1
+  local filename=$2
+  sed -i -e "s/HASHPLACEHOLDER/${code}/" "${filename}"
+}
+
+code=$( calculate_hash )
+
+replace_placeholder ${code} templates/dashboard.html.hbs
+replace_placeholder ${code} templates/layout.html.hbs
+replace_placeholder ${code} static/ui-HASHPLACEHOLDER/devand.js
+
+mv static/ui-HASHPLACEHOLDER static/ui-${code}

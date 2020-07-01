@@ -17,6 +17,7 @@ RUN bash setup.sh && \
 WORKDIR /home/builder/project/devand-web
 ENV DEVAND_BASE_URL=https://devand.dev
 RUN cargo -Z no-index-update build --release
+RUN ./tools/replace-hash-placeholder
 
 # Set up the run environment.
 FROM docker.pkg.github.com/alepez/devand/devand-run-env
