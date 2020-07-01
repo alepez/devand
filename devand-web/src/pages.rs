@@ -1,6 +1,7 @@
 use crate::auth::{self, AuthData, ExpectedCaptcha};
 use crate::StaticDir;
 use crate::{Mailer, PgDevandConn};
+use devand_crypto::{EmailVerification, EmailVerificationToken};
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Content, Flash, NamedFile, Redirect};
@@ -362,6 +363,40 @@ fn favicon(static_dir: State<StaticDir>) -> Option<NamedFile> {
     NamedFile::open(std::path::Path::new(&static_dir.0).join("favicon.ico")).ok()
 }
 
+#[get("/verify_email/<token>")]
+fn verify_email_token(
+    token: String,
+    auth_data: Option<AuthData>,
+    crypto_decoder: State<devand_crypto::Decoder>,
+    conn: PgDevandConn,
+) -> Template {
+    let token = EmailVerificationToken::from(token);
+
+    let verified = if let Some(EmailVerification { address }) = token.decode(&crypto_decoder) {
+        devand_db::set_verified_email(&address, &conn)
+            .ok()
+            .expect("Email can be verified");
+        true
+    } else {
+        false
+    };
+
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        authenticated: bool,
+        verified: bool,
+    }
+
+    let context = Context {
+        title: "Email address verification",
+        authenticated: auth_data.is_some(),
+        verified,
+    };
+
+    Template::render("email_verification", &context)
+}
+
 pub fn routes() -> Vec<Route> {
     routes![
         index,
@@ -388,6 +423,7 @@ pub fn routes() -> Vec<Route> {
         code_of_conduct,
         help,
         favicon,
+        verify_email_token,
     ]
 }
 
