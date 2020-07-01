@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+( cd devand-core      && cargo test )
+( cd devand-db        && cargo test )
+( cd devand-crypto    && cargo test )
+( cd devand-mailer    && cargo test --features=server )
+( cd devand-mailer    && cargo test --features=client )
+( cd devand-web       && cargo test )
+( cd devand-ui        && cargo test )

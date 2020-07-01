@@ -1,6 +1,6 @@
-use devand_mailer::{Client, ClientConf};
-
+#[cfg(feature = "client")]
 fn main() {
+    use devand_mailer::{Client, ClientConf};
     dotenv::dotenv().ok();
 
     let conf = ClientConf {
@@ -11,3 +11,6 @@ fn main() {
 
     client.verify_address("admin@devand.dev".to_string());
 }
+
+#[cfg(not(feature = "client"))]
+fn main() {}
