@@ -82,11 +82,25 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
 
     let settings = serde_json::to_value(settings).unwrap();
 
+    let (current_email, current_email_verified): (String, bool) = schema::users::table
+        .filter(schema::users::dsl::id.eq(user.id.0))
+        .select((schema::users::email, schema::users::email_verified))
+        .first(conn)
+        .ok()?;
+
+    let email_changed = &current_email != &email;
+    let email_verified = current_email_verified && !email_changed;
+
+    if email_verified != current_email_verified {
+        log::warn!("Email changed, it now needs to be verified again");
+    }
+
     diesel::update(schema::users::table.filter(schema::users::dsl::id.eq(user.id.0)))
         .set((
             schema::users::dsl::settings.eq(settings),
             schema::users::dsl::visible_name.eq(visible_name),
             schema::users::dsl::email.eq(email),
+            schema::users::dsl::email_verified.eq(email_verified),
         ))
         .get_result(conn)
         .ok()
