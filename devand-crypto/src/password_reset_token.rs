@@ -20,10 +20,22 @@ impl Encoder {
         Self { encoding_key }
     }
 
-    fn encode(&self, claims: Claims) -> Option<Token> {
+    fn encode_claims(&self, claims: Claims) -> Option<Token> {
         encode(&Header::default(), &claims, &self.encoding_key)
             .ok()
             .map(|x| Token(x))
+    }
+
+    fn encode<T>(&self, data: &T) -> Option<Token>
+    where
+        T: serde::ser::Serialize,
+    {
+        let encoded_data = serde_json::to_string(data).ok()?;
+        let claims = Claims {
+            exp: 9999999999,
+            sub: encoded_data,
+        };
+        self.encode_claims(claims)
     }
 }
 
@@ -37,44 +49,18 @@ impl<'a> Decoder<'a> {
         Self { decoding_key }
     }
 
-    fn decode(&self, token: Token) -> Option<Claims> {
+    fn decode_claims(&self, token: Token) -> Option<Claims> {
         let validation = Validation::default();
         decode::<Claims>(&token.0, &self.decoding_key, &validation)
             .map(|x| x.claims)
             .ok()
-    }
-}
-
-struct DataVerifier<'a> {
-    encoder: Encoder,
-    decoder: Decoder<'a>,
-}
-
-impl<'a> DataVerifier<'a> {
-    fn new_from_secret(secret: &'a [u8]) -> Self {
-        Self {
-            encoder: Encoder::new_from_secret(secret),
-            decoder: Decoder::new_from_secret(secret),
-        }
-    }
-
-    fn encode<T>(&self, data: &T) -> Option<Token>
-    where
-        T: serde::ser::Serialize,
-    {
-        let encoded_data = serde_json::to_string(data).ok()?;
-        let claims = Claims {
-            exp: 9999999999,
-            sub: encoded_data,
-        };
-        self.encoder.encode(claims)
     }
 
     fn decode<T>(&self, token: Token) -> Option<T>
     where
         T: serde::de::DeserializeOwned,
     {
-        let decoded: Claims = self.decoder.decode(token)?;
+        let decoded: Claims = self.decode_claims(token)?;
         serde_json::from_str(&decoded.sub).ok()?
     }
 }
@@ -96,16 +82,17 @@ mod test {
             exp: 9999999999,
         };
 
-        let token = encoder.encode(claims).unwrap();
-        let data = decoder.decode(token).unwrap();
+        let token = encoder.encode_claims(claims).unwrap();
+        let data = decoder.decode_claims(token).unwrap();
 
         assert!(sub == &data.sub);
     }
 
     #[test]
-    fn verifier() {
+    fn encode_decode_generic() {
         let key = b"secret";
-        let verifier = DataVerifier::new_from_secret(key);
+        let encoder = Encoder::new_from_secret(key);
+        let decoder = Decoder::new_from_secret(key);
 
         #[derive(Serialize, Deserialize, Debug)]
         struct Data {
@@ -114,8 +101,8 @@ mod test {
 
         let data = Data { x: 42 };
 
-        let token = verifier.encode(&data).unwrap();
-        let decoded: Data = verifier.decode(token).unwrap();
+        let token = encoder.encode(&data).unwrap();
+        let decoded: Data = decoder.decode(token).unwrap();
 
         assert_eq!(decoded.x, data.x);
     }
