@@ -8,7 +8,7 @@ struct Claims {
     sub: String,
 }
 
-struct Token(String);
+struct SignedToken(String);
 
 struct Encoder {
     encoding_key: EncodingKey,
@@ -20,13 +20,13 @@ impl Encoder {
         Self { encoding_key }
     }
 
-    fn encode_claims(&self, claims: Claims) -> Option<Token> {
+    fn encode_claims(&self, claims: Claims) -> Option<SignedToken> {
         encode(&Header::default(), &claims, &self.encoding_key)
             .ok()
-            .map(|x| Token(x))
+            .map(|x| SignedToken(x))
     }
 
-    fn encode<T>(&self, data: &T) -> Option<Token>
+    fn encode<T>(&self, data: &T) -> Option<SignedToken>
     where
         T: serde::ser::Serialize,
     {
@@ -49,14 +49,14 @@ impl<'a> Decoder<'a> {
         Self { decoding_key }
     }
 
-    fn decode_claims(&self, token: Token) -> Option<Claims> {
+    fn decode_claims(&self, token: SignedToken) -> Option<Claims> {
         let validation = Validation::default();
         decode::<Claims>(&token.0, &self.decoding_key, &validation)
             .map(|x| x.claims)
             .ok()
     }
 
-    fn decode<T>(&self, token: Token) -> Option<T>
+    fn decode<T>(&self, token: SignedToken) -> Option<T>
     where
         T: serde::de::DeserializeOwned,
     {
