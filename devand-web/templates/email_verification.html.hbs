@@ -1,0 +1,11 @@
+{{#*inline "body"}}
+
+{{#if verified }}
+    <div class="alert alert-success">Your email has been successfully verified</div>
+{{else}}
+    <div class="alert alert-error">Invalid url. Verification token may be expired.</div>
+{{/if}}
+
+{{/inline}}
+{{>layout}}
+

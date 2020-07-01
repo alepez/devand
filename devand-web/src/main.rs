@@ -5,9 +5,9 @@ extern crate rocket;
 
 mod api;
 mod auth;
+mod notifications;
 mod pages;
 mod state;
-mod notifications;
 
 use rocket::fairing::AdHoc;
 use rocket::Rocket;
@@ -67,7 +67,8 @@ fn create_mailer() -> Mailer {
 }
 
 fn create_crypto_decoder() -> devand_crypto::Decoder {
-    todo!()
+    let secret = std::env::var("DEVAND_SECRET").unwrap();
+    devand_crypto::Decoder::new_from_secret(secret.as_bytes())
 }
 
 #[derive(Default)]
