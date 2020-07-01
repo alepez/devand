@@ -1,7 +1,7 @@
 use crate::auth::{self, AuthData, ExpectedCaptcha};
 use crate::StaticDir;
 use crate::{Mailer, PgDevandConn};
-use devand_crypto::{EmailVerification, Signable, SignedToken};
+use devand_crypto::{EmailVerification, PasswordReset, Signable, SignedToken};
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Content, Flash, NamedFile, Redirect};
@@ -10,7 +10,7 @@ use rocket_contrib::templates::Template;
 use serde::Serialize;
 
 const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
-const DEFAULT_BASE_URL: &'static str = "https://localhost:8000";
+const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
 
 // Handle authentication request
 #[post("/login", data = "<credentials>")]
@@ -95,14 +95,17 @@ fn password_reset(
     password_reset: Form<PasswordReset1>,
     real_ip: auth::RealIp,
     mailer: State<Mailer>,
+    crypto_encoder: State<devand_crypto::Encoder>,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     let err_msg = "That address is not associated with a personal user account.";
     let PasswordReset1 { email } = password_reset.0;
 
     if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
-        let token = devand_db::auth::create_password_reset_token(user.id, &conn)
-            .expect("Cannot create password reset token");
+        let user_id = user.id;
+        let data = PasswordReset { user_id: user_id.0 };
+
+        let token = data.sign(&crypto_encoder);
 
         crate::notifications::password_reset(
             BASE_URL.unwrap_or(DEFAULT_BASE_URL),
@@ -120,7 +123,11 @@ fn password_reset(
 }
 
 #[get("/password_reset/<token>")]
-fn password_reset_token_page(token: String, flash: Option<FlashMessage>) -> Template {
+fn password_reset_token_page(
+    token: String,
+    flash: Option<FlashMessage>,
+    crypto_decoder: State<devand_crypto::Decoder>,
+) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
@@ -128,7 +135,13 @@ fn password_reset_token_page(token: String, flash: Option<FlashMessage>) -> Temp
         flash_msg: Option<String>,
         flash_name: Option<String>,
         authenticated: bool,
+        valid_token: bool,
     }
+
+    // Here we decode the token just to give an immediate feedback to user about its validity
+    // It is checked again on form submission
+    let valid_token =
+        PasswordReset::try_from_token(&token.clone().into(), &crypto_decoder).is_some();
 
     let context = Context {
         title: "Reset your password",
@@ -136,6 +149,7 @@ fn password_reset_token_page(token: String, flash: Option<FlashMessage>) -> Temp
         flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
         flash_name: flash.as_ref().map(|x| x.name().to_string()),
         authenticated: false,
+        valid_token,
     };
 
     Template::render("password_reset_new", &context)
@@ -167,9 +181,11 @@ fn password_reset_token(
     real_ip: auth::RealIp,
     token: String,
     password_reset: Form<PasswordReset2>,
+    crypto_decoder: State<devand_crypto::Decoder>,
     conn: PgDevandConn,
 ) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let ok_msg = "Your password has been changed! You can now sign in with your new password.";
+    let redirect_ok = Redirect::to(uri!(login_page));
     let redirect_err = Redirect::to(uri!(password_reset_token_page: token.clone()));
 
     let PasswordReset2 { password } = password_reset.0;
@@ -179,17 +195,22 @@ fn password_reset_token(
         return Err(Flash::error(redirect_err, err_msg));
     }
 
-    let token = devand_db::auth::PasswordResetToken(token);
-    let result =
-        devand_db::auth::reset_password(token, password, &conn).map_err(|_| "Invalid token");
+    let token = SignedToken::from(token);
+    let signed_data = PasswordReset::try_from_token(&token, &crypto_decoder);
 
-    if let Err(err) = result {
-        log_fail(real_ip.0);
-        let err_msg = err.to_string();
-        Err(Flash::error(redirect_err, err_msg))
-    } else {
-        let redirect = Redirect::to(uri!(login_page));
-        Ok(Flash::success(redirect, ok_msg))
+    match signed_data {
+        Some(PasswordReset { user_id }) => {
+            let user_id = devand_core::UserId(user_id);
+            devand_db::auth::set_password(user_id, &password, &conn)
+                .ok()
+                .expect("Password to be updated on database");
+            Ok(Flash::success(redirect_ok, ok_msg))
+        }
+        None => {
+            log_fail(real_ip.0);
+            let err_msg = "Invalid token";
+            Err(Flash::error(redirect_err, err_msg))
+        }
     }
 }
 

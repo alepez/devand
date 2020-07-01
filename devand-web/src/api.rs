@@ -8,7 +8,7 @@ use rocket::{Route, State};
 use rocket_contrib::json::Json;
 
 const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
-const DEFAULT_BASE_URL: &'static str = "https://localhost:8000";
+const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
 
 pub fn routes() -> Vec<Route> {
     routes![
