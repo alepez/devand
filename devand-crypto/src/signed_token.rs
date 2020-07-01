@@ -6,6 +6,20 @@ pub trait Signable {
     /// Identifies the expiration (in seconds since encoding) after which the
     /// JWT must not be accepted for processing.
     const EXP_SECONDS: i64;
+
+    fn sign(&self, encoder: &Encoder) -> SignedToken
+    where
+        Self: serde::ser::Serialize + std::marker::Sized,
+    {
+        encoder.encode(self).expect("Token is encoded")
+    }
+
+    fn try_from_token(token: &SignedToken, decoder: &Decoder) -> Option<Self>
+    where
+        Self: serde::de::DeserializeOwned + std::marker::Sized,
+    {
+        decoder.decode(&token)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -15,7 +29,7 @@ struct Claims {
 }
 
 #[derive(Clone)]
-pub(crate) struct SignedToken(String);
+pub struct SignedToken(String);
 
 impl Into<String> for SignedToken {
     fn into(self) -> String {
@@ -136,8 +150,8 @@ mod test {
 
         let data = Data { x: 42 };
 
-        let token = encoder.encode(&data).unwrap();
-        let decoded: Data = decoder.decode(&token).unwrap();
+        let token = data.sign(&encoder);
+        let decoded = Data::try_from_token(&token, &decoder).unwrap();
 
         assert_eq!(decoded.x, data.x);
     }
