@@ -1,5 +1,4 @@
-use jsonwebtoken::errors::ErrorKind;
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -8,14 +7,14 @@ struct Claims {
     sub: String,
 }
 
-struct SignedToken(String);
+pub struct SignedToken(String);
 
-struct Encoder {
+pub struct Encoder {
     encoding_key: EncodingKey,
 }
 
 impl Encoder {
-    fn new_from_secret(secret: &[u8]) -> Self {
+    pub fn new_from_secret(secret: &[u8]) -> Self {
         let encoding_key = EncodingKey::from_secret(secret);
         Self { encoding_key }
     }
@@ -26,7 +25,7 @@ impl Encoder {
             .map(|x| SignedToken(x))
     }
 
-    fn encode<T>(&self, data: &T) -> Option<SignedToken>
+    pub fn encode<T>(&self, data: &T) -> Option<SignedToken>
     where
         T: serde::ser::Serialize,
     {
@@ -39,24 +38,24 @@ impl Encoder {
     }
 }
 
-struct Decoder<'a> {
+pub struct Decoder<'a> {
     decoding_key: DecodingKey<'a>,
 }
 
 impl<'a> Decoder<'a> {
-    fn new_from_secret(secret: &'a [u8]) -> Self {
+    pub fn new_from_secret(secret: &'a [u8]) -> Self {
         let decoding_key = DecodingKey::from_secret(&secret);
         Self { decoding_key }
     }
 
-    fn decode_claims(&self, token: SignedToken) -> Option<Claims> {
+    fn decode_claims(&self, token: &SignedToken) -> Option<Claims> {
         let validation = Validation::default();
         decode::<Claims>(&token.0, &self.decoding_key, &validation)
             .map(|x| x.claims)
             .ok()
     }
 
-    fn decode<T>(&self, token: SignedToken) -> Option<T>
+    pub fn decode<T>(&self, token: &SignedToken) -> Option<T>
     where
         T: serde::de::DeserializeOwned,
     {
@@ -83,7 +82,7 @@ mod test {
         };
 
         let token = encoder.encode_claims(claims).unwrap();
-        let data = decoder.decode_claims(token).unwrap();
+        let data = decoder.decode_claims(&token).unwrap();
 
         assert!(sub == &data.sub);
     }
@@ -102,7 +101,7 @@ mod test {
         let data = Data { x: 42 };
 
         let token = encoder.encode(&data).unwrap();
-        let decoded: Data = decoder.decode(token).unwrap();
+        let decoded: Data = decoder.decode(&token).unwrap();
 
         assert_eq!(decoded.x, data.x);
     }
