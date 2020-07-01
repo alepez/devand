@@ -23,15 +23,6 @@ table! {
 }
 
 table! {
-    password_reset (id) {
-        id -> Int4,
-        user_id -> Int4,
-        token -> Varchar,
-        expires_at -> Timestamp,
-    }
-}
-
-table! {
     users (id) {
         id -> Int4,
         username -> Varchar,
@@ -46,6 +37,5 @@ allow_tables_to_appear_in_same_query!(
     auth,
     chats,
     messages,
-    password_reset,
     users,
 );

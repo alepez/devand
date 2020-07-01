@@ -66,11 +66,6 @@ fn create_mailer() -> Mailer {
     Mailer::new(conf)
 }
 
-fn create_crypto_decoder() -> devand_crypto::Decoder {
-    let secret = std::env::var("DEVAND_SECRET").unwrap();
-    devand_crypto::Decoder::new_from_secret(secret.as_bytes())
-}
-
 #[derive(Default)]
 struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 
@@ -81,11 +76,15 @@ fn main() {
     env_logger::init();
     dotenv::dotenv().ok();
 
+    let secret = std::env::var("DEVAND_SECRET").unwrap();
+    let secret = secret.as_bytes();
+
     rocket::ignite()
         .manage(create_mailer())
         .manage(CodeNowUsers::default())
         .manage(WeekScheduleMatrix::default())
-        .manage(create_crypto_decoder())
+        .manage(devand_crypto::Decoder::new_from_secret(secret))
+        .manage(devand_crypto::Encoder::new_from_secret(secret))
         .attach(Template::fairing())
         .attach(PgDevandConn::fairing())
         .attach(AdHoc::on_attach("Database Migrations", run_db_migrations))

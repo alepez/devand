@@ -1,6 +1,7 @@
 use crate::Mailer;
 use crate::PgDevandConn;
 use devand_core::{User, UserId};
+use devand_crypto::SignedToken;
 
 pub(crate) fn notify_chat_members(
     base_url: &str,
@@ -32,9 +33,9 @@ pub(crate) fn password_reset(
     base_url: &str,
     mailer: &Mailer,
     recipient: String,
-    token: devand_db::auth::PasswordResetToken,
+    token: SignedToken,
 ) {
-    let token_url = format!("{}/password_reset/{}", base_url, token.0);
+    let token_url = format!("{}/password_reset/{}", base_url, token);
     let retry_url = format!("{}/password_reset", base_url);
     let subject = "DevAndDev - Please reset your password";
     let text = format!(

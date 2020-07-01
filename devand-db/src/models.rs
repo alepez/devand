@@ -1,4 +1,4 @@
-use super::schema::{auth, chats, messages, password_reset, users};
+use super::schema::{auth, chats, messages, users};
 use chrono::{DateTime, Utc};
 use serde_json;
 use std::convert::TryInto;
@@ -101,12 +101,4 @@ impl Into<devand_core::chat::ChatMessage> for ChatMessage {
 #[derive(Debug)]
 pub enum Error {
     CannotDeserializeUserSettings(String),
-}
-
-#[derive(Insertable)]
-#[table_name = "password_reset"]
-pub struct NewPasswordReset {
-    pub user_id: i32,
-    pub token: String,
-    pub expires_at: chrono::NaiveDateTime,
 }
