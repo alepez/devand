@@ -71,13 +71,14 @@ impl Encoder {
     where
         T: serde::ser::Serialize + Signable,
     {
-        let encoded_data = serde_json::to_string(data).ok()?;
+        let encoded_data = bincode::serialize(data).ok()?;
+        let base64_encoded_data = base64::encode(&encoded_data);
         let now = chrono::Utc::now();
         let exp = now.checked_add_signed(chrono::Duration::seconds(T::EXP_SECONDS))?;
         let exp = exp.timestamp() as usize;
         let claims = Claims {
             exp,
-            sub: encoded_data,
+            sub: base64_encoded_data,
         };
         self.encode_claims(claims)
     }
@@ -112,7 +113,9 @@ impl Decoder {
         T: serde::de::DeserializeOwned,
     {
         let decoded: Claims = self.decode_claims(token)?;
-        serde_json::from_str(&decoded.sub).ok()?
+        let base64_encoded_data = decoded.sub;
+        let encoded_data = base64::decode(base64_encoded_data).ok()?;
+        bincode::deserialize(&encoded_data).ok()
     }
 }
 
