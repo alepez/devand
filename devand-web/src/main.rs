@@ -66,6 +66,10 @@ fn create_mailer() -> Mailer {
     Mailer::new(conf)
 }
 
+fn create_crypto_decoder() -> devand_crypto::Decoder {
+    todo!()
+}
+
 #[derive(Default)]
 struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 
@@ -80,6 +84,7 @@ fn main() {
         .manage(create_mailer())
         .manage(CodeNowUsers::default())
         .manage(WeekScheduleMatrix::default())
+        .manage(create_crypto_decoder())
         .attach(Template::fairing())
         .attach(PgDevandConn::fairing())
         .attach(AdHoc::on_attach("Database Migrations", run_db_migrations))

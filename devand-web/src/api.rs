@@ -15,6 +15,7 @@ pub fn routes() -> Vec<Route> {
         settings,
         settings_put,
         verify_email,
+        verify_email_token,
         affinities,
         code_now,
         availability_match,
@@ -61,7 +62,11 @@ fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
 }
 
 #[get("/verify_email/<token>")]
-fn verify_email_token(_token: String) -> Json<()> {
+fn verify_email_token(token: String, crypto_decoder: State<devand_crypto::Decoder>) -> Json<()> {
+    let token = devand_crypto::EmailVerificationToken::from(token);
+    let data = token.decode(&crypto_decoder);
+    // FIXME
+    dbg!(data);
     Json(())
 }
 
