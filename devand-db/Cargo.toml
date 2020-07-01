@@ -6,8 +6,8 @@ edition = "2018"
 
 [dependencies]
 devand-core = { path = "../devand-core" }
-diesel = { version = "1.4", features = ["postgres", "serde_json", "chrono"] }
-diesel_migrations = "1.4"
+diesel = { version = "1", features = ["postgres", "serde_json", "chrono"] }
+diesel_migrations = "1"
 dotenv = "0.15"
 rust-argon2 = "0.8"
 rand = "0.7"

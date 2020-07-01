@@ -13,13 +13,13 @@ serde = "1"
 serde_json = "1"
 validator = "0.10"
 validator_derive = "0.10"
-captcha = "0.0.7"
+captcha = "*"
 uuid = { version = "0.8", features = ["v4"] }
-time = "0.1.43"
+time = "0.1"
 chrono = { version = "0.4", features = ["serde"] }
 env_logger = "0.7"
 log = "0.4"
-dotenv = "0.15.0"
+dotenv = "0.15"
 
 [dependencies.rocket]
 version = "0.4"

@@ -35,7 +35,7 @@ git = "https://github.com/yewstack/yew.git"
 tag = "0.16.2"
 
 [dependencies.web-sys]
-version = "0.3.4"
+version = "0.3"
 features = [
   'KeyboardEvent',
   'RequestMode',
