@@ -52,19 +52,24 @@ impl Encoder {
     }
 }
 
-pub struct Decoder<'a> {
-    decoding_key: DecodingKey<'a>,
+// Note: we cannot store DecodingKey here
+// DecodingKey has a lifetime parameter and Decoder::new() cannot
+// return a DecodingKey with reference to the secret.
+// See https://stackoverflow.com/questions/32300132/why-cant-i-store-a-value-and-a-reference-to-that-value-in-the-same-struct
+pub struct Decoder {
+    secret: Vec<u8>,
 }
 
-impl<'a> Decoder<'a> {
-    pub fn new_from_secret(secret: &'a [u8]) -> Self {
-        let decoding_key = DecodingKey::from_secret(&secret);
-        Self { decoding_key }
+impl Decoder {
+    pub fn new_from_secret(secret: &[u8]) -> Self {
+        let secret = secret.to_owned();
+        Self { secret }
     }
 
     fn decode_claims(&self, token: &SignedToken) -> Option<Claims> {
+        let decoding_key = DecodingKey::from_secret(&self.secret);
         let validation = Validation::default();
-        decode::<Claims>(&token.0, &self.decoding_key, &validation)
+        decode::<Claims>(&token.0, &decoding_key, &validation)
             .map(|x| x.claims)
             .ok()
     }
