@@ -35,6 +35,7 @@ pub enum Msg {
 struct State {
     messages: Vec<ChatMessage>,
     other_user: Option<PublicUserProfile>,
+    pending: bool,
 }
 
 impl Component for ChatPage {
@@ -83,20 +84,22 @@ impl Component for ChatPage {
                 true
             }
             Msg::AddMessages(messages) => {
-                log::debug!("{:?}", messages);
+                self.state.pending = false;
                 for msg in messages {
                     self.state.messages.push(msg);
                 }
                 true
             }
             Msg::SendMessage(txt) => {
-                log::debug!("{}", txt);
                 self.service.send_message(txt);
                 true
             }
             Msg::Poll => {
-                let last_message = self.state.messages.last();
-                self.service.poll(last_message);
+                if !self.state.pending {
+                    let last_message = self.state.messages.last();
+                    self.state.pending = true;
+                    self.service.poll(last_message);
+                }
                 false
             }
         }
