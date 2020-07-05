@@ -54,7 +54,6 @@ impl Component for CodeNowPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::CodeNowUsersFetchOk(code_now) => {
-                log::info!("{:?}", &code_now);
                 self.state.code_now = Some(code_now);
             }
             Msg::CodeNowUsersFetchErr => {

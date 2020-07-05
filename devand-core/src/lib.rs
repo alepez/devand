@@ -1,10 +1,10 @@
 mod affinity;
 pub mod auth;
+pub mod chat;
 mod languages;
 pub mod mock;
 mod schedule;
 pub mod schedule_matcher;
-pub mod chat;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
@@ -15,11 +15,12 @@ pub use affinity::{Affinity, AffinityParams};
 pub use languages::Language;
 pub use schedule::{Availability, DaySchedule, WeekSchedule};
 
-#[derive(Default, Debug, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+/// Identifies univocally an user
+#[derive(Debug, Default, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 #[serde(rename_all = "snake_case")]
 pub struct UserId(pub i32);
 
-#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[derive(Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
     /// This is unique and cannot be changed
@@ -36,7 +37,7 @@ pub struct User {
     pub email_verified: bool,
 }
 
-#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[derive(Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Languages(pub BTreeMap<Language, LanguagePreference>);
 
@@ -69,7 +70,7 @@ impl Languages {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserSettings {
     /// User can set language preferences
@@ -81,7 +82,6 @@ pub struct UserSettings {
 }
 
 #[derive(
-    Debug,
     Serialize,
     Deserialize,
     Copy,
@@ -112,7 +112,6 @@ impl Level {
 }
 
 #[derive(
-    Debug,
     Serialize,
     Deserialize,
     Copy,
@@ -134,7 +133,7 @@ pub enum Priority {
     High,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct LanguagePreference {
     pub level: Level,
@@ -150,7 +149,7 @@ impl Default for LanguagePreference {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct UserAffinity {
     pub user: PublicUserProfile,
@@ -223,7 +222,7 @@ pub fn calculate_affinities_2(
         .filter(|aff| aff.affinity != Affinity::NONE)
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct PublicUserProfile {
     pub id: UserId,
@@ -249,18 +248,18 @@ impl From<User> for PublicUserProfile {
     }
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CodeNow {
     pub current_user: User,
     pub all_users: Vec<PublicUserProfile>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct PasswordEdit {
     pub old_password: String,

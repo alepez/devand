@@ -2,14 +2,14 @@ use crate::UserId;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive( Serialize, Deserialize)]
 pub struct ChatMessage {
     pub created_at: DateTime<Utc>,
     pub author: UserId,
     pub txt: String,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive( Copy, Clone)]
 pub struct ChatId(pub i32);
 
 impl std::fmt::Display for ChatId {

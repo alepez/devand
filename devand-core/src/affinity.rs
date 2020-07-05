@@ -6,7 +6,7 @@ use crate::Priority;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
 struct PairPriority(i32);
 
 impl PairPriority {
@@ -27,7 +27,7 @@ impl PairPriority {
     }
 }
 
-#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
 struct PairLevel(i32);
 
 impl PairLevel {
@@ -45,7 +45,7 @@ impl PairLevel {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Default, Clone)]
 pub struct AffinityParams {
     languages: Languages,
 }
@@ -109,7 +109,7 @@ fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
 }
 
 // TODO Normalize to [0..1] when serializing
-#[derive(Debug, Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone)]
+#[derive(Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone)]
 pub struct Affinity(i32);
 
 impl Affinity {

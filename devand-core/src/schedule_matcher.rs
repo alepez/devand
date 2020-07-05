@@ -3,7 +3,6 @@ use chrono::prelude::*;
 use chrono::Duration;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
 struct AffinityMatrix(Vec<Option<Affinity>>);
 
 impl std::ops::Index<(UserId, UserId)> for AffinityMatrix {
@@ -71,10 +70,8 @@ impl ToString for Hour {
 /// availability) in a given hour of the day.
 /// It's useful because, given an hour of the day and an user id, the access
 /// time is constant.
-#[derive(Debug)]
 pub struct DayScheduleMatrix {
     data: Vec<bool>,
-    max_user_id: UserId,
 }
 
 impl std::ops::Index<&(UserId, Hour)> for DayScheduleMatrix {
@@ -113,12 +110,10 @@ impl From<Vec<(UserId, DaySchedule)>> for DayScheduleMatrix {
             }
             Self {
                 data,
-                max_user_id: UserId(*max_user_id),
             }
         } else {
             Self {
                 data: Vec::default(),
-                max_user_id: UserId(0),
             }
         }
     }
@@ -165,7 +160,6 @@ impl DayScheduleMatrix {
 
 /// WeekScheduleMatrix contains a DayScheduleMatrix for each day of the
 /// week.
-#[derive(Debug)]
 pub struct WeekScheduleMatrix {
     mon: DayScheduleMatrix,
     tue: DayScheduleMatrix,
@@ -299,9 +293,6 @@ impl WeekScheduleMatrix {
     }
 
     fn update_week_schedule(&mut self, user: UserId, week_sched: &WeekSchedule) {
-        log::debug!("WeekScheduleMatrix: {:?}", &self);
-        log::debug!("update user: {:?}", &user);
-
         if !self.has_user(user) {
             // Not in the matrix, cannot update
             log::error!("Cannot update wsm");
@@ -504,7 +495,6 @@ mod tests {
         ];
         let wsm = WeekScheduleMatrix::from(v);
         assert!(wsm.mon.users_len() == 3);
-        assert!(wsm.mon.max_user_id == UserId(2));
     }
 
     #[test]
@@ -516,7 +506,6 @@ mod tests {
         ];
         let wsm = WeekScheduleMatrix::from(v);
         assert!(wsm.mon.users_len() == 4);
-        assert!(wsm.mon.max_user_id == UserId(3));
     }
 
     #[test]
@@ -528,7 +517,6 @@ mod tests {
         ];
         let wsm = WeekScheduleMatrix::from(v);
         assert!(wsm.mon.users_len() == 3);
-        assert!(wsm.mon.max_user_id == UserId(2));
     }
 
     #[test]
@@ -540,7 +528,6 @@ mod tests {
         ];
         let wsm = WeekScheduleMatrix::from(v);
         assert!(wsm.mon.users_len() == 4);
-        assert!(wsm.mon.max_user_id == UserId(3));
     }
 
     #[test]

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
 use std::convert::TryFrom;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Availability {
     /// Disabled
@@ -17,7 +17,7 @@ impl Default for Availability {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Default, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct DaySchedule {
     pub hours: [bool; 24],
@@ -70,7 +70,7 @@ impl DaySchedule {
 }
 
 /// Week scheduling
-#[derive(Debug, Serialize, Deserialize, Clone, Default, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Default, Ord, PartialOrd, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct WeekSchedule {
     pub mon: DaySchedule,

@@ -2,7 +2,7 @@ use devand_core::{CodeNowUsers, PublicUserProfile, User, UserId};
 use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct CodeNowUsersMap {
     users: BTreeMap<UserId, (Instant, PublicUserProfile)>,
     last_clear: Instant,
