@@ -248,6 +248,10 @@ fn password_edit(
         return Err(Status::Unauthorized);
     }
 
+    if !devand_core::auth::is_valid_password(&passwords.0.new_password) {
+        return Err(Status::BadRequest);
+    }
+
     devand_db::auth::set_password(auth_data.user_id, &passwords.0.new_password, &conn)
         .map_err(|_| Status::InternalServerError)
 }
