@@ -8,7 +8,6 @@ const API_PASSWORD_EDIT_URL: &'static str = "/api/password-edit";
 
 pub struct SecurityService {
     callback: FetchCallback,
-    service: FetchService,
     task: Option<FetchTask>,
 }
 
@@ -16,7 +15,6 @@ impl SecurityService {
     pub fn new(callback: FetchCallback) -> Self {
         Self {
             callback,
-            service: FetchService::new(),
             task: None,
         }
     }
@@ -40,7 +38,7 @@ impl SecurityService {
             }
         };
 
-        self.task = self.service.fetch(req, handler.into()).ok();
+        self.task = FetchService::fetch(req, handler.into()).ok();
     }
 
     pub fn check_old_password(&mut self, old_password: &str) {
@@ -64,6 +62,6 @@ impl SecurityService {
             }
         };
 
-        self.task = self.service.fetch(req, handler.into()).ok();
+        self.task = FetchService::fetch(req, handler.into()).ok();
     }
 }

@@ -38,7 +38,6 @@ pub struct ChatService {
     new_messages_callback: NewMessagesCallback,
     other_user_loaded_callback: OtherUserLoadedCallback,
 
-    service: FetchService,
     task: Option<FetchTask>,
 }
 
@@ -51,7 +50,6 @@ impl ChatService {
             chat_members: None,
             new_messages_callback,
             other_user_loaded_callback,
-            service: FetchService::new(),
             task: None,
         }
     }
@@ -74,7 +72,7 @@ impl ChatService {
             }
         };
 
-        self.task = self.service.fetch(req, handler.into()).ok();
+        self.task = FetchService::fetch(req, handler.into()).ok();
     }
 
     pub fn load_history(&mut self, mut chat_members: Vec<UserId>) {
@@ -82,7 +80,7 @@ impl ChatService {
         self.chat_members = Some(chat_members.clone());
         let url = api_url_get(&chat_members);
         let req = Request::get(url).body(Nothing).unwrap();
-        self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+        self.task = request(self.new_messages_callback.clone(), req).ok();
     }
 
     pub fn send_message(&mut self, txt: String) {
@@ -90,7 +88,7 @@ impl ChatService {
             let url = api_url_post(chat_members);
             let json = serde_json::to_string(&txt).map_err(|_| anyhow::anyhow!("Cannot serialize"));
             let req = Request::post(url).body(json).unwrap();
-            self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+            self.task = request(self.new_messages_callback.clone(), req).ok();
         } else {
             log::error!("Cannot send message without knowing chat members");
         }
@@ -100,13 +98,12 @@ impl ChatService {
         if let Some(chat_members) = &self.chat_members {
             let url = api_url_poll(chat_members, last_message);
             let req = Request::get(url).body(Nothing).unwrap();
-            self.task = request(&mut self.service, self.new_messages_callback.clone(), req).ok();
+            self.task = request(self.new_messages_callback.clone(), req).ok();
         }
     }
 }
 
 fn request<R>(
-    service: &mut FetchService,
     callback: Callback<Vec<ChatMessage>>,
     r: http::request::Request<R>,
 ) -> Result<FetchTask, anyhow::Error>
@@ -122,5 +119,5 @@ where
         }
     };
 
-    service.fetch(r, handler.into())
+    FetchService::fetch(r, handler.into())
 }

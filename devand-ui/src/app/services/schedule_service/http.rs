@@ -15,8 +15,6 @@ fn api_url_get_user(user_id: UserId) -> String {
 pub struct ScheduleService {
     callback: FetchCallback,
 
-    service: FetchService,
-
     // TODO Possible memory leak (tasks can grow forever)
     tasks: Vec<FetchTask>,
 
@@ -28,7 +26,6 @@ impl ScheduleService {
     pub fn new(callback: FetchCallback) -> Self {
         Self {
             callback,
-            service: FetchService::new(),
             tasks: Vec::new(),
             user_cache: Arc::new(Mutex::new(BTreeMap::default())),
             user_requests: BTreeSet::default(),
@@ -51,7 +48,7 @@ impl ScheduleService {
             }
         };
 
-        let task = self.service.fetch(req, handler.into()).ok();
+        let task = FetchService::fetch(req, handler.into()).ok();
         self.enqueue_task(task);
     }
 
@@ -85,7 +82,7 @@ impl ScheduleService {
             }
         };
 
-        let task = self.service.fetch(req, handler.into()).ok();
+        let task = FetchService::fetch(req, handler.into()).ok();
         self.enqueue_task(task);
     }
 

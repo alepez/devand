@@ -13,8 +13,6 @@ pub struct ChatPage {
     #[allow(dead_code)]
     service: ChatService,
     #[allow(dead_code)]
-    poll_service: IntervalService,
-    #[allow(dead_code)]
     poll_task: IntervalTask,
 }
 
@@ -52,9 +50,7 @@ impl Component for ChatPage {
 
         let state = State::default();
 
-        let mut poll_service = IntervalService::new();
-
-        let poll_task = poll_service.spawn(
+        let poll_task = IntervalService::spawn(
             std::time::Duration::from_secs(1),
             link.callback(|_| Msg::Poll),
         );
@@ -64,7 +60,6 @@ impl Component for ChatPage {
             service,
             state,
             link,
-            poll_service,
             poll_task,
         }
     }

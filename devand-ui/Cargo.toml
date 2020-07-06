@@ -28,15 +28,15 @@ rand = { version = "0.7", optional = true }
 
 [dependencies.yew]
 git = "https://github.com/yewstack/yew.git"
-tag = "0.16.2"
+tag = "0.17.2"
 
 [dependencies.yew-router]
 git = "https://github.com/yewstack/yew.git"
-tag = "0.16.2"
+tag = "0.17.2"
 
 [dependencies.yewtil]
 git = "https://github.com/yewstack/yew.git"
-tag = "0.16.2"
+tag = "0.17.2"
 
 [dependencies.web-sys]
 version = "0.3"

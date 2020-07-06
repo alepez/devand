@@ -30,7 +30,6 @@ pub struct UserService {
 }
 
 struct PutHandler {
-    service: FetchService,
     callback: FetchCallback,
     task: Option<FetchTask>,
     debouncer: Option<Timeout>,
@@ -38,14 +37,12 @@ struct PutHandler {
 }
 
 struct GetHandler {
-    service: FetchService,
     callback: FetchCallback,
     task: Option<FetchTask>,
     pending: Arc<Mutex<bool>>,
 }
 
 fn request<R>(
-    service: &mut FetchService,
     callback: Callback<Result<User, anyhow::Error>>,
     pending: Arc<Mutex<bool>>,
     r: http::request::Request<R>,
@@ -66,14 +63,13 @@ where
         }
     };
 
-    service.fetch(r, handler.into())
+    FetchService::fetch(r, handler.into())
 }
 
 impl GetHandler {
     fn get(&mut self) {
         let req = Request::get(API_URL).body(Nothing).unwrap();
         self.task = request(
-            &mut self.service,
             self.callback.clone(),
             self.pending.clone(),
             req,
@@ -87,7 +83,6 @@ impl PutHandler {
         let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
         let req = Request::put(API_URL).body(json).unwrap();
         self.task = request(
-            &mut self.service,
             self.callback.clone(),
             self.pending.clone(),
             req,
@@ -99,7 +94,6 @@ impl PutHandler {
 impl UserService {
     pub fn new(callback: FetchCallback) -> Self {
         let put_handler = PutHandler {
-            service: FetchService::new(),
             callback: callback.clone(),
             task: None,
             debouncer: None,
@@ -111,7 +105,6 @@ impl UserService {
         let on_unload = make_on_unload_callback(put_handler.clone());
 
         let get_handler = GetHandler {
-            service: FetchService::new(),
             callback: callback.clone(),
             task: None,
             pending: Arc::new(Mutex::new(false)),
@@ -158,7 +151,7 @@ impl UserService {
             // Just ignore the response
         };
 
-        self.get_handler.task = self.get_handler.service.fetch(req, handler.into()).ok();
+        self.get_handler.task = FetchService::fetch(req, handler.into()).ok();
     }
 }
 

@@ -18,13 +18,11 @@ pub struct CodeNowService {
 }
 
 struct GetHandler {
-    service: FetchService,
     callback: FetchCallback,
     task: Option<FetchTask>,
 }
 
 fn request<R>(
-    service: &mut FetchService,
     callback: Callback<Result<CodeNow, anyhow::Error>>,
     r: http::request::Request<R>,
 ) -> Result<FetchTask, anyhow::Error>
@@ -40,20 +38,19 @@ where
         }
     };
 
-    service.fetch(r, handler.into())
+    FetchService::fetch(r, handler.into())
 }
 
 impl GetHandler {
     fn get(&mut self) {
         let req = Request::get(API_URL).body(Nothing).unwrap();
-        self.task = request(&mut self.service, self.callback.clone(), req).ok();
+        self.task = request(self.callback.clone(), req).ok();
     }
 }
 
 impl CodeNowService {
     pub fn new(callback: FetchCallback) -> Self {
         let get_handler = GetHandler {
-            service: FetchService::new(),
             callback: callback.clone(),
             task: None,
         };
