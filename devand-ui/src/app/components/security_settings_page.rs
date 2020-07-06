@@ -103,6 +103,11 @@ impl Component for SecuritySettingsPage {
             None => Ok(""),
         };
 
+        let submit_enabled = old_password_alert.is_ok()
+            && new_password_alert.is_ok()
+            && !self.state.old_password.is_empty()
+            && !self.state.new_password.is_empty();
+
         html! {
         <>
         <h1>{ "Security" }</h1>
@@ -143,6 +148,7 @@ impl Component for SecuritySettingsPage {
 
                 <button
                     class="pure-button"
+                    disabled=!submit_enabled
                     onclick=self.link.callback(|_| Msg::ChangePassword)>
                     { "Change password" }
                 </button>

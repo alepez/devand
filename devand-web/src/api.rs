@@ -4,6 +4,7 @@ use chrono::prelude::*;
 use chrono::Duration;
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{User, UserAffinity, UserId};
+use rocket::http::Status;
 use rocket::{Route, State};
 use rocket_contrib::json::Json;
 
@@ -239,15 +240,16 @@ fn password_edit(
     auth_data: AuthData,
     conn: PgDevandConn,
     passwords: Json<devand_core::PasswordEdit>,
-) -> Option<()> {
+) -> Result<(), Status> {
     let ok = devand_db::auth::check_password(auth_data.user_id, &passwords.0.old_password, &conn)
-        .ok()?;
+        .map_err(|_| Status::InternalServerError)?;
 
     if !ok {
-        return None;
+        return Err(Status::Unauthorized);
     }
 
-    devand_db::auth::set_password(auth_data.user_id, &passwords.0.new_password, &conn).ok()
+    devand_db::auth::set_password(auth_data.user_id, &passwords.0.new_password, &conn)
+        .map_err(|_| Status::InternalServerError)
 }
 
 /// Given a string with user ids separated by a dash, return a Vec of UserId
