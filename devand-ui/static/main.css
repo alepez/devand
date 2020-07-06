@@ -67,12 +67,12 @@ body {
 }
 
 a {
-    color: #586069!important;
+    color: #586069;
     text-decoration: none;
 }
 
 a:hover {
-    color: #0366d6!important;
+    color: #0366d6;
     text-decoration: underline;
 }
 
@@ -96,4 +96,14 @@ a:hover {
   display: inline-block;
   height: 2em;
   width: 2em;
+}
+
+.devand-cookie-policy {
+  background: #586059;
+  color: #ffffff;
+  padding: 1em;
+}
+
+.devand-cookie-policy a {
+  color: #bdbfc0;
 }
