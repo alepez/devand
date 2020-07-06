@@ -1,8 +1,9 @@
 use crate::app::components::LanguageTag;
-use crate::app::services::AffinitiesService;
 use crate::app::elements::busy_indicator;
+use crate::app::services::AffinitiesService;
 use devand_core::{PublicUserProfile, UserAffinity};
 use yew::{prelude::*, Properties};
+use yewtil::NeqAssign;
 
 #[derive(Default)]
 pub struct State {
@@ -55,17 +56,17 @@ impl Component for AffinitiesPage {
             Msg::AffinitiesFetchOk(mut affinities) => {
                 affinities.sort_unstable_by_key(|x| x.affinity);
                 self.state.affinities = Some(affinities);
+                true
             }
             Msg::AffinitiesFetchErr => {
                 log::error!("Affinities fetch error");
+                false
             }
         }
-        true
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

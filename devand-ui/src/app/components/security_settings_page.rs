@@ -1,15 +1,11 @@
 use crate::app::services::{SecurityService, SecurityServiceContent};
-use yew::{prelude::*, Properties};
+use yew::prelude::*;
 
 pub struct SecuritySettingsPage {
-    props: Props,
     state: State,
     link: ComponentLink<Self>,
     service: SecurityService,
 }
-
-#[derive(Clone, Properties)]
-pub struct Props {}
 
 pub enum Msg {
     ServiceResponse(Result<SecurityServiceContent, anyhow::Error>),
@@ -32,14 +28,13 @@ struct State {
 
 impl Component for SecuritySettingsPage {
     type Message = Msg;
-    type Properties = Props;
+    type Properties = ();
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
         let service_callback = link.callback(Msg::ServiceResponse);
         let service = SecurityService::new(service_callback);
         SecuritySettingsPage {
-            props,
             link,
             state,
             service,
@@ -49,42 +44,32 @@ impl Component for SecuritySettingsPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::SetOldPassword(s) => {
-                log::debug!("set old password: {}", &s);
                 self.state.old_password = s;
                 self.state.old_password_ok = None;
                 self.state.generic_alert = None;
                 true
             }
             Msg::SetNewPassword(s) => {
-                log::debug!("set new password: {}", &s);
                 self.state.new_password = s;
                 self.state.generic_alert = None;
                 true
             }
             Msg::SetRepeatNewPassword(s) => {
-                log::debug!("set repeat password: {}", &s);
                 self.state.repeat_new_password = s;
                 true
             }
             Msg::CheckOldPassword => {
-                log::debug!("Check old password");
                 if !self.state.old_password.is_empty() {
                     self.service.check_old_password(&self.state.old_password);
                 }
                 false
             }
             Msg::ChangePassword => {
-                log::debug!(
-                    "change password: {} {}",
-                    &self.state.old_password,
-                    &self.state.new_password
-                );
                 self.service
                     .edit_password(&self.state.old_password, &self.state.new_password);
                 false
             }
             Msg::ServiceResponse(res) => {
-                log::debug!("service response");
                 match res {
                     Ok(SecurityServiceContent::OldPasswordCheck(ok)) => {
                         self.state.old_password_ok = Some(ok);
@@ -101,9 +86,8 @@ impl Component for SecuritySettingsPage {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+        false
     }
 
     fn view(&self) -> Html {

@@ -18,7 +18,7 @@ use devand_core::{PublicUserProfile, User};
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
 type RouterButton = yew_router::components::RouterButton<AppRoute>;
 
-#[derive(Switch, Debug, Clone)]
+#[derive(Switch, Clone)]
 pub enum AppRoute {
     #[to = "/affinities"]
     Affinities,

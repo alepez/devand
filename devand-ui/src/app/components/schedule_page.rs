@@ -6,6 +6,7 @@ use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserId};
 use yew::{prelude::*, Properties};
 // use crate::app::components::LanguageTag;
 use crate::app::RouterAnchor;
+use yewtil::NeqAssign;
 
 pub struct SchedulePage {
     props: Props,
@@ -74,8 +75,7 @@ impl Component for SchedulePage {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

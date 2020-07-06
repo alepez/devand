@@ -1,6 +1,7 @@
 use chrono::Weekday;
 use devand_core::{Availability, DaySchedule, WeekSchedule};
 use yew::{prelude::*, Properties};
+use yewtil::NeqAssign;
 
 pub struct AvailabilityTable {
     props: Props,
@@ -44,8 +45,7 @@ impl Component for AvailabilityTable {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

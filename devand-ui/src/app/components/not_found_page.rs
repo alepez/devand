@@ -1,6 +1,5 @@
 use yew::{prelude::*, Properties};
-
-pub enum Msg {}
+use yewtil::NeqAssign;
 
 pub struct NotFoundPage {
     props: Props,
@@ -12,7 +11,7 @@ pub struct Props {
 }
 
 impl Component for NotFoundPage {
-    type Message = Msg;
+    type Message = ();
     type Properties = Props;
 
     fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
@@ -20,25 +19,18 @@ impl Component for NotFoundPage {
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        true
+        false
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {
-        html! {
-            <>
-            {
-                if let Some(missed_route) = &self.props.missed_route {
-                    html! { <h1>{ format!("Page {} not found", missed_route) }</h1> }
-                } else {
-                    html! { <h1>{ "Page not found" }</h1> }
-                }
-            }
-            </>
+        if let Some(missed_route) = &self.props.missed_route {
+            html! { <h1>{ format!("Page {} not found", missed_route) }</h1> }
+        } else {
+            html! { <h1>{ "Page not found" }</h1> }
         }
     }
 }

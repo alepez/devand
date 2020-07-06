@@ -8,10 +8,10 @@ use yew::{prelude::*, Properties};
 
 pub struct ChatPage {
     props: Props,
-    #[allow(dead_code)]
-    service: ChatService,
     state: State,
     link: ComponentLink<Self>,
+    #[allow(dead_code)]
+    service: ChatService,
     #[allow(dead_code)]
     poll_service: IntervalService,
     #[allow(dead_code)]
@@ -92,7 +92,7 @@ impl Component for ChatPage {
             }
             Msg::SendMessage(txt) => {
                 self.service.send_message(txt);
-                true
+                false
             }
             Msg::Poll => {
                 if !self.state.pending {

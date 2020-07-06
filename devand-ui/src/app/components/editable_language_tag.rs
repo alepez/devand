@@ -1,6 +1,7 @@
 use super::language_tag::{view_language_level, view_language_priority};
 use devand_core::{Language, LanguagePreference};
 use yew::{prelude::*, Properties};
+use yewtil::NeqAssign;
 
 pub struct EditableLanguageTag {
     props: Props,
@@ -36,8 +37,7 @@ impl Component for EditableLanguageTag {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {
