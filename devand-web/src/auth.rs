@@ -76,7 +76,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthData {
             .cookies()
             .get_private(LOGIN_COOKIE_KEY)
             .and_then(|cookie| AuthData::try_from(cookie).ok())
-            .or_forward(())
+            .into_outcome((rocket::http::Status::Unauthorized, ()))
     }
 }
 
