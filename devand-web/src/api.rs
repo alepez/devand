@@ -28,11 +28,13 @@ pub fn routes() -> Vec<Route> {
     ]
 }
 
+/// Retrieve user settings
 #[get("/settings")]
 fn settings(user: LoggedUser) -> Json<User> {
     Json(user.into())
 }
 
+/// Update user settings
 #[put("/settings", data = "<user>")]
 fn settings_put(
     auth_data: AuthData,
@@ -46,20 +48,24 @@ fn settings_put(
         return None;
     }
 
+    // Update immediately the week schedule matrix
     wsmc.0
         .write()
         .unwrap()
         .update(user.id, &user.settings.schedule);
 
+    // Save new settings in db
     devand_db::save_user(user.0, &conn.0).map(|x| Json(x))
 }
 
+/// Send a verification email to the logged user
 #[post("/verify_email")]
 fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
     mailer.verify_address(user.email.clone());
     Json(())
 }
 
+/// Retrieve user's affinities
 #[get("/affinities")]
 fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
     let users = devand_db::load_users(&conn.0)?;
@@ -67,6 +73,8 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
     Some(Json(affinities.collect()))
 }
 
+/// Retrieve user's affinities who are online. When an user access this
+/// endpoint, it is considered online for some time (see CodeNowUserMap::TTL)
 #[get("/code-now")]
 fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devand_core::CodeNow> {
     let user: User = user.into();
@@ -84,6 +92,8 @@ fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devan
     })
 }
 
+/// Retrieve possible matching for the next week, considered user's schedule
+/// and affinities
 #[get("/availability-match")]
 fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<AvailabilityMatch> {
     let now = Utc::now();
@@ -96,13 +106,7 @@ fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<
     Json(res)
 }
 
-fn parse_members(s: &str) -> Vec<UserId> {
-    s.split("-")
-        .filter_map(|x| x.parse().ok())
-        .map(UserId)
-        .collect()
-}
-
+/// Retrieve all messages in a chat, given its members
 #[get("/chat/<members>/messages")]
 fn chat_messages_get(
     user: LoggedUser,
@@ -121,6 +125,7 @@ fn chat_messages_get(
     Some(Json(result))
 }
 
+/// Post a new message in a chat
 #[post("/chat/<members>/messages", data = "<txt>")]
 fn chat_messages_post(
     user: LoggedUser,
@@ -159,6 +164,7 @@ fn chat_messages_post(
     }
 }
 
+/// Retrieve new messages
 #[get("/chat/<members>/messages/poll/<after>")]
 fn chat_messages_poll(
     user: LoggedUser,
@@ -212,6 +218,9 @@ fn user_public_profile(
     Some(Json(user.into()))
 }
 
+/// Check if user password is the right one. This enpoint is used when
+/// user is changing password.  It  just give an immediate feedback about
+/// password validity.
 #[post("/password-check", data = "<passwords>")]
 fn password_check(
     auth_data: AuthData,
@@ -223,6 +232,8 @@ fn password_check(
     Some(Json(ok))
 }
 
+/// Change user password. Both old and new password must be provided, even
+/// if the user is authenticated
 #[post("/password-edit", data = "<passwords>")]
 fn password_edit(
     auth_data: AuthData,
@@ -239,7 +250,10 @@ fn password_edit(
     devand_db::auth::set_password(auth_data.user_id, &passwords.0.new_password, &conn).ok()
 }
 
-#[cfg(test)]
-mod tests {
-    // use super::*;
+/// Given a string with user ids separated by a dash, return a Vec of UserId
+fn parse_members(s: &str) -> Vec<UserId> {
+    s.split("-")
+        .filter_map(|x| x.parse().ok())
+        .map(UserId)
+        .collect()
 }
