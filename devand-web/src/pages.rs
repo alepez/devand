@@ -31,31 +31,33 @@ fn login(
         })
 }
 
-// When user is authenticated, /login just redirect to index
 #[get("/login")]
-fn login_authenticated(_auth_data: auth::AuthData) -> Redirect {
-    Redirect::to(uri!(index))
-}
+fn login_page(
+    auth_data: Option<auth::AuthData>,
+    flash: Option<FlashMessage>,
+) -> Result<Template, Redirect> {
+    if auth_data.is_some() {
+        // When user is authenticated, /login just redirect to index
+        Err(Redirect::to(uri!(index)))
+    } else {
+        // When user is not authenticated, /login displays a form
+        #[derive(Serialize)]
+        struct Context {
+            title: &'static str,
+            flash_msg: Option<String>,
+            flash_name: Option<String>,
+            authenticated: bool,
+        }
 
-// When user is not authenticated, /login displays a form
-#[get("/login", rank = 2)]
-fn login_page(flash: Option<FlashMessage>) -> Template {
-    #[derive(Serialize)]
-    struct Context {
-        title: &'static str,
-        flash_msg: Option<String>,
-        flash_name: Option<String>,
-        authenticated: bool,
+        let context = Context {
+            title: "Sign in to DevAndDev",
+            flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
+            flash_name: flash.as_ref().map(|x| x.name().to_string()),
+            authenticated: false,
+        };
+
+        Ok(Template::render("login", &context))
     }
-
-    let context = Context {
-        title: "Sign in to DevAndDev",
-        flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
-        flash_name: flash.as_ref().map(|x| x.name().to_string()),
-        authenticated: false,
-    };
-
-    Template::render("login", &context)
 }
 
 // /logout just remove the cookie
@@ -233,35 +235,38 @@ fn join(
         })
 }
 
-// When user is authenticated, /join just redirect to index
-#[get("/join")]
-fn join_authenticated(_auth_data: AuthData) -> Redirect {
-    Redirect::to(uri!(index))
-}
-
-// When user is not authenticated, /join displays a form
 #[get("/join", rank = 2)]
-fn join_page(flash: Option<FlashMessage>, join_data: Option<auth::JoinData>) -> Template {
-    #[derive(Serialize)]
-    struct Context {
-        title: &'static str,
-        flash: Option<String>,
-        username: Option<String>,
-        email: Option<String>,
-        password: Option<String>,
-        authenticated: bool,
+fn join_page(
+    flash: Option<FlashMessage>,
+    join_data: Option<auth::JoinData>,
+    auth_data: Option<AuthData>,
+) -> Result<Template, Redirect> {
+    if auth_data.is_some() {
+        // When user is authenticated, /join just redirect to index
+        Err(Redirect::to(uri!(index)))
+    } else {
+        // When user is not authenticated, /join displays a form
+        #[derive(Serialize)]
+        struct Context {
+            title: &'static str,
+            flash: Option<String>,
+            username: Option<String>,
+            email: Option<String>,
+            password: Option<String>,
+            authenticated: bool,
+        }
+
+        let context = Context {
+            title: "Create your DevAndDev account",
+            flash: flash.map(|x| x.msg().to_string()),
+            username: join_data.as_ref().map(|x| x.username.to_string()),
+            email: join_data.as_ref().map(|x| x.email.to_string()),
+            password: join_data.as_ref().map(|x| x.password.to_string()),
+            authenticated: false,
+        };
+
+        Ok(Template::render("join", &context))
     }
-
-    let context = Context {
-        title: "Create your DevAndDev account",
-        flash: flash.map(|x| x.msg().to_string()),
-        username: join_data.as_ref().map(|x| x.username.to_string()),
-        email: join_data.as_ref().map(|x| x.email.to_string()),
-        password: join_data.as_ref().map(|x| x.password.to_string()),
-        authenticated: false,
-    };
-
-    Template::render("join", &context)
 }
 
 // When user is not authenticated, /join displays a form
@@ -423,11 +428,9 @@ pub fn routes() -> Vec<Route> {
     routes![
         index,
         join,
-        join_authenticated,
         join_page,
         join_captcha,
         login,
-        login_authenticated,
         login_page,
         password_reset,
         password_reset_page,

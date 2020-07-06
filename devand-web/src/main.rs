@@ -17,6 +17,7 @@ use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 
 use devand_mailer::Client as Mailer;
+use serde::Serialize;
 
 #[database("pg_devand")]
 struct PgDevandConn(diesel::PgConnection);
@@ -72,6 +73,36 @@ struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 #[derive(Default)]
 struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>);
 
+#[catch(401)]
+fn unauthorized() -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+    }
+
+    let context = Context {
+        title: "Unauthorized",
+    };
+
+    Template::render("unauthorized", &context)
+}
+
+#[catch(404)]
+fn not_found() -> Template {
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        message: &'static str,
+    }
+
+    let context = Context {
+        title: "Unauthorized",
+        message: "The requested resource could not be found.",
+    };
+
+    Template::render("error", &context)
+}
+
 fn main() {
     env_logger::init();
     dotenv::dotenv().ok();
@@ -92,5 +123,6 @@ fn main() {
         .attach(AdHoc::on_attach("WeekScheduleMatrixCache", init_wsmc))
         .mount("/", pages::routes())
         .mount("/api", api::routes())
+        .register(catchers![not_found, unauthorized])
         .launch();
 }
