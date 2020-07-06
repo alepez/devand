@@ -31,6 +31,7 @@ pub enum Msg {
 struct State {
     schedule: Option<AvailabilityMatch>,
     users: std::collections::BTreeMap<UserId, PublicUserProfile>,
+    user_requests: std::collections::BTreeSet<UserId>,
 }
 
 impl Component for SchedulePage {
@@ -68,7 +69,10 @@ impl Component for SchedulePage {
                 true
             }
             Msg::LoadUser(user_id) => {
-                self.service.load_public_profile(user_id);
+                if !self.state.user_requests.contains(&user_id) {
+                    self.state.user_requests.insert(user_id);
+                    self.service.load_public_profile(user_id);
+                }
                 false
             }
         }
@@ -156,6 +160,7 @@ impl SchedulePage {
             </span>
             }
         } else {
+            // Load user public profile, but only if loading has not already started
             self.link.send_message(Msg::LoadUser(user_id));
             html! { <></> }
         }
