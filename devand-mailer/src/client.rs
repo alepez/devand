@@ -51,11 +51,7 @@ impl Client {
             .block_on(http::connect::<GenClient>(&client_url))
             .unwrap();
 
-        client
-            .clone()
-            .verify_address(address)
-            .wait()
-            .unwrap();
+        client.clone().verify_address(address).wait().unwrap();
 
         rt.shutdown_now().wait().unwrap();
     }

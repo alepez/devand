@@ -17,8 +17,7 @@ impl SecurityService {
             self.callback
                 .emit(Ok(SecurityServiceContent::PasswordChanged))
         } else {
-            self.callback
-                .emit(Err(anyhow::anyhow!("Invalid password")))
+            self.callback.emit(Err(anyhow::anyhow!("Invalid password")))
         }
     }
     pub fn check_old_password(&mut self, old_password: &str) {

@@ -1,6 +1,6 @@
-use std::convert::TryFrom;
 use super::*;
 use maplit::btreemap;
+use std::convert::TryFrom;
 
 pub fn user() -> User {
     User {

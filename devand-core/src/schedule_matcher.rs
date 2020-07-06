@@ -108,9 +108,7 @@ impl From<Vec<(UserId, DaySchedule)>> for DayScheduleMatrix {
                     *cell = in_schedule;
                 }
             }
-            Self {
-                data,
-            }
+            Self { data }
         } else {
             Self {
                 data: Vec::default(),

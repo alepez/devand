@@ -37,11 +37,7 @@ where
 impl GetHandler {
     fn get(&mut self) {
         let req = Request::get(API_URL).body(Nothing).unwrap();
-        self.task = request(
-            self.callback.clone(),
-            req,
-        )
-        .ok();
+        self.task = request(self.callback.clone(), req).ok();
     }
 }
 
@@ -52,9 +48,7 @@ impl AffinitiesService {
             task: None,
         };
 
-        Self {
-            get_handler,
-        }
+        Self { get_handler }
     }
 
     pub fn restore(&mut self) {

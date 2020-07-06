@@ -3,7 +3,6 @@ use std::cmp::Ord;
 use strum_macros::{Display, EnumIter, EnumString};
 
 #[derive(
-    
     Serialize,
     Deserialize,
     Ord,
@@ -22,15 +21,15 @@ pub enum Language {
     Bash,
     C,
     Caml,
-    #[strum(serialize="C++")]
+    #[strum(serialize = "C++")]
     CPlusPlus,
-    #[strum(serialize="C#")]
+    #[strum(serialize = "C#")]
     CSharp,
     Clojure,
     Dart,
     Elixir,
     Erlang,
-    #[strum(serialize="F#")]
+    #[strum(serialize = "F#")]
     FSharp,
     Go,
     Groovy,
@@ -50,4 +49,3 @@ pub enum Language {
     TypeScript,
     VBA,
 }
-

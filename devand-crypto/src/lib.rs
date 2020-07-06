@@ -4,4 +4,4 @@ mod signed_token;
 
 pub use email_verification_token::EmailVerification;
 pub use password_reset_token::PasswordReset;
-pub use signed_token::{Decoder, Encoder, SignedToken, Signable};
+pub use signed_token::{Decoder, Encoder, Signable, SignedToken};

@@ -69,12 +69,7 @@ where
 impl GetHandler {
     fn get(&mut self) {
         let req = Request::get(API_URL).body(Nothing).unwrap();
-        self.task = request(
-            self.callback.clone(),
-            self.pending.clone(),
-            req,
-        )
-        .ok();
+        self.task = request(self.callback.clone(), self.pending.clone(), req).ok();
     }
 }
 
@@ -82,12 +77,7 @@ impl PutHandler {
     fn put(&mut self, user: User) {
         let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
         let req = Request::put(API_URL).body(json).unwrap();
-        self.task = request(
-            self.callback.clone(),
-            self.pending.clone(),
-            req,
-        )
-        .ok();
+        self.task = request(self.callback.clone(), self.pending.clone(), req).ok();
     }
 }
 
