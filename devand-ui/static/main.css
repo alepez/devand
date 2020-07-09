@@ -14,7 +14,7 @@ body {
     padding: 0 2em;
     max-width: 1400px;
     line-height: 1.6em;
-    padding-bottom: 12rem;
+    padding-bottom: 20rem;
 }
 
 .main-header {
@@ -109,7 +109,7 @@ a:hover {
 }
 
 .devand-hero-animated {
-  font-size: 5em;
+  font-size: 2em;
   line-height: 1em;
   text-transform: uppercase;
   font-weight: bolder;
@@ -121,6 +121,13 @@ a:hover {
   background: linear-gradient(135deg, rgba(7,18,100,1) 0%, rgba(12,25,125,1) 100%);
   overflow-x: hidden;
 }
+
+@media screen and (min-width: 64em) {
+  .devand-hero-animated {
+    font-size: 5em;
+  }
+}
+
 
 .devand-hero-animated strong {
   color: #d2fced;
