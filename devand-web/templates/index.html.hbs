@@ -1,7 +1,40 @@
 {{#*inline "body"}}
 
-<strong>DevAndDev helps developers finding pair-programming partners.</strong>
-<br />
+<div class="devand-hero-animated">
+  <p class="devand-hero-animated-step visible">
+    Are you looking for somebody to <strong>pair-program</strong> with on a hobby project?
+  </p>
+  <p class="devand-hero-animated-step">
+    Do you want to <strong>improve</strong> your programming <strong>skills</strong>?
+  </p>
+  <p class="devand-hero-animated-step">
+    ...or you just <strong>love</strong> to program?
+  </p>
+  <p class="devand-hero-animated-step">
+    <em>DevAndDev</em> helps developers to find pair-programming partners.
+  </p>
+  <p class="devand-hero-animated-step">
+    How?
+  </p>
+  <p class="devand-hero-animated-step">
+    Let us know your favourite <strong>languages</strong> and your level...
+  </p>
+  <p class="devand-hero-animated-step">
+    ...and when you have some <strong>time</strong> to spend programming.
+  </p>
+  <p class="devand-hero-animated-step">
+    We will try yo <strong>match</strong> you with other users...
+  </p>
+  <p class="devand-hero-animated-step">
+    ...<strong>who love</strong> the same languages...
+  </p>
+  <p class="devand-hero-animated-step">
+    ...and are <strong>available</strong> in the same moment.
+  </p>
+  <p class="devand-hero-animated-step">
+    <em>DevAndDev</em>
+  </p>
+</div>
 
 <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; ">
   <iframe
@@ -13,6 +46,39 @@
     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
   </iframe>
 </div>
+
+<script>
+  document.addEventListener('readystatechange', event => {
+    if (event.target.readyState === 'interactive') {
+      const rootElement = document.getElementsByClassName('devand-hero-animated')[0];
+      const elements = rootElement.getElementsByClassName('devand-hero-animated-step');
+      const elementsNum = elements.length;
+
+      let currentIndex = 0;
+      let currentElement = elements[currentIndex];
+      let maxHeight = currentElement.clientHeight;
+      rootElement.style.height = `${maxHeight}px`;
+
+      const showNext = () => {
+        currentIndex = (currentIndex + 1) % elementsNum;
+
+        let nextElement = elements[currentIndex];
+
+        if (nextElement.clientHeight > maxHeight) {
+          maxHeight = nextElement.clientHeight;
+          rootElement.style.height = `${maxHeight}px`;
+        }
+
+        currentElement.classList.remove('visible');
+        nextElement.classList.add('visible');
+
+        currentElement = nextElement;
+      };
+
+      setInterval(showNext, 3000);
+    }
+  });
+</script>
 
 {{/inline}}
 {{>layout}}
