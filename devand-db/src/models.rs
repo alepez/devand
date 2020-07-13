@@ -20,6 +20,7 @@ pub struct User {
     pub settings: serde_json::Value,
     pub visible_name: Option<String>,
     pub email_verified: bool,
+    pub created_at: chrono::NaiveDateTime,
 }
 
 #[derive(Insertable)]
