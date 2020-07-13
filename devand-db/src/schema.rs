@@ -30,6 +30,7 @@ table! {
         settings -> Jsonb,
         visible_name -> Nullable<Varchar>,
         email_verified -> Bool,
+        created_at -> Timestamp,
     }
 }
 
