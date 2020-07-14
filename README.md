@@ -4,4 +4,6 @@
 
 DevAndDev helps developers finding pair-programming partners.
 
-site: https://devand.dev
+[Main DevAndDev website](https://devand.dev)
+
+[Contribution guidelines for this project](docs/CONTRIBUTING.md)
