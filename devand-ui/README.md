@@ -1,10 +1,6 @@
-## About
+# devand-ui
 
-TODO
-
-## Usage
-
-### Build
+## Build
 
 When building for the first time, ensure to install dependencies first.
 
@@ -13,7 +9,7 @@ bash setup.sh
 yarn install
 ```
 
-#### Build for devand-web
+### Build for devand-web
 
 ```shell
 yarn run build
@@ -21,7 +17,7 @@ yarn run build
 
 Generated files are copied in `../devand-web/static/ui` directory
 
-### Serve locally
+## Serve locally
 
 This configuration does not need a server or a database, mock services
 are automatically instantiated.
