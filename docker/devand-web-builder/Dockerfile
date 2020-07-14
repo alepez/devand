@@ -1,3 +1,4 @@
+# rustc 1.46.0-nightly
 FROM rustlang/rust@sha256:2e7212d08e15e685c410e01080c15eb6e733a4fce410dd60f81ab0bcc01b3ead
 
 ENV DEBIAN_FRONTEND=noninteractive
