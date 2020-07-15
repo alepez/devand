@@ -18,6 +18,8 @@ yarn install
 ```shell
 yarn run build
 ```
+If the builder find the rust stable release report the ```error[E0554]: #![feature] may not be used on the stable release channel```.
+So it's necessary to install and use, by default, the rust nighlty version.
 
 Generated files are copied in `../devand-web/static/ui` directory
 
