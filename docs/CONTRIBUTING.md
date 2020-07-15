@@ -64,6 +64,8 @@ To build `devand-ui` and start `devand-web`:
 ( cd devand-ui && yarn run build )
 ( cd devand-web && cargo watch -x check -x test -x run )
 ```
+Be sure that cargo watch is installed otherwise the building process end with an error.
+You can install it executing ```cargo install cargo-watch```
 
 To create and test `devand-db` database migrations, a `.env` file must be
 created inside `devand-db` directory, with this content:
