@@ -127,6 +127,8 @@ impl SchedulePage {
                     .filter(|u| !u.affinity.is_zero())
                     .collect();
 
+                users.sort_by_key(|u| std::cmp::Reverse(u.affinity));
+
                 (t, users)
             })
             .collect();
