@@ -104,6 +104,7 @@ fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<
     let wsm = wsm.0.read().unwrap();
     let wsm = wsm.get();
     let res = wsm.find_all_users_matching_in_week(id, next_week, availability);
+    // TODO [optimization] users with same availability time can bee lots. Sort by affinity and keep only first n
     Json(res)
 }
 
