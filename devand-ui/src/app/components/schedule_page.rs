@@ -103,13 +103,17 @@ impl Component for SchedulePage {
 impl SchedulePage {
     fn view_schedule(&self, schedule: &AvailabilityMatch) -> Html {
         if schedule.slots.is_empty() {
-            html! {
-                <div class=("alert", "alert-warning")>
-                    {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your availability." }</RouterAnchor>
-                </div>
-            }
+            self.view_no_slots()
         } else {
             self.view_slots(&schedule.slots)
+        }
+    }
+
+    fn view_no_slots(&self) -> Html {
+        html! {
+            <div class=("alert", "alert-warning")>
+                {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your availability." }</RouterAnchor>
+            </div>
         }
     }
 
