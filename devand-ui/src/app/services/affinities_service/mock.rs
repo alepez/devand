@@ -43,10 +43,7 @@ fn fake_affinities(rng: &mut StdRng) -> Vec<UserAffinity> {
     users
 }
 
-fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
-    let name: String = Name(EN).fake_with_rng(rng);
-    let user_id: i32 = rng.gen_range(1, 1_000_000_000);
-
+fn fake_languages(rng: &mut StdRng) -> Languages {
     let mut languages = std::collections::BTreeMap::default();
 
     for lang in Language::iter() {
@@ -57,7 +54,12 @@ fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
         }
     }
 
-    let languages = Languages(languages);
+    Languages(languages)
+}
+
+fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
+    let name: String = Name(EN).fake_with_rng(rng);
+    let user_id: i32 = rng.gen_range(1, 1_000_000_000);
 
     PublicUserProfile {
         id: UserId(user_id),
@@ -68,6 +70,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
             .filter(|x| x.is_alphabetic())
             .collect(),
         visible_name: name.to_string(),
-        languages,
+        languages: fake_languages(rng),
     }
 }

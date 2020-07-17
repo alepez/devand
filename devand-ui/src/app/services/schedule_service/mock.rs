@@ -1,14 +1,16 @@
 use super::{FetchCallback, ScheduleServiceContent};
-use devand_core::schedule_matcher::AvailabilityMatch;
-use devand_core::{
-    Language, LanguagePreference, Languages, Level, Priority, PublicUserProfile, UserId,
-};
-use std::collections::BTreeMap;
-
 use chrono::offset::TimeZone;
+use devand_core::schedule_matcher::AvailabilityMatch;
+use devand_core::*;
+use fake::faker::internet::raw::*;
+use fake::faker::name::raw::*;
+use fake::locales::*;
+use fake::Fake;
 use rand::rngs::StdRng;
+use rand::seq::IteratorRandom;
 use rand::Rng;
 use rand::SeedableRng;
+use strum::IntoEnumIterator;
 
 pub struct ScheduleService {
     callback: FetchCallback,
@@ -31,58 +33,33 @@ impl ScheduleService {
     pub fn load_public_profile(&mut self, user_id: UserId) {
         self.callback
             .emit(Ok(ScheduleServiceContent::PublicUserProfile(
-                fake_public_profile(user_id),
+                fake_public_profile(&mut self.rng, user_id),
             )))
     }
 }
 
-fn fake_public_profile(id: UserId) -> PublicUserProfile {
+fn fake_public_profile(rng: &mut StdRng, user_id: UserId) -> PublicUserProfile {
+    let name: String = Name(EN).fake_with_rng(rng);
+    let username: String = Username(EN).fake_with_rng(rng);
+
     PublicUserProfile {
-        id,
-        languages: fake_languages(),
-        username: format!("user{}", id.0),
-        visible_name: format!("User {}", id.0),
+        id: user_id,
+        languages: fake_languages(rng),
+        username,
+        visible_name: name,
     }
 }
 
-fn fake_languages() -> Languages {
-    let mut languages = BTreeMap::default();
+fn fake_languages(rng: &mut StdRng) -> Languages {
+    let mut languages = std::collections::BTreeMap::default();
 
-    languages.insert(
-        Language::C,
-        LanguagePreference {
-            level: Level::Expert,
-            priority: Priority::Low,
-        },
-    );
-    languages.insert(
-        Language::JavaScript,
-        LanguagePreference {
-            level: Level::Proficient,
-            priority: Priority::Low,
-        },
-    );
-    languages.insert(
-        Language::CPlusPlus,
-        LanguagePreference {
-            level: Level::Expert,
-            priority: Priority::Low,
-        },
-    );
-    languages.insert(
-        Language::Rust,
-        LanguagePreference {
-            level: Level::Proficient,
-            priority: Priority::High,
-        },
-    );
-    languages.insert(
-        Language::Go,
-        LanguagePreference {
-            level: Level::Novice,
-            priority: Priority::No,
-        },
-    );
+    for lang in Language::iter() {
+        if rng.gen_bool(0.2) {
+            let level = Level::iter().choose(rng).unwrap();
+            let priority = Priority::iter().choose(rng).unwrap();
+            languages.insert(lang, LanguagePreference { level, priority });
+        }
+    }
 
     Languages(languages)
 }
@@ -94,13 +71,13 @@ fn fake_availability_match(rng: &mut StdRng) -> AvailabilityMatch {
 
     for i in 0..(7 * 24) {
         let t_diff: i64 = i * 60 * 60;
-        let available = rng.gen_range(0, 10) < 1;
+        let available = rng.gen_bool(0.1);
         if available {
             let t = chrono::Utc.timestamp(start_t + t_diff, 0);
-            let users_count = rng.gen_range(1, 7);
+            let users_count = rng.gen_range(1, 10);
             let mut users = Vec::new();
             for _ in 0..users_count {
-                users.push(devand_core::UserId(rng.gen_range(0, 5)));
+                users.push(devand_core::UserId(rng.gen_range(0, 1_000_000_000)));
             }
             slots.push((t, users));
         }
