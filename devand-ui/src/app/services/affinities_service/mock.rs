@@ -2,13 +2,15 @@ use super::FetchCallback;
 use devand_core::Affinity;
 use devand_core::UserAffinity;
 
-use fake::faker::lorem::en::*;
+use devand_core::*;
 use fake::faker::name::raw::*;
 use fake::locales::*;
 use fake::Fake;
 use rand::rngs::StdRng;
+use rand::seq::IteratorRandom;
 use rand::Rng;
 use rand::SeedableRng;
+use strum::IntoEnumIterator;
 
 pub struct AffinitiesService {
     callback: FetchCallback,
@@ -42,10 +44,6 @@ fn fake_affinities(rng: &mut StdRng) -> Vec<UserAffinity> {
 }
 
 fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
-    use devand_core::*;
-    use rand::seq::IteratorRandom;
-    use strum::IntoEnumIterator;
-
     let name: String = Name(EN).fake_with_rng(rng);
     let user_id: i32 = rng.gen_range(1, 1_000_000_000);
 
