@@ -120,6 +120,13 @@ impl SchedulePage {
     fn view_slots(&self, slots: &Vec<(DateTime<Utc>, Vec<UserId>)>) -> Html {
         let slots = slots
             .iter()
+            .map(|(t, users)| {
+                let users = users
+                    .into_iter()
+                    .filter_map(|&u| self.expand_user(u))
+                    .collect();
+                (t, users)
+            })
             .map(|(t, users)| html! { <li> { self.view_slot(t, users) } </li> });
 
         html! {
@@ -129,44 +136,51 @@ impl SchedulePage {
         }
     }
 
-    fn view_slot(&self, t: &DateTime<Utc>, users: &Vec<UserId>) -> Html {
+    fn view_slot(&self, t: &DateTime<Utc>, users: Vec<ExpandedUser>) -> Html {
         html! {
             <>
             <span class="devand-slot-time">{ t.to_string() }</span>
             <span class="devand-slot-users">
-            { for users.iter().map(|&u| self.view_user_profile(u)) }
+            { for users.into_iter().map(|u| self.view_user_profile(u)) }
             </span>
             </>
         }
     }
 
-    fn view_user_profile(&self, user_id: UserId) -> Html {
-        if let Some(user) = self.state.users.get(&user_id) {
-            // TODO Showing languages takes too long
-            // let languages = &user.languages;
-            // let lang_tags = languages.iter().map(|(lang, pref)| {
-            //     html! { <LanguageTag lang=lang pref=pref /> }
-            // });
+    fn view_user_profile(&self, u: ExpandedUser) -> Html {
+        let ExpandedUser { user, affinity } = u;
 
+        html! {
+        <span class="devand-slot-user">
+            <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(user.username)>{ "💬" }</RouterButton></span>
+            <span class="devand-visible-name">{ &user.visible_name }</span>
+            <span class="devand-affinity">{ affinity.to_string() }</span>
+        </span>
+        }
+    }
+
+    fn expand_user(&self, user_id: UserId) -> Option<ExpandedUser> {
+        if let Some(user) = self.state.users.get(&user_id) {
             let my_aff_params =
                 AffinityParams::new().with_languages(self.props.me.languages.clone());
-            let u_aff_params = AffinityParams::new().with_languages(user.languages.clone());
-            let username = user.username.clone();
 
+            let u_aff_params = AffinityParams::new().with_languages(user.languages.clone());
             let affinity = Affinity::from_params(&my_aff_params, &u_aff_params);
 
-            html! {
-            <span class="devand-slot-user">
-                <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(username)>{ "💬" }</RouterButton></span>
-                <span class="devand-visible-name">{ &user.visible_name }</span>
-                <span class="devand-affinity">{ affinity.to_string() }</span>
-                // <span>{ for lang_tags }</span>
-            </span>
-            }
+            // TODO [optimization] Avoid clone
+            Some(ExpandedUser {
+                user: user.clone(),
+                affinity,
+            })
         } else {
             // Load user public profile, but only if loading has not already started
             self.link.send_message(Msg::LoadUser(user_id));
-            html! { <></> }
+            None
         }
     }
+}
+
+struct ExpandedUser {
+    user: devand_core::PublicUserProfile,
+    affinity: Affinity,
 }
