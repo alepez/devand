@@ -131,6 +131,7 @@ impl SchedulePage {
 
                 (t, users)
             })
+            .filter(|(_, users)| !users.is_empty())
             .collect();
 
         let slots_view = slots
@@ -158,11 +159,17 @@ impl SchedulePage {
     fn view_user_profile(&self, u: ExpandedUser) -> Html {
         let ExpandedUser { user, affinity } = u;
 
+        let (affinity_class, affinity_title) = match affinity.normalize() {
+            x if x >= 0.6 => ("devand-affinity-high", "High affinity"),
+            x if x >= 0.3 => ("devand-affinity-medium", "Medium affinity"),
+            _ => ("devand-affinity-low", "Low affinity"),
+        };
+
         html! {
         <span class="devand-slot-user">
             <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(user.username)>{ "💬" }</RouterButton></span>
+            <span class=("devand-affinity-tag", affinity_class) title=affinity_title>{ affinity.to_string() }</span>
             <span class="devand-visible-name">{ &user.visible_name }</span>
-            <span class="devand-affinity">{ affinity.to_string() }</span>
         </span>
         }
     }

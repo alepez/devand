@@ -1,4 +1,5 @@
-.devand-language-tag {
+.devand-language-tag,
+.devand-slot-user {
   background-color: #ffffff;
   margin-left: 0.4em;
   margin-bottom: 0.4em;
@@ -144,15 +145,24 @@
   margin: 0 0 1em 0;
 }
 
-.devand-slot-user {
-  margin-right: 1em;
-  display: inline-block;
-}
-
 .devand-slot-user span {
   margin-right: 0.5em;
 }
 
 .devand-slot-time {
   display: block;
+}
+
+.devand-affinity-tag {
+  font-weight: bold;
+}
+
+.devand-affinity-tag.devand-affinity-low {
+  color: rgb(202, 60, 60)
+}
+.devand-affinity-tag.devand-affinity-medium {
+  color: rgb(223, 117, 20);
+}
+.devand-affinity-tag.devand-affinity-high {
+  color: rgb(28, 184, 65);
 }
