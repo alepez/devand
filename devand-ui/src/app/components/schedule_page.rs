@@ -118,20 +118,26 @@ impl SchedulePage {
     }
 
     fn view_slots(&self, slots: &Vec<(DateTime<Utc>, Vec<UserId>)>) -> Html {
-        let slots = slots
+        let slots: Vec<_> = slots
             .iter()
             .map(|(t, users)| {
-                let users = users
+                let mut users: Vec<_> = users
                     .into_iter()
                     .filter_map(|&u| self.expand_user(u))
+                    .filter(|u| !u.affinity.is_zero())
                     .collect();
+
                 (t, users)
             })
+            .collect();
+
+        let slots_view = slots
+            .into_iter()
             .map(|(t, users)| html! { <li> { self.view_slot(t, users) } </li> });
 
         html! {
             <ul class="devand-schedule-slots">
-                { for slots }
+                { for slots_view }
             </ul>
         }
     }

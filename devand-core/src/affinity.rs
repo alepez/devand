@@ -140,6 +140,10 @@ impl Affinity {
             n => (n * (Self::MAX as f64)) as i32,
         })
     }
+
+    pub fn is_zero(&self) -> bool {
+        self.0 <= Self::MIN
+    }
 }
 
 impl ToString for Affinity {
