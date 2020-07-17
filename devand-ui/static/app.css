@@ -1,30 +1,40 @@
 .devand-language-tag {
-    margin-left: 0.4em;
-    margin-bottom: 0.4em;
-    display: inline-block;
-    border: 1px solid #000000;
-    border-radius: 0.5em;
-    padding: 0.2em 0.4em;
+  background-color: #ffffff;
+  margin-left: 0.4em;
+  margin-bottom: 0.4em;
+  display: inline-block;
+  border: 1px solid #000000;
+  border-radius: 0.5em;
+  padding: 0.2em 0.4em;
+  vertical-align: middle;
+  line-height: 2em;
+}
+
+.devand-language-tag.devand-language-priority-no {
+  opacity: 0.3;
+  filter: brightness(50%);
 }
 
 .devand-language-tag .pure-button {
-    margin-right: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .devand-language-level-tag,
 .devand-language-priority-tag {
   margin-left: 0.5em;
+  font-size: 1.5em;
+  vertical-align: middle;
 }
 
-.devand-language-level-tag-expert {
+.devand-language-level-expert .devand-language-level-tag {
   color: #e5c100;
 }
 
-.devand-language-level-tag-proficient {
+.devand-language-level-proficient .devand-language-level-tag {
   color: #999999;
 }
 
-.devand-language-level-tag-novice {
+.devand-language-level-novice .devand-language-level-tag {
   color: #cd7f32;
 }
 

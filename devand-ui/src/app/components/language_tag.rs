@@ -29,28 +29,33 @@ impl Component for LanguageTag {
     }
 
     fn view(&self) -> Html {
+        let level_class = format!("devand-language-level-{}", self.props.pref.level).to_lowercase();
+
+        let priority_class =
+            format!("devand-language-priority-{}", self.props.pref.priority).to_lowercase();
+
+        let class = vec!["devand-language-tag", &level_class, &priority_class];
+
         html! {
-            <span class="devand-language-tag">
-                <span>{ self.props.lang }</span>
-                { view_language_level(self.props.pref.level) }
-                { view_language_priority(self.props.pref.priority) }
-            </span>
+        <span class=class>
+            <span>{ self.props.lang }</span>
+            { view_language_level(self.props.pref.level) }
+            { view_language_priority(self.props.pref.priority) }
+        </span>
         }
     }
 }
 
 pub fn view_language_priority(priority: Priority) -> Html {
     let icon = match priority {
-        Priority::No => "X",
-        Priority::Low => ":|",
-        Priority::High => ":)",
+        Priority::No => "🚫",
+        Priority::Low => "😐",
+        Priority::High => "😍",
     };
     let title = format!("{}", priority);
-    let priority_class = format!("devand-language-priority-tag-{}", priority).to_lowercase();
-    let class = vec!["devand-language-priority-tag", &priority_class];
 
     html! {
-        <span class=class title=title>{ icon }</span>
+    <span class="devand-language-priority-tag"  title=title>{ icon }</span>
     }
 }
 
@@ -58,12 +63,10 @@ pub fn view_language_level(level: Level) -> Html {
     let stars = (1..=3).map(|x| x <= level.as_number());
     let icon = |on| if on { "★" } else { "☆" };
     let title = format!("{}", level);
-    let level_class = format!("devand-language-level-tag-{}", level).to_lowercase();
-    let class = vec!["devand-language-level-tag", &level_class];
 
     html! {
-        <span class=class title=title>
-            { for stars.map(|on| { html! { <span>{ icon(on) }</span> } }) }
-        </span>
+    <span class="devand-language-level-tag" title=title>
+        { for stars.map(|on| { html! { <span>{ icon(on) }</span> } }) }
+    </span>
     }
 }
