@@ -62,7 +62,9 @@ fn settings_put(
 /// Send a verification email to the logged user
 #[post("/verify_email")]
 fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
-    mailer.verify_address(user.email.clone());
+    if let Err(e) = mailer.verify_address(user.email.clone()) {
+        log::error!("Cannot send email: {:?}", e);
+    }
     Json(())
 }
 

@@ -3,6 +3,7 @@ use crate::PgDevandConn;
 use devand_core::{User, UserId};
 use devand_crypto::SignedToken;
 
+// TODO Subject/Text from text template
 pub(crate) fn notify_chat_members(
     base_url: &str,
     mailer: &Mailer,
@@ -25,10 +26,15 @@ pub(crate) fn notify_chat_members(
         .filter_map(|&user_id| devand_db::load_user_by_id(user_id, &conn).map(|u| u.email))
         .collect();
 
-    // TODO This call is blocking and takes too much time. Just send and forget
-    mailer.send_email(recipients, subject.to_string(), text.to_string());
+    if mailer
+        .send_email(recipients, subject.to_string(), text.to_string())
+        .is_err()
+    {
+        log::error!("Cannot send email");
+    }
 }
 
+// TODO Subject/Text from text template
 pub(crate) fn password_reset(
     base_url: &str,
     mailer: &Mailer,
@@ -50,5 +56,7 @@ If you don’t use this link within 3 hours, it will expire. To get a new passwo
 Thanks,\n
 The DevAndDev team\n", token_url, retry_url);
 
-    mailer.send_email(vec![recipient], subject.to_string(), text);
+    mailer
+        .send_email(vec![recipient], subject.to_string(), text)
+        .unwrap()
 }

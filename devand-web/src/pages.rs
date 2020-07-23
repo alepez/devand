@@ -225,9 +225,12 @@ fn join(
     expected_captcha: ExpectedCaptcha,
     mut cookies: Cookies,
     real_ip: auth::RealIp,
+    mailer: State<Mailer>,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
+    let email_address = join_data.email.clone();
     auth::join(&mut cookies, join_data.0, expected_captcha, &conn)
+        .map(|_| mailer.verify_address(email_address))
         .map(|_| Redirect::to(uri!(dashboard_index)))
         .map_err(|err| {
             log_fail(real_ip.0);
