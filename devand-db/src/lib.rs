@@ -25,6 +25,7 @@ pub fn establish_connection() -> PgConnection {
     PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
 }
 
+#[derive(Debug)]
 pub enum Error {
     Unknown,
 }
@@ -233,6 +234,14 @@ pub fn set_verified_email(email_addr: &str, conn: &PgConnection) -> Result<(), E
         .set((schema::users::dsl::email_verified.eq(true),))
         .execute(conn)
         .map(|_| ())
+        .map_err(|_| Error::Unknown)
+}
+
+pub fn list_unverified_emails(conn: &PgConnection) -> Result<Vec<String>, Error> {
+    schema::users::table
+        .filter(schema::users::dsl::email_verified.eq(false))
+        .select(schema::users::dsl::email)
+        .get_results(conn)
         .map_err(|_| Error::Unknown)
 }
 

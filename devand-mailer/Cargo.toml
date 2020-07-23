@@ -31,3 +31,7 @@ required-features = ["client"]
 [[bin]]
 name = "devand-mailer"
 required-features = ["server"]
+
+[[bin]]
+name = "devand-verify-address-reminder"
+required-features = ["client"]
