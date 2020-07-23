@@ -1,5 +1,6 @@
 use devand_crypto::{EmailVerification, Signable};
 use lettre::smtp::authentication::Credentials;
+use lettre::smtp::ConnectionReuseParameters;
 use lettre::{SmtpClient, Transport};
 use lettre_email::Mailbox;
 use std::sync::mpsc;
@@ -31,9 +32,11 @@ impl Mailer {
 
         let creds = Credentials::new(username, password);
 
+        // Reuse connection to avoid server rate limit when sending bulk email
         let mut transport = SmtpClient::new_simple(server.as_str())
             .unwrap()
             .credentials(creds)
+            .connection_reuse(ConnectionReuseParameters::ReuseUnlimited)
             .transport();
 
         let (tx, rx): (mpsc::Sender<Email>, mpsc::Receiver<Email>) = mpsc::channel();
