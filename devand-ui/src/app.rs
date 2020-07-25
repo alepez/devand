@@ -4,7 +4,7 @@ mod services;
 
 use self::components::{
     AffinitiesPage, ChatPage, CodeNowPage, NotFoundPage, SchedulePage, SecuritySettingsPage,
-    SettingsPage,
+    SettingsPage, UserProfilePage,
 };
 use self::elements::busy_indicator;
 use self::services::UserService;
@@ -34,6 +34,8 @@ pub enum AppRoute {
     SecuritySettings,
     #[to = "/chat/{username}"]
     Chat(String),
+    #[to = "/u/{username}"]
+    UserProfile(String),
 }
 
 pub struct App {
@@ -145,6 +147,7 @@ impl App {
                         AppRoute::Chat(username) => html!{ <ChatPage chat_with=username me=pub_user_profile.clone() />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                         AppRoute::SecuritySettings => html!{ <SecuritySettingsPage /> },
+                        AppRoute::UserProfile(username) => html!{ <UserProfilePage username=username /> },
                     }
                 })
                 redirect = Router::redirect(|route: Route| { AppRoute::NotFound(Permissive(Some(route.route))) })

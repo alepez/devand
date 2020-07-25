@@ -3,6 +3,7 @@ use std::cmp::Ord;
 use strum_macros::{Display, EnumIter, EnumString};
 
 #[derive(
+    Debug,
     Serialize,
     Deserialize,
     Ord,

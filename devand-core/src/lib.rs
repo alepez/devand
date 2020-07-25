@@ -37,7 +37,7 @@ pub struct User {
     pub email_verified: bool,
 }
 
-#[derive(Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Languages(pub BTreeMap<Language, LanguagePreference>);
 
@@ -82,6 +82,7 @@ pub struct UserSettings {
 }
 
 #[derive(
+    Debug,
     Serialize,
     Deserialize,
     Copy,
@@ -112,6 +113,7 @@ impl Level {
 }
 
 #[derive(
+    Debug,
     Serialize,
     Deserialize,
     Copy,
@@ -133,7 +135,7 @@ pub enum Priority {
     High,
 }
 
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct LanguagePreference {
     pub level: Level,
@@ -222,13 +224,23 @@ pub fn calculate_affinities_2(
         .filter(|aff| aff.affinity != Affinity::NONE)
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct PublicUserProfile {
     pub id: UserId,
     pub username: String,
     pub visible_name: String,
     pub languages: Languages,
+}
+
+impl PublicUserProfile {
+    pub fn full_name(&self) -> String {
+        if self.visible_name != self.username {
+            format!("{} ({})", &self.visible_name, &self.username)
+        } else {
+            self.visible_name.clone()
+        }
+    }
 }
 
 impl PartialEq for PublicUserProfile {
