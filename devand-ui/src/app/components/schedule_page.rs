@@ -167,9 +167,9 @@ impl SchedulePage {
 
         html! {
         <span class="devand-slot-user">
-            <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(user.username)>{ "💬" }</RouterButton></span>
+            <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(user.username.clone())>{ "💬" }</RouterButton></span>
             <span class=("devand-affinity-tag", affinity_class) title=affinity_title>{ affinity.to_string() }</span>
-            <span class="devand-visible-name">{ &user.visible_name }</span>
+            <span class="devand-visible-name"><RouterAnchor route=AppRoute::UserProfile(user.username.clone()) >{ user.visible_name }</RouterAnchor></span>
         </span>
         }
     }

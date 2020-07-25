@@ -10,6 +10,7 @@ mod not_found_page;
 mod schedule_page;
 mod security_settings_page;
 mod settings_page;
+mod user_profile_page;
 
 pub use affinities_page::AffinitiesPage;
 pub use availability_table::AvailabilityTable;
@@ -23,3 +24,4 @@ pub use not_found_page::NotFoundPage;
 pub use schedule_page::SchedulePage;
 pub use security_settings_page::SecuritySettingsPage;
 pub use settings_page::SettingsPage;
+pub use user_profile_page::UserProfilePage;
