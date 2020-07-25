@@ -1,6 +1,7 @@
 use crate::app::components::LanguageTag;
 use crate::app::elements::busy_indicator;
 use crate::app::services::UserProfileService;
+use crate::app::{AppRoute, RouterButton};
 use devand_core::PublicUserProfile;
 use yew::{prelude::*, Properties};
 
@@ -79,8 +80,11 @@ impl Component for UserProfilePage {
 
             html! {
             <>
-                <h1>{ other_user.full_name() }</h1>
-                { for languages_tags }
+                <h1><RouterButton route=AppRoute::Chat(other_user.username.clone())>{ "💬 " }</RouterButton>{ other_user.full_name() }</h1>
+                <h2>{"Languages"}</h2>
+                <div>
+                    { for languages_tags }
+                </div>
             </>
             }
         } else {
