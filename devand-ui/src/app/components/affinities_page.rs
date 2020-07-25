@@ -1,6 +1,7 @@
 use crate::app::components::LanguageTag;
 use crate::app::elements::busy_indicator;
 use crate::app::services::AffinitiesService;
+use crate::app::{AppRoute, RouterAnchor};
 use devand_core::{PublicUserProfile, UserAffinity};
 use yew::{prelude::*, Properties};
 use yewtil::NeqAssign;
@@ -104,6 +105,7 @@ fn view_affinity(affinity: &UserAffinity) -> Html {
     let PublicUserProfile {
         visible_name,
         languages,
+        username,
         ..
     } = user;
 
@@ -118,7 +120,7 @@ fn view_affinity(affinity: &UserAffinity) -> Html {
     html! {
         <tr class=("user-affinity")>
             <td class="affinity">{ affinity.to_string() }</td>
-            <td class="visible_name">{ visible_name }</td>
+            <td class="visible_name"><RouterAnchor route=AppRoute::UserProfile(username.clone()) >{ visible_name }</RouterAnchor></td>
             <td class="languages"> { for languages_tags } </td>
         </tr>
     }
