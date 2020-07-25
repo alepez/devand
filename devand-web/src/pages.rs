@@ -311,6 +311,11 @@ fn dashboard_settings_password(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
+#[get("/u/<_username>")]
+fn dashboard_user_profile(auth_data: AuthData, _username: String) -> Template {
+    dashboard(auth_data)
+}
+
 fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
@@ -447,6 +452,7 @@ pub fn routes() -> Vec<Route> {
         dashboard_schedule,
         dashboard_chat,
         dashboard_settings_password,
+        dashboard_user_profile,
         privacy,
         code_of_conduct,
         help,
