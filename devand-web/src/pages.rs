@@ -60,9 +60,8 @@ fn login_page(
     }
 }
 
-// TODO https://github.com/alepez/devand/issues/69 This should be POST and frontend should use a form
 /// /logout just remove the cookie
-#[get("/logout")]
+#[post("/logout")]
 fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     auth::logout(&mut cookies);
     Flash::success(Redirect::to(uri!(login_page)), "Successfully logged out.")
