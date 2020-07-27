@@ -7,6 +7,7 @@ come in many forms. You could:
   2. Ask for improved documentation as an [issue].
   3. Comment on [issues that require feedback].
   4. Contribute code via [pull requests].
+  5. Propose a pair-programming session to [alepez](https://devand.dev/chat/alepez)
 
 [issue]: https://github.com/alepez/devand/issues
 [issues that require feedback]: https://github.com/alepez/devand/issues?q=is%3Aissue+is%3Aopen+label%3A%22feedback+wanted%22
