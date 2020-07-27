@@ -78,6 +78,7 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
 
 /// Retrieve user's affinities who are online. When an user access this
 /// endpoint, it is considered online for some time (see CodeNowUserMap::TTL)
+// TODO https://github.com/alepez/devand/issues/69 This should not change State<CodeNowUsers>.  Another POST endpoint should do it
 #[get("/code-now")]
 fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devand_core::CodeNow> {
     let user: User = user.into();
@@ -176,7 +177,7 @@ fn chat_messages_poll(
     after: i64,
     conn: PgDevandConn,
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
-    // Note: Rocket 0.16.2 does not support websocket, so we just poll for new messages
+    // Note: Rocket 0.4 does not support websocket, so we just poll for new messages
     let members = parse_members(&members);
 
     // TODO [refactoring] Authorize using request guard
