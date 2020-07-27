@@ -60,7 +60,8 @@ fn login_page(
     }
 }
 
-// /logout just remove the cookie
+// TODO https://github.com/alepez/devand/issues/69 This should be POST and frontend should use a form
+/// /logout just remove the cookie
 #[get("/logout")]
 fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     auth::logout(&mut cookies);
@@ -272,7 +273,7 @@ fn join_page(
     }
 }
 
-// When user is not authenticated, /join displays a form
+/// Generate a captcha png
 #[get("/join/captcha.png")]
 fn join_captcha(mut cookies: Cookies) -> Option<Content<Vec<u8>>> {
     let captcha = auth::captcha(&mut cookies).unwrap();
@@ -343,6 +344,7 @@ fn index(auth_data: Option<AuthData>) -> Template {
         title: "Find your pair-programming pal",
         authenticated: auth_data.is_some(),
     };
+
     Template::render("index", &context)
 }
 
@@ -358,6 +360,7 @@ fn privacy(auth_data: Option<AuthData>) -> Template {
         title: "Privacy Policy",
         authenticated: auth_data.is_some(),
     };
+
     Template::render("privacy", &context)
 }
 
@@ -373,6 +376,7 @@ fn code_of_conduct(auth_data: Option<AuthData>) -> Template {
         title: "DevAndDev Code of Conduct",
         authenticated: auth_data.is_some(),
     };
+
     Template::render("code-of-conduct", &context)
 }
 
@@ -397,6 +401,7 @@ fn favicon(static_dir: State<StaticDir>) -> Option<NamedFile> {
     NamedFile::open(std::path::Path::new(&static_dir.0).join("favicon.ico")).ok()
 }
 
+// TODO https://github.com/alepez/devand/issues/69 This should render a form
 #[get("/verify_email/<token>")]
 fn verify_email_token(
     token: String,
