@@ -400,9 +400,37 @@ fn favicon(static_dir: State<StaticDir>) -> Option<NamedFile> {
     NamedFile::open(std::path::Path::new(&static_dir.0).join("favicon.ico")).ok()
 }
 
-// TODO https://github.com/alepez/devand/issues/69 This should render a form
 #[get("/verify_email/<token>")]
 fn verify_email_token(
+    token: String,
+    auth_data: Option<AuthData>,
+    crypto_decoder: State<devand_crypto::Decoder>,
+) -> Template {
+    // Here we decode the token just to give an immediate feedback to user about its validity
+    // It is checked again on form submission
+    let valid_token =
+        EmailVerification::try_from_token(&token.clone().into(), &crypto_decoder).is_some();
+
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        authenticated: bool,
+        valid_token: bool,
+        token: String,
+    }
+
+    let context = Context {
+        title: "Email address verification",
+        authenticated: auth_data.is_some(),
+        valid_token,
+        token,
+    };
+
+    Template::render("email_verification_step1", &context)
+}
+
+#[post("/verify_email/<token>")]
+fn verify_email_token_post(
     token: String,
     auth_data: Option<AuthData>,
     crypto_decoder: State<devand_crypto::Decoder>,
@@ -433,7 +461,7 @@ fn verify_email_token(
         verified,
     };
 
-    Template::render("email_verification", &context)
+    Template::render("email_verification_step2", &context)
 }
 
 pub fn routes() -> Vec<Route> {
@@ -462,6 +490,7 @@ pub fn routes() -> Vec<Route> {
         help,
         favicon,
         verify_email_token,
+        verify_email_token_post,
     ]
 }
 
