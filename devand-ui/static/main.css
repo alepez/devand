@@ -66,16 +66,23 @@ body {
     border-color: #ffeeba;
 }
 
-button,
+button.devand-link-button,
 a {
     color: #586069;
     text-decoration: none;
 }
 
-button:hover,
+button.devand-link-button:hover,
 a:hover {
     color: #0366d6;
     text-decoration: underline;
+}
+
+/* Disguise a button as a normal link */
+.devand-link-button {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .devand-menu {
@@ -172,11 +179,4 @@ a:hover {
     -webkit-transform: translateX(0);
             transform: translateX(0);
   }
-}
-
-/* Disguise a button as a normal link */
-.devand-link-button {
-  background: none;
-  border: none;
-  cursor: pointer;
 }
