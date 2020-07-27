@@ -11,13 +11,13 @@ const INTERVAL_MS: u32 = 5_000;
 const API_URL: &'static str = "/api/code-now";
 
 pub struct CodeNowService {
-    get_handler: Arc<Mutex<GetHandler>>,
+    post_handler: Arc<Mutex<PostHandler>>,
 
     #[allow(dead_code)]
     pinger: Interval,
 }
 
-struct GetHandler {
+struct PostHandler {
     callback: FetchCallback,
     task: Option<FetchTask>,
 }
@@ -41,36 +41,36 @@ where
     FetchService::fetch(r, handler.into())
 }
 
-impl GetHandler {
-    fn get(&mut self) {
-        let req = Request::get(API_URL).body(Nothing).unwrap();
+impl PostHandler {
+    fn post(&mut self) {
+        let req = Request::post(API_URL).body(Nothing).unwrap();
         self.task = request(self.callback.clone(), req).ok();
     }
 }
 
 impl CodeNowService {
     pub fn new(callback: FetchCallback) -> Self {
-        let get_handler = GetHandler {
+        let post_handler = PostHandler {
             callback: callback.clone(),
             task: None,
         };
 
-        let get_handler = Arc::new(Mutex::new(get_handler));
+        let post_handler = Arc::new(Mutex::new(post_handler));
 
-        let interval_get_handler = get_handler.clone();
+        let interval_post_handler = post_handler.clone();
 
         let pinger = Interval::new(INTERVAL_MS, move || {
-            let mut get_handler = interval_get_handler.lock().unwrap();
-            get_handler.get();
+            let mut post_handler = interval_post_handler.lock().unwrap();
+            post_handler.post();
         });
 
         Self {
-            get_handler,
+            post_handler,
             pinger,
         }
     }
 
     pub fn restore(&mut self) {
-        self.get_handler.lock().unwrap().get();
+        self.post_handler.lock().unwrap().post();
     }
 }

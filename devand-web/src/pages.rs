@@ -60,8 +60,8 @@ fn login_page(
     }
 }
 
-// /logout just remove the cookie
-#[get("/logout")]
+/// /logout just remove the cookie
+#[post("/logout")]
 fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     auth::logout(&mut cookies);
     Flash::success(Redirect::to(uri!(login_page)), "Successfully logged out.")
@@ -272,7 +272,7 @@ fn join_page(
     }
 }
 
-// When user is not authenticated, /join displays a form
+/// Generate a captcha png
 #[get("/join/captcha.png")]
 fn join_captcha(mut cookies: Cookies) -> Option<Content<Vec<u8>>> {
     let captcha = auth::captcha(&mut cookies).unwrap();
@@ -343,6 +343,7 @@ fn index(auth_data: Option<AuthData>) -> Template {
         title: "Find your pair-programming pal",
         authenticated: auth_data.is_some(),
     };
+
     Template::render("index", &context)
 }
 
@@ -358,6 +359,7 @@ fn privacy(auth_data: Option<AuthData>) -> Template {
         title: "Privacy Policy",
         authenticated: auth_data.is_some(),
     };
+
     Template::render("privacy", &context)
 }
 
@@ -373,6 +375,7 @@ fn code_of_conduct(auth_data: Option<AuthData>) -> Template {
         title: "DevAndDev Code of Conduct",
         authenticated: auth_data.is_some(),
     };
+
     Template::render("code-of-conduct", &context)
 }
 
@@ -399,6 +402,35 @@ fn favicon(static_dir: State<StaticDir>) -> Option<NamedFile> {
 
 #[get("/verify_email/<token>")]
 fn verify_email_token(
+    token: String,
+    auth_data: Option<AuthData>,
+    crypto_decoder: State<devand_crypto::Decoder>,
+) -> Template {
+    // Here we decode the token just to give an immediate feedback to user about its validity
+    // It is checked again on form submission
+    let valid_token =
+        EmailVerification::try_from_token(&token.clone().into(), &crypto_decoder).is_some();
+
+    #[derive(Serialize)]
+    struct Context {
+        title: &'static str,
+        authenticated: bool,
+        valid_token: bool,
+        token: String,
+    }
+
+    let context = Context {
+        title: "Email address verification",
+        authenticated: auth_data.is_some(),
+        valid_token,
+        token,
+    };
+
+    Template::render("email_verification_step1", &context)
+}
+
+#[post("/verify_email/<token>")]
+fn verify_email_token_post(
     token: String,
     auth_data: Option<AuthData>,
     crypto_decoder: State<devand_crypto::Decoder>,
@@ -429,7 +461,7 @@ fn verify_email_token(
         verified,
     };
 
-    Template::render("email_verification", &context)
+    Template::render("email_verification_step2", &context)
 }
 
 pub fn routes() -> Vec<Route> {
@@ -458,6 +490,7 @@ pub fn routes() -> Vec<Route> {
         help,
         favicon,
         verify_email_token,
+        verify_email_token_post,
     ]
 }
 

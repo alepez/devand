@@ -10,7 +10,9 @@
             <a href="/dashboard" class="pure-menu-link">Dashboard</a>
           </li>
           <li class="pure-menu-item">
-            <a href="/logout" class="pure-menu-link">Sign Out</a>
+            <form class="logout-form" action="/logout" method="post">
+              <button type="submit" class="pure-menu-link devand-link-button">Sign out</button>
+            </form>
           </li>
     {{else}}
           <li class="pure-menu-item">

@@ -1,0 +1,15 @@
+{{#*inline "body"}}
+
+{{#if valid_token }}
+    <form action="/verify_email/{{ token }}" method="post" accept-charset="utf-8" class="pure-form pure-form-stacked">
+        <div class="pure-controls">
+          <button type="submit" class="pure-button pure-button-primary">Click here to complete email verification</button>
+        </div>
+    </form>
+{{else}}
+    <div class="alert alert-error">Invalid url. Verification token may be expired.</div>
+{{/if}}
+
+{{/inline}}
+{{>layout}}
+
