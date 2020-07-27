@@ -10,7 +10,8 @@ mod pages;
 mod state;
 
 use rocket::fairing::AdHoc;
-use rocket::Rocket;
+use rocket::http::uri::Uri;
+use rocket::{Request, Rocket};
 use rocket_contrib::database;
 use rocket_contrib::databases::diesel;
 use rocket_contrib::serve::StaticFiles;
@@ -74,14 +75,19 @@ struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>);
 
 #[catch(401)]
-fn unauthorized() -> Template {
+fn unauthorized(req: &Request) -> Template {
     #[derive(Serialize)]
     struct Context {
         title: &'static str,
+        uri: String,
     }
+
+    let uri = req.uri();
+    let uri = Uri::percent_encode(&uri.to_string()).to_string();
 
     let context = Context {
         title: "Unauthorized",
+        uri,
     };
 
     Template::render("unauthorized", &context)

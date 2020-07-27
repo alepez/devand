@@ -2,6 +2,7 @@ use crate::auth::{self, AuthData, ExpectedCaptcha};
 use crate::StaticDir;
 use crate::{Mailer, PgDevandConn};
 use devand_crypto::{EmailVerification, PasswordReset, Signable, SignedToken};
+use rocket::http::uri::Uri;
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Content, Flash, NamedFile, Redirect};
@@ -13,26 +14,33 @@ const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
 const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
 
 // Handle authentication request
-#[post("/login", data = "<credentials>")]
+#[post("/login/<return_to>", data = "<credentials>")]
 fn login(
+    return_to: String,
     mut cookies: Cookies,
     credentials: Form<auth::Credentials>,
     real_ip: auth::RealIp,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
     auth::login(&mut cookies, credentials.0, &conn)
-        .map(|_| Redirect::to(uri!(dashboard_index)))
+        .map(|_| Redirect::to(return_to.clone()))
         .map_err(|_| {
             log_fail(real_ip.0);
             Flash::error(
-                Redirect::to(uri!(login_page)),
+                Redirect::to(uri!(login_page: return_to)),
                 "Incorrect username or password",
             )
         })
 }
 
 #[get("/login")]
+fn login_page_default() -> Redirect {
+    Redirect::to(uri!(login_page: "/".to_string()))
+}
+
+#[get("/login/<return_to>")]
 fn login_page(
+    return_to: String,
     auth_data: Option<auth::AuthData>,
     flash: Option<FlashMessage>,
 ) -> Result<Template, Redirect> {
@@ -47,6 +55,7 @@ fn login_page(
             flash_msg: Option<String>,
             flash_name: Option<String>,
             authenticated: bool,
+            return_to: String,
         }
 
         let context = Context {
@@ -54,6 +63,7 @@ fn login_page(
             flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
             flash_name: flash.as_ref().map(|x| x.name().to_string()),
             authenticated: false,
+            return_to: Uri::percent_encode(&return_to).to_string(),
         };
 
         Ok(Template::render("login", &context))
@@ -64,7 +74,10 @@ fn login_page(
 #[post("/logout")]
 fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     auth::logout(&mut cookies);
-    Flash::success(Redirect::to(uri!(login_page)), "Successfully logged out.")
+    Flash::success(
+        Redirect::to(uri!(login_page: String::new())),
+        "Successfully logged out.",
+    )
 }
 
 #[get("/password_reset")]
@@ -187,7 +200,7 @@ fn password_reset_token(
     conn: PgDevandConn,
 ) -> Result<Flash<Redirect>, Flash<Redirect>> {
     let ok_msg = "Your password has been changed! You can now sign in with your new password.";
-    let redirect_ok = Redirect::to(uri!(login_page));
+    let redirect_ok = Redirect::to(uri!(login_page: String::new()));
     let redirect_err = Redirect::to(uri!(password_reset_token_page: token.clone()));
 
     let PasswordReset2 { password } = password_reset.0;
@@ -471,6 +484,7 @@ pub fn routes() -> Vec<Route> {
         join_page,
         join_captcha,
         login,
+        login_page_default,
         login_page,
         password_reset,
         password_reset_page,

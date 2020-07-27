@@ -4,7 +4,7 @@
     <div class="alert alert-{{ flash_name }}">{{ flash_msg }}</div>
     {{/if}}
 
-    <form action="/login" method="post" accept-charset="utf-8" class="pure-form pure-form-stacked">
+    <form action="/login/{{ return_to }}" method="post" accept-charset="utf-8" class="pure-form pure-form-stacked">
       <fieldset>
         <div class="pure-control-group">
           <label for="username">Username or email address</label>
@@ -13,7 +13,7 @@
 
         <div class="pure-control-group">
           <label for="password">Password <small><a href="/password_reset">Forgot password?</a></small></label>
-          <input type="password" name="password" id="password" value="" placeholder="password" />
+          <input type="password" name="password" id="password" value="" placeholder="Password" />
         </div>
 
         <div class="pure-controls">
