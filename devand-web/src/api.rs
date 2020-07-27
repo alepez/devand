@@ -78,8 +78,7 @@ fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffin
 
 /// Retrieve user's affinities who are online. When an user access this
 /// endpoint, it is considered online for some time (see CodeNowUserMap::TTL)
-// TODO https://github.com/alepez/devand/issues/69 This should not change State<CodeNowUsers>.  Another POST endpoint should do it
-#[get("/code-now")]
+#[post("/code-now")]
 fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devand_core::CodeNow> {
     let user: User = user.into();
 

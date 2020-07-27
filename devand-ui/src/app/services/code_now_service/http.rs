@@ -43,7 +43,7 @@ where
 
 impl GetHandler {
     fn get(&mut self) {
-        let req = Request::get(API_URL).body(Nothing).unwrap();
+        let req = Request::post(API_URL).body(Nothing).unwrap();
         self.task = request(self.callback.clone(), req).ok();
     }
 }
