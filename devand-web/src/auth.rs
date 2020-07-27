@@ -4,7 +4,7 @@ use self::captcha::CaptchaFile;
 use crate::PgDevandConn;
 use core::convert::TryFrom;
 use devand_db as db;
-use rocket::http::{Cookie, Cookies};
+use rocket::http::{Cookie, Cookies, SameSite};
 use rocket::outcome::IntoOutcome;
 use rocket::request::{FromRequest, Outcome, Request};
 use serde::{Deserialize, Serialize};
@@ -64,6 +64,7 @@ impl<'a> Into<rocket::http::Cookie<'a>> for AuthData {
         Cookie::build(LOGIN_COOKIE_KEY, json)
             .http_only(true)
             .max_age(time::Duration::days(30))
+            .same_site(SameSite::Lax)
             .finish()
     }
 }
