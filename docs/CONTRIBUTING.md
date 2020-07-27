@@ -29,7 +29,7 @@ rustup target add wasm32-unknown-unknown
 documentation about dependencies.
 
 Project can be built inside a Docker container too, see
-`https://github.com/alepez/devand/blob/master/docker/devand-web-builder/Dockerfile`
+[the Dockerfile](/docker/devand-web-builder/Dockerfile)
 for a complete build environment.
 
 `devand-ui` can be tested without any backend, it just uses *mock* services to
