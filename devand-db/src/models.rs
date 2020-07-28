@@ -53,7 +53,14 @@ impl TryInto<devand_core::User> for User {
             email_verified: self.email_verified,
             visible_name,
             settings,
-            chats: devand_core::UserChats::default(), // FIXME
+            // FIXME FAKE
+            chats: devand_core::UserChats(vec![devand_core::UserChat {
+                chat: devand_core::chat::Chat {
+                    id: devand_core::chat::ChatId(23),
+                    members: vec![devand_core::UserId(1), devand_core::UserId(2)],
+                },
+                new_messages: 5,
+            }]),
         };
 
         Ok(user)
