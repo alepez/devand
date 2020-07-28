@@ -13,7 +13,7 @@ use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
 
-use devand_core::{PublicUserProfile, User};
+use devand_core::{PublicUserProfile, User, UserChats};
 
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
 type RouterButton = yew_router::components::RouterButton<AppRoute>;
@@ -63,16 +63,13 @@ impl Component for App {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let fetch_callback =
-            link.callback(
-                |result: Result<User, anyhow::Error>| match result {
-                    Ok(user) => Msg::UserFetchOk(user),
-                    Err(err) => {
-                        log::error!("{:?}", err);
-                        Msg::UserFetchErr
-                    }
-                },
-            );
+        let fetch_callback = link.callback(|result: Result<User, anyhow::Error>| match result {
+            Ok(user) => Msg::UserFetchOk(user),
+            Err(err) => {
+                log::error!("{:?}", err);
+                Msg::UserFetchErr
+            }
+        });
 
         let mut user_service = UserService::new(fetch_callback);
         user_service.restore();
@@ -127,7 +124,7 @@ impl App {
     fn view_ok(&self, user: &User) -> VNode {
         html! {
             <>
-            { view_menu() }
+            { view_menu(user) }
             { self.view_routes(&user) }
             </>
         }
@@ -160,7 +157,7 @@ impl App {
     }
 }
 
-fn view_menu() -> VNode {
+fn view_menu(user: &User) -> VNode {
     html! {
     <ul class=("devand-menu")>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
@@ -168,6 +165,24 @@ fn view_menu() -> VNode {
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ view_messages(&user.chats) }</RouterAnchor></li>
     </ul>
+    }
+}
+
+fn view_messages(chats: &UserChats) -> VNode {
+    let unread_count: usize = chats.0.iter().map(|chat| chat.new_messages).sum();
+
+    html! {
+    <span>
+        <span>{ "Messages"}</span>
+        {
+            if unread_count > 0 {
+                html! { <span class="devand-messages-count">{ format!("{}", unread_count) }</span> }
+            } else {
+                html! { }
+            }
+        }
+    </span>
     }
 }

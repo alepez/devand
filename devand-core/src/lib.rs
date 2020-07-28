@@ -23,8 +23,8 @@ pub struct UserId(pub i32);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserChat {
-    chat: chat::Chat,
-    new_messages: usize,
+    pub chat: chat::Chat,
+    pub new_messages: usize,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
@@ -47,7 +47,7 @@ pub struct User {
     /// Email must be verified to enable some feature (notifications, ...)
     pub email_verified: bool,
     /// User's chats
-    pub chats: UserChats
+    pub chats: UserChats,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
