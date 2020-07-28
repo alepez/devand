@@ -20,6 +20,17 @@ pub use schedule::{Availability, DaySchedule, WeekSchedule};
 #[serde(rename_all = "snake_case")]
 pub struct UserId(pub i32);
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct UserChat {
+    chat: chat::Chat,
+    new_messages: usize,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct UserChats(pub Vec<UserChat>);
+
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
@@ -35,6 +46,8 @@ pub struct User {
     pub settings: UserSettings,
     /// Email must be verified to enable some feature (notifications, ...)
     pub email_verified: bool,
+    /// User's chats
+    pub chats: UserChats
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]

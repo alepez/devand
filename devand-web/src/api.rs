@@ -13,8 +13,8 @@ const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
 
 pub fn routes() -> Vec<Route> {
     routes![
-        settings,
-        settings_put,
+        user,
+        user_put,
         verify_email,
         affinities,
         code_now,
@@ -30,14 +30,14 @@ pub fn routes() -> Vec<Route> {
 }
 
 /// Retrieve user settings
-#[get("/settings")]
-fn settings(user: LoggedUser) -> Json<User> {
+#[get("/user")]
+fn user(user: LoggedUser) -> Json<User> {
     Json(user.into())
 }
 
 /// Update user settings
-#[put("/settings", data = "<user>")]
-fn settings_put(
+#[put("/user", data = "<user>")]
+fn user_put(
     auth_data: AuthData,
     user: Json<User>,
     conn: PgDevandConn,

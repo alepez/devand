@@ -53,6 +53,7 @@ impl TryInto<devand_core::User> for User {
             email_verified: self.email_verified,
             visible_name,
             settings,
+            chats: devand_core::UserChats::default(), // FIXME
         };
 
         Ok(user)

@@ -1,4 +1,4 @@
-use super::{FetchCallback, UserServiceContent};
+use super::FetchCallback;
 use devand_core::User;
 use gloo::timers::callback::Timeout;
 use std::ops::DerefMut;
@@ -7,6 +7,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::BeforeUnloadEvent;
 use yew::format::{Json, Nothing};
+use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 const DELAY_MS: u32 = 2_000;
@@ -41,27 +42,34 @@ struct GetHandler {
     pending: Arc<Mutex<bool>>,
 }
 
+fn request<R>(
+    callback: Callback<Result<User, anyhow::Error>>,
+    pending: Arc<Mutex<bool>>,
+    r: http::request::Request<R>,
+) -> Result<FetchTask, anyhow::Error>
+where
+    R: std::convert::Into<std::result::Result<std::string::String, anyhow::Error>>,
+{
+    let handler = move |response: Response<Json<Result<User, anyhow::Error>>>| {
+        let (meta, Json(data)) = response.into_parts();
+        if meta.status.is_success() {
+            callback.emit(data)
+        } else {
+            callback.emit(Err(anyhow::anyhow!(meta.status)))
+        }
+
+        if let Ok(mut pending) = pending.lock() {
+            *pending.deref_mut() = false;
+        }
+    };
+
+    FetchService::fetch(r, handler.into())
+}
+
 impl GetHandler {
     fn get(&mut self) {
         let req = Request::get(API_URL).body(Nothing).unwrap();
-        let callback = self.callback.clone();
-        let pending = self.pending.clone();
-
-        let handler = move |response: Response<Json<Result<UserServiceContent, anyhow::Error>>>| {
-            let (meta, Json(data)) = response.into_parts();
-
-            if meta.status.is_success() {
-                callback.emit(data)
-            } else {
-                callback.emit(Err(anyhow::anyhow!(meta.status)))
-            }
-
-            if let Ok(mut pending) = pending.lock() {
-                *pending.deref_mut() = false;
-            }
-        };
-
-        self.task = FetchService::fetch(req, handler.into()).ok();
+        self.task = request(self.callback.clone(), self.pending.clone(), req).ok();
     }
 }
 
@@ -69,24 +77,7 @@ impl PutHandler {
     fn put(&mut self, user: User) {
         let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
         let req = Request::put(API_URL).body(json).unwrap();
-        let callback = self.callback.clone();
-        let pending = self.pending.clone();
-
-        let handler = move |response: Response<Json<Result<UserServiceContent, anyhow::Error>>>| {
-            let (meta, Json(data)) = response.into_parts();
-
-            if meta.status.is_success() {
-                callback.emit(data)
-            } else {
-                callback.emit(Err(anyhow::anyhow!(meta.status)))
-            }
-
-            if let Ok(mut pending) = pending.lock() {
-                *pending.deref_mut() = false;
-            }
-        };
-
-        self.task = FetchService::fetch(req, handler.into()).ok();
+        self.task = request(self.callback.clone(), self.pending.clone(), req).ok();
     }
 }
 

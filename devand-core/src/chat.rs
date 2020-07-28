@@ -22,7 +22,6 @@ impl std::fmt::Display for ChatId {
 pub struct Chat {
     pub id: ChatId,
     pub members: Vec<UserId>,
-    pub new_messages: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
