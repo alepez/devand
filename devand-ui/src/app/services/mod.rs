@@ -12,4 +12,4 @@ pub use code_now_service::CodeNowService;
 pub use schedule_service::{ScheduleService, ScheduleServiceContent};
 pub use security_service::{SecurityService, SecurityServiceContent};
 pub use user_profile_service::UserProfileService;
-pub use user_service::UserService;
+pub use user_service::{UserService, UserServiceContent};

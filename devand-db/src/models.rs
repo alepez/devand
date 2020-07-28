@@ -83,6 +83,21 @@ pub struct Chat {
     pub members: serde_json::Value,
 }
 
+impl TryInto<devand_core::chat::Chat> for Chat {
+    type Error = Error;
+    fn try_into(self) -> Result<devand_core::chat::Chat, Self::Error> {
+        let members: Vec<devand_core::UserId> = serde_json::from_value(self.members)
+            .map_err(|e| Error::CannotDeserializeChatMembers(e.to_string()))?;
+
+        let chat = devand_core::chat::Chat {
+            id: devand_core::chat::ChatId(self.id),
+            members,
+        };
+
+        Ok(chat)
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "chats"]
 pub struct NewChat {
@@ -102,4 +117,5 @@ impl Into<devand_core::chat::ChatMessage> for ChatMessage {
 #[derive(Debug)]
 pub enum Error {
     CannotDeserializeUserSettings(String),
+    CannotDeserializeChatMembers(String),
 }

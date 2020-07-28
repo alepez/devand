@@ -20,7 +20,7 @@ pub use schedule::{Availability, DaySchedule, WeekSchedule};
 #[serde(rename_all = "snake_case")]
 pub struct UserId(pub i32);
 
-#[derive(Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
     /// This is unique and cannot be changed
@@ -70,7 +70,7 @@ impl Languages {
     }
 }
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserSettings {
     /// User can set language preferences

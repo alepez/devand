@@ -7,7 +7,7 @@ use self::components::{
     SettingsPage, UserProfilePage,
 };
 use self::elements::busy_indicator;
-use self::services::UserService;
+use self::services::{UserService, UserServiceContent};
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
@@ -53,7 +53,7 @@ pub struct State {
 
 pub enum Msg {
     UserStore(User),
-    UserFetchOk(User),
+    UserFetchOk(UserServiceContent),
     UserFetchErr,
     VerifyEmail,
 }
@@ -63,13 +63,16 @@ impl Component for App {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let fetch_callback = link.callback(|result: Result<User, anyhow::Error>| match result {
-            Ok(user) => Msg::UserFetchOk(user),
-            Err(err) => {
-                log::error!("{:?}", err);
-                Msg::UserFetchErr
-            }
-        });
+        let fetch_callback =
+            link.callback(
+                |result: Result<UserServiceContent, anyhow::Error>| match result {
+                    Ok(user) => Msg::UserFetchOk(user),
+                    Err(err) => {
+                        log::error!("{:?}", err);
+                        Msg::UserFetchErr
+                    }
+                },
+            );
 
         let mut user_service = UserService::new(fetch_callback);
         user_service.restore();
@@ -91,8 +94,10 @@ impl Component for App {
                 self.user_service.store(&user);
                 false
             }
-            Msg::UserFetchOk(user) => {
+            Msg::UserFetchOk(user_service_content) => {
                 log::debug!("User fetch ok");
+                // TODO Extract chats
+                let UserServiceContent { user, .. } = user_service_content;
                 self.state.user = Some(user);
                 self.state.pending_save = false;
                 true

@@ -9,7 +9,7 @@ pub struct ChatMessage {
     pub txt: String,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct ChatId(pub i32);
 
 impl std::fmt::Display for ChatId {
@@ -17,3 +17,13 @@ impl std::fmt::Display for ChatId {
         write!(f, "{}", self.0)
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Chat {
+    pub id: ChatId,
+    pub members: Vec<UserId>,
+    pub new_messages: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct Chats(pub Vec<Chat>);

@@ -1,4 +1,5 @@
-use super::FetchCallback;
+use super::{FetchCallback, UserServiceContent};
+use devand_core::chat::Chats;
 use devand_core::User;
 
 pub struct UserService {
@@ -11,7 +12,11 @@ impl UserService {
     }
 
     pub fn restore(&mut self) {
-        self.callback.emit(Ok(mock_user()))
+        let content = UserServiceContent {
+            user: mock_user(),
+            chats: Chats::default(),
+        };
+        self.callback.emit(Ok(content))
     }
 
     pub fn store(&mut self, _user: &User) {}
