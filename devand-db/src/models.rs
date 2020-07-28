@@ -1,4 +1,4 @@
-use super::schema::{auth, chats, messages, users};
+use super::schema::{auth, chats, messages, unread_messages, users};
 use chrono::{DateTime, Utc};
 use serde_json;
 use std::convert::TryInto;
@@ -120,6 +120,13 @@ impl Into<devand_core::chat::ChatMessage> for ChatMessage {
             author: devand_core::UserId(self.author),
         }
     }
+}
+
+#[derive(Insertable)]
+#[table_name = "unread_messages"]
+pub struct NewUnreadMessage {
+    pub user_id: i32,
+    pub message_id: i32,
 }
 
 #[derive(Debug)]

@@ -187,6 +187,42 @@ pub fn load_chat_history_by_members(
     }
 }
 
+fn mark_message_as_unread(message: &models::ChatMessage, conn: &PgConnection) {
+    let models::ChatMessage {
+        id,
+        author,
+        chat_id,
+        ..
+    } = message;
+
+    let message_id = *id;
+
+    schema::chats::table
+        .filter(schema::chats::dsl::id.eq(chat_id))
+        .first(conn)
+        .ok()
+        .and_then(|x: models::Chat| x.try_into().ok())
+        .map(|chat: devand_core::chat::Chat| chat.members)
+        .unwrap_or(Vec::default())
+        .into_iter()
+        .map(|x| x.0)
+        .filter(|x| x != author)
+        .for_each(|user_id| {
+            let values = models::NewUnreadMessage {
+                user_id,
+                message_id,
+            };
+
+            let res = diesel::insert_into(schema::unread_messages::table)
+                .values(values)
+                .execute(conn);
+
+            if let Err(err) = res {
+                log::warn!("Error: {:?}", err);
+            }
+        });
+}
+
 pub fn add_chat_message_by_id(
     chat_id: devand_core::chat::ChatId,
     new_message: devand_core::chat::ChatMessage,
@@ -199,14 +235,17 @@ pub fn add_chat_message_by_id(
         author: new_message.author.0,
     };
 
-    diesel::insert_into(schema::messages::table)
+    let message: models::ChatMessage = diesel::insert_into(schema::messages::table)
         .values(new_message)
         .get_result(conn)
         .map_err(|err| {
             dbg!(err);
             Error::Unknown
-        })
-        .map(|x: models::ChatMessage| x.into())
+        })?;
+
+    mark_message_as_unread(&message, conn);
+
+    Ok(message.into())
 }
 
 pub fn add_chat_message_by_members(
