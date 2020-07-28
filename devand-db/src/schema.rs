@@ -23,6 +23,13 @@ table! {
 }
 
 table! {
+    unread_messages (message_id, user_id) {
+        message_id -> Int4,
+        user_id -> Int4,
+    }
+}
+
+table! {
     users (id) {
         id -> Int4,
         username -> Varchar,
@@ -34,4 +41,10 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(auth, chats, messages, users,);
+allow_tables_to_appear_in_same_query!(
+    auth,
+    chats,
+    messages,
+    unread_messages,
+    users,
+);
