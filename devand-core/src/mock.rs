@@ -27,7 +27,7 @@ pub fn user() -> User {
                 sun: DaySchedule::never(),
             }),
         },
-        chats: UserChats::default(),
+        unread_messages: 5,
     }
 }
 

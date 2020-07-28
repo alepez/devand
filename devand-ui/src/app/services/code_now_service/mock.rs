@@ -75,6 +75,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::User {
             schedule: Availability::default(),
             vacation_mode: false,
         },
-        chats: UserChats::default(),
+        unread_messages: 5,
     }
 }

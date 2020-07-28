@@ -53,14 +53,7 @@ impl TryInto<devand_core::User> for User {
             email_verified: self.email_verified,
             visible_name,
             settings,
-            // FIXME FAKE
-            chats: devand_core::UserChats(vec![devand_core::UserChat {
-                chat: devand_core::chat::Chat {
-                    id: devand_core::chat::ChatId(23),
-                    members: vec![devand_core::UserId(1), devand_core::UserId(2)],
-                },
-                new_messages: 5,
-            }]),
+            unread_messages: 0,
         };
 
         Ok(user)
@@ -122,9 +115,9 @@ impl Into<devand_core::chat::ChatMessage> for ChatMessage {
     }
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Queryable)]
 #[table_name = "unread_messages"]
-pub struct NewUnreadMessage {
+pub struct UnreadMessage {
     pub user_id: i32,
     pub message_id: i32,
 }

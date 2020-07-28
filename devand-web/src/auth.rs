@@ -410,7 +410,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for LoggedUser {
     fn from_request(request: &'a Request<'r>) -> Outcome<LoggedUser, ()> {
         let conn = request.guard::<PgDevandConn>()?;
         let auth_data = request.guard::<AuthData>()?;
-        let user = devand_db::load_user_by_id(auth_data.user_id, &conn.0);
+        // TODO load_full_user_by_id is expensive
+        let user = devand_db::load_full_user_by_id(auth_data.user_id, &conn.0);
         user.map(|x| LoggedUser(x)).or_forward(())
     }
 }

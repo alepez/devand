@@ -47,8 +47,9 @@ pub struct User {
     /// Email must be verified to enable some feature (notifications, ...)
     pub email_verified: bool,
     /// User's chats
-    pub chats: UserChats,
+    pub unread_messages: usize,
 }
+// FIXME User contains too many fields. UserChats should be in another type, like FullUser
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]

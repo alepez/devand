@@ -13,7 +13,7 @@ use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
 
-use devand_core::{PublicUserProfile, User, UserChats};
+use devand_core::{PublicUserProfile, User};
 
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
 type RouterButton = yew_router::components::RouterButton<AppRoute>;
@@ -165,20 +165,18 @@ fn view_menu(user: &User) -> VNode {
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ view_messages(&user.chats) }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ view_messages(user.unread_messages) }</RouterAnchor></li>
     </ul>
     }
 }
 
-fn view_messages(chats: &UserChats) -> VNode {
-    let unread_count: usize = chats.0.iter().map(|chat| chat.new_messages).sum();
-
+fn view_messages(unread_messages: usize) -> VNode {
     html! {
     <span>
         <span>{ "Messages"}</span>
         {
-            if unread_count > 0 {
-                html! { <span class="devand-messages-count">{ format!("{}", unread_count) }</span> }
+            if unread_messages > 0 {
+                html! { <span class="devand-messages-count">{ format!("{}", unread_messages) }</span> }
             } else {
                 html! { }
             }

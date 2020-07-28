@@ -100,6 +100,6 @@ fn mock_user() -> devand_core::User {
                 sun: DaySchedule::never(),
             }),
         },
-        chats: mock_chats(),
+        unread_messages: 5,
     }
 }
