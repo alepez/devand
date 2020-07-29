@@ -78,7 +78,7 @@ impl Component for ChatPage {
                     }
                     true
                 }
-                    _ => false,
+                _ => false,
             },
             Msg::SendMessage(txt) => {
                 self.service.send_message(txt);
