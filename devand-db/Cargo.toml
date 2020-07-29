@@ -14,7 +14,7 @@ log = "0.4"
 rand = "0.7"
 rust-argon2 = "0.8"
 serde_json = "1"
-uuid = { version = "*", features = ["v4"] }
+uuid = { version = ">=0.2.0, <0.7.0", features = ["v4", "serde"] }
 
 [features]
 postgres = []

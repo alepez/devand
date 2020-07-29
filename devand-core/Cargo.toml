@@ -12,4 +12,4 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 strum = "0.17"
 strum_macros = "0.17"
-uuid = { version = "*", features = ["v4", "serde"] }
+uuid = { version = ">=0.2.0, <0.7.0", features = ["v4", "serde"] }
