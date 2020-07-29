@@ -126,6 +126,11 @@ fn chat_messages_get(
     }
 
     let result = devand_db::load_chat_history_by_members(&members, &conn);
+
+    if !result.is_empty() {
+        devand_db::mark_messages_as_read_by(user.id, &result, &conn);
+    }
+
     Some(Json(result))
 }
 
@@ -138,12 +143,8 @@ fn chat_messages_post(
     mailer: State<Mailer>,
     conn: PgDevandConn,
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
-    let new_message = devand_core::chat::ChatMessage {
-        author: user.id,
-        txt: txt.0,
-        created_at: Utc::now(),
-    };
-
+    let author = user.id;
+    let txt = txt.0;
     let members = parse_members(&members);
 
     // TODO [refactoring] Authorize using request guard
@@ -160,7 +161,7 @@ fn chat_messages_post(
         &members,
     );
 
-    if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
+    if let Some(new_message) = devand_db::add_chat_message_by_members(&members, author, txt, &conn)
     {
         Some(Json(vec![new_message]))
     } else {
@@ -187,10 +188,15 @@ fn chat_messages_poll(
 
     // TODO [optimization] It could be better loading from db only messages created after the
     // threshold, instead of filtering here.
-    let result = devand_db::load_chat_history_by_members(&members, &conn)
+    let result: Vec<_> = devand_db::load_chat_history_by_members(&members, &conn)
         .into_iter()
         .filter(|x| x.created_at.timestamp() > after)
         .collect();
+
+    if !result.is_empty() {
+        devand_db::mark_messages_as_read_by(user.id, &result, &conn);
+    }
+
     Some(Json(result))
 }
 

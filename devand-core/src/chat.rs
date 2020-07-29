@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct ChatMessage {
+    pub id: i32, // FIXME UUID
     pub created_at: DateTime<Utc>,
     pub author: UserId,
     pub txt: String,

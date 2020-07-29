@@ -7,11 +7,13 @@ mod models;
 mod schema;
 mod schema_view;
 
+use chrono::prelude::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
 use std::convert::TryInto;
 use std::env;
+
 #[macro_use]
 extern crate diesel_migrations;
 
@@ -210,6 +212,25 @@ pub fn load_chat_history_by_members(
     }
 }
 
+pub fn mark_messages_as_read_by(
+    user_id: devand_core::UserId,
+    messages: &[devand_core::chat::ChatMessage],
+    conn: &PgConnection,
+) {
+    for message in messages {
+        let res = diesel::delete(
+            schema::unread_messages::table
+                .filter(schema::unread_messages::user_id.eq(user_id.0))
+                .filter(schema::unread_messages::message_id.eq(message.id)),
+        )
+        .execute(conn);
+
+        if let Err(err) = res {
+            log::warn!("Cannot mark as read message: {:?}", err);
+        }
+    }
+}
+
 fn mark_message_as_unread(message: &models::ChatMessage, conn: &PgConnection) {
     let models::ChatMessage {
         id,
@@ -248,14 +269,15 @@ fn mark_message_as_unread(message: &models::ChatMessage, conn: &PgConnection) {
 
 pub fn add_chat_message_by_id(
     chat_id: devand_core::chat::ChatId,
-    new_message: devand_core::chat::ChatMessage,
+    author: devand_core::UserId,
+    txt: String,
     conn: &PgConnection,
 ) -> Result<devand_core::chat::ChatMessage, Error> {
     let new_message = models::NewChatMessage {
         chat_id: chat_id.0,
-        created_at: new_message.created_at.naive_utc(),
-        txt: new_message.txt,
-        author: new_message.author.0,
+        created_at: Utc::now().naive_utc(),
+        txt,
+        author: author.0,
     };
 
     let message: models::ChatMessage = diesel::insert_into(schema::messages::table)
@@ -273,11 +295,12 @@ pub fn add_chat_message_by_id(
 
 pub fn add_chat_message_by_members(
     members: &[devand_core::UserId],
-    new_message: devand_core::chat::ChatMessage,
+    author: devand_core::UserId,
+    txt: String,
     conn: &PgConnection,
 ) -> Option<devand_core::chat::ChatMessage> {
     if let Ok(chat_id) = find_or_create_chat_by_members(members, conn) {
-        add_chat_message_by_id(chat_id, new_message, conn).ok()
+        add_chat_message_by_id(chat_id, author, txt, conn).ok()
     } else {
         None
     }

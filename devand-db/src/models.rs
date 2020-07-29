@@ -108,6 +108,7 @@ pub struct NewChat {
 impl Into<devand_core::chat::ChatMessage> for ChatMessage {
     fn into(self) -> devand_core::chat::ChatMessage {
         devand_core::chat::ChatMessage {
+            id: self.id,
             created_at: DateTime::from_utc(self.created_at, Utc),
             txt: self.txt,
             author: devand_core::UserId(self.author),
