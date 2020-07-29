@@ -23,5 +23,6 @@ table! {
     unread_messages_full (message_id) {
         message_id -> Uuid,
         chat_id -> Uuid,
+        user_id -> Int4,
     }
 }

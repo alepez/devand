@@ -88,10 +88,10 @@ fn view_chats(chats: &UserChats) -> Html {
 }
 
 fn view_chat(chat: &UserChat) -> Html {
-    if chat.members.len() == 1 {
-        view_direct_chat(chat)
-    } else {
-        view_group_chat(chat)
+    match chat.members.len() {
+        0 => unimplemented!(),
+        1 => view_direct_chat(chat),
+        _ => view_group_chat(chat),
     }
 }
 

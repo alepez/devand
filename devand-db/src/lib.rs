@@ -236,6 +236,7 @@ fn load_user_chat_by_id(
 
     let unread_messages: i64 = schema_view::unread_messages_full::table
         .filter(schema_view::unread_messages_full::chat_id.eq(id))
+        .filter(schema_view::unread_messages_full::user_id.eq(user.0))
         .select(diesel::dsl::count(
             schema_view::unread_messages_full::dsl::message_id,
         ))

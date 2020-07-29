@@ -8,5 +8,5 @@ SELECT chats.id as chat_id,
 FROM chats INNER JOIN users ON members @> ARRAY[users.id];
 
 CREATE VIEW unread_messages_full AS
-SELECT messages.id AS message_id, messages.chat_id AS chat_id
+SELECT messages.id AS message_id, messages.chat_id AS chat_id, unread_messages.user_id AS user_id
 FROM unread_messages INNER JOIN messages ON unread_messages.message_id = messages.id;
