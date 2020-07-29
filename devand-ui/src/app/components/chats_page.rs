@@ -87,16 +87,36 @@ fn view_chats(chats: &UserChats) -> Html {
     }
 }
 
-// FIXME
-fn view_chat(_chat: &UserChat) -> Html {
-    let username = "FIXME".to_string();
-    let visible_name = "FIXME".to_string();
+fn view_chat(chat: &UserChat) -> Html {
+    if chat.members.len() == 1 {
+        view_direct_chat(chat)
+    } else {
+        view_group_chat(chat)
+    }
+}
+
+fn view_direct_chat(chat: &UserChat) -> Html {
+    let other_user = &chat.members[0];
+    let username = other_user.username.clone();
+    let visible_name = other_user.visible_name.clone();
+    let unread_messages = chat.unread_messages;
 
     html! {
-        <li class=("user-chat")>
-            <span class="visible_name"><RouterAnchor route=AppRoute::UserProfile(username.clone()) >{ visible_name }</RouterAnchor></span>
-        </li>
+    <li class=("user-chat")>
+        <span class="visible_name"><RouterAnchor route=AppRoute::Chat(username) >{ visible_name }</RouterAnchor></span>
+        {
+            if unread_messages > 0 {
+                html! { <span class="devand-messages-count">{ format!("{}", unread_messages) }</span> }
+            } else {
+                html! { }
+            }
+        }
+    </li>
     }
+}
+
+fn view_group_chat(_chat: &UserChat) -> Html {
+    todo!()
 }
 
 fn view_no_chats() -> Html {

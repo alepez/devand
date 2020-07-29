@@ -200,7 +200,11 @@ fn find_or_create_chat_by_members(
     }
 }
 
-fn load_user_chat_by_id(id: uuid::Uuid, conn: &PgConnection) -> Option<devand_core::UserChat> {
+fn load_user_chat_by_id(
+    user: devand_core::UserId,
+    id: uuid::Uuid,
+    conn: &PgConnection,
+) -> Option<devand_core::UserChat> {
     // TODO [refactoring] Create PublicUserProfile model
     let members: Vec<devand_core::PublicUserProfile> = schema_view::chat_members::table
         .filter(schema_view::chat_members::chat_id.eq(id))
@@ -213,6 +217,7 @@ fn load_user_chat_by_id(id: uuid::Uuid, conn: &PgConnection) -> Option<devand_co
         .load(conn)
         .unwrap_or(Vec::default())
         .into_iter()
+        .filter(|(user_id, _, _, _)| *user_id != user.0)
         .filter_map(|(user_id, username, visible_name, languages)| {
             let languages: devand_core::Languages = serde_json::from_value(languages).ok()?;
 
@@ -263,7 +268,7 @@ pub fn load_chats_by_member(
         .map(|chats: Vec<uuid::Uuid>| {
             chats
                 .into_iter()
-                .filter_map(|id| load_user_chat_by_id(id, conn))
+                .filter_map(|id| load_user_chat_by_id(member, id, conn))
                 .collect()
         })
         .unwrap_or(Vec::default());
