@@ -24,7 +24,7 @@ pub struct UserId(pub i32);
 #[serde(rename_all = "snake_case")]
 pub struct UserChat {
     pub chat: chat::Chat,
-    pub new_messages: usize,
+    pub unread_messages: usize,
     pub members: Vec<PublicUserProfile>,
 }
 

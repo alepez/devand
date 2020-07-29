@@ -126,5 +126,4 @@ pub struct UnreadMessage {
 #[derive(Debug)]
 pub enum Error {
     CannotDeserializeUserSettings(String),
-    CannotDeserializeChatMembers(String),
 }

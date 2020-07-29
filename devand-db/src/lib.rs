@@ -200,34 +200,75 @@ fn find_or_create_chat_by_members(
     }
 }
 
+fn load_user_chat_by_id(id: uuid::Uuid, conn: &PgConnection) -> Option<devand_core::UserChat> {
+    // TODO [refactoring] Create PublicUserProfile model
+    let members: Vec<devand_core::PublicUserProfile> = schema_view::chat_members::table
+        .filter(schema_view::chat_members::chat_id.eq(id))
+        .select((
+            schema_view::chat_members::user_id,
+            schema_view::chat_members::username,
+            schema_view::chat_members::visible_name,
+            schema_view::chat_members::languages,
+        ))
+        .load(conn)
+        .unwrap_or(Vec::default())
+        .into_iter()
+        .filter_map(|(user_id, username, visible_name, languages)| {
+            let languages: devand_core::Languages = serde_json::from_value(languages).ok()?;
+
+            let profile = devand_core::PublicUserProfile {
+                id: devand_core::UserId(user_id),
+                username,
+                visible_name,
+                languages,
+            };
+
+            Some(profile)
+        })
+        .collect();
+
+    let members_ids = members.iter().map(|u| u.id).collect();
+
+    let unread_messages: i64 = schema_view::unread_messages_full::table
+        .filter(schema_view::unread_messages_full::chat_id.eq(id))
+        .select(diesel::dsl::count(
+            schema_view::unread_messages_full::dsl::message_id,
+        ))
+        .first(conn)
+        .ok()?;
+
+    let unread_messages = unread_messages as usize;
+
+    let chat = devand_core::UserChat {
+        chat: devand_core::chat::Chat {
+            id: devand_core::chat::ChatId(id),
+            members: members_ids,
+        },
+        unread_messages,
+        members,
+    };
+
+    Some(chat)
+}
+
 pub fn load_chats_by_member(
     member: devand_core::UserId,
     conn: &PgConnection,
 ) -> devand_core::UserChats {
-    // FIXME This is really slow (diesel cannot query inside json)
-    // FIXME Possible solution: a view written in psql
-    let chats: Vec<devand_core::chat::Chat> = schema::chats::table
+    let chats = schema::chats::table
+        .filter(schema::chats::members.contains(vec![member.0]))
+        .select(schema::chats::id)
         .load(conn)
-        .map(|x: Vec<models::Chat>| {
-            x.into_iter()
-                .filter_map(|chat| chat.try_into().ok())
+        .ok()
+        .map(|chats: Vec<uuid::Uuid>| {
+            chats
+                .into_iter()
+                .filter_map(|id| load_user_chat_by_id(id, conn))
                 .collect()
         })
         .unwrap_or(Vec::default());
 
-    devand_core::UserChats(
-        chats
-            .into_iter()
-            .filter(|chat| chat.members.contains(&member))
-            .map(|chat| {
-                devand_core::UserChat {
-                    chat,
-                    new_messages: 0,         // FIXME Count unread messages
-                    members: Vec::default(), // FIXME Load public profile
-                }
-            })
-            .collect(),
-    )
+    devand_core::UserChats(chats)
 }
 
 pub fn load_chat_history_by_members(
