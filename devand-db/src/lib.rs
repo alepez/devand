@@ -157,21 +157,20 @@ pub fn load_chat_history_by_id(
     chat_id: devand_core::chat::ChatId,
     conn: &PgConnection,
 ) -> Vec<devand_core::chat::ChatMessage> {
-    let result: Option<Vec<devand_core::chat::ChatMessage>> = schema::messages::table
+    schema::messages::table
         .filter(schema::messages::dsl::chat_id.eq(chat_id.0))
         .load(conn)
-        .ok()
-        .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect());
-
-    result.unwrap_or(Vec::default())
+        .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect())
+        .unwrap_or(Vec::default())
 }
 
 fn find_chat_id_by_members(
     members: &[devand_core::UserId],
     conn: &PgConnection,
 ) -> Option<devand_core::chat::ChatId> {
-    let members = serde_json::to_value(members).unwrap();
+    let members: Vec<_> = members.iter().map(|x| x.0).collect();
 
+    // TODO eq may not be good, what if members are in different order?
     schema::chats::table
         .filter(schema::chats::dsl::members.eq(members))
         .select(schema::chats::id)
@@ -187,9 +186,9 @@ fn find_or_create_chat_by_members(
     if let Some(chat_id) = find_chat_id_by_members(members, conn) {
         Ok(chat_id)
     } else {
-        let new_chat = models::NewChat {
-            members: serde_json::to_value(members).unwrap(),
-        };
+        let members: Vec<_> = members.iter().map(|x| x.0).collect();
+        let new_chat = models::NewChat { members };
+
         diesel::insert_into(schema::chats::table)
             .values(new_chat)
             .get_result(conn)
@@ -199,6 +198,36 @@ fn find_or_create_chat_by_members(
             })
             .map(|x: models::Chat| devand_core::chat::ChatId(x.id))
     }
+}
+
+pub fn load_chats_by_member(
+    member: devand_core::UserId,
+    conn: &PgConnection,
+) -> devand_core::UserChats {
+    // FIXME This is really slow (diesel cannot query inside json)
+    // FIXME Possible solution: a view written in psql
+    let chats: Vec<devand_core::chat::Chat> = schema::chats::table
+        .load(conn)
+        .map(|x: Vec<models::Chat>| {
+            x.into_iter()
+                .filter_map(|chat| chat.try_into().ok())
+                .collect()
+        })
+        .unwrap_or(Vec::default());
+
+    devand_core::UserChats(
+        chats
+            .into_iter()
+            .filter(|chat| chat.members.contains(&member))
+            .map(|chat| {
+                devand_core::UserChat {
+                    chat,
+                    new_messages: 0,         // FIXME Count unread messages
+                    members: Vec::default(), // FIXME Load public profile
+                }
+            })
+            .collect(),
+    )
 }
 
 pub fn load_chat_history_by_members(

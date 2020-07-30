@@ -7,15 +7,15 @@ table! {
 
 table! {
     chats (id) {
-        id -> Int4,
-        members -> Jsonb,
+        id -> Uuid,
+        members -> Array<Int4>,
     }
 }
 
 table! {
     messages (id) {
-        id -> Int4,
-        chat_id -> Int4,
+        id -> Uuid,
+        chat_id -> Uuid,
         created_at -> Timestamp,
         txt -> Varchar,
         author -> Int4,
@@ -24,7 +24,7 @@ table! {
 
 table! {
     unread_messages (message_id, user_id) {
-        message_id -> Int4,
+        message_id -> Uuid,
         user_id -> Int4,
     }
 }

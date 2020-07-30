@@ -1,8 +1,7 @@
-use super::{NewMessagesCallback, OtherUserLoadedCallback};
+use super::{ChatServiceCallback, ChatServiceContent};
 use devand_core::chat::ChatMessage;
-use devand_core::UserId;
+use devand_core::{UserChats, UserId};
 use yew::format::{Json, Nothing};
-use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 fn encode_chat_members(chat_members: &[UserId]) -> String {
@@ -33,23 +32,21 @@ fn api_url_poll(chat_members: &[UserId], last_message: Option<&ChatMessage>) -> 
     )
 }
 
+fn api_url_chats() -> String {
+    format!("/api/chats")
+}
+
 pub struct ChatService {
     chat_members: Option<Vec<UserId>>,
-    new_messages_callback: NewMessagesCallback,
-    other_user_loaded_callback: OtherUserLoadedCallback,
-
+    callback: ChatServiceCallback,
     task: Option<FetchTask>,
 }
 
 impl ChatService {
-    pub fn new(
-        new_messages_callback: NewMessagesCallback,
-        other_user_loaded_callback: OtherUserLoadedCallback,
-    ) -> Self {
+    pub fn new(callback: ChatServiceCallback) -> Self {
         Self {
             chat_members: None,
-            new_messages_callback,
-            other_user_loaded_callback,
+            callback,
             task: None,
         }
     }
@@ -57,18 +54,32 @@ impl ChatService {
     pub fn load_other_user(&mut self, username: &str) {
         let url = api_url_get_user(username);
         let req = Request::get(url).body(Nothing).unwrap();
-
-        let callback = self.other_user_loaded_callback.clone();
+        let callback = self.callback.clone();
 
         let handler = move |response: Response<
             Json<Result<devand_core::PublicUserProfile, anyhow::Error>>,
         >| {
             let (meta, Json(data)) = response.into_parts();
             if let Ok(data) = data {
-                callback.emit(Some(data));
+                callback.emit(ChatServiceContent::OtherUser(data));
             } else {
                 log::error!("{:?}", &meta);
-                callback.emit(None);
+            }
+        };
+
+        self.task = FetchService::fetch(req, handler.into()).ok();
+    }
+
+    pub fn load_all_chats(&mut self) {
+        let url = api_url_chats();
+        let req = Request::get(url).body(Nothing).unwrap();
+        let callback = self.callback.clone();
+        let handler = move |response: Response<Json<Result<UserChats, anyhow::Error>>>| {
+            let (meta, Json(data)) = response.into_parts();
+            if let Ok(data) = data {
+                callback.emit(ChatServiceContent::AllChats(data));
+            } else {
+                log::error!("{:?}", &meta);
             }
         };
 
@@ -80,7 +91,19 @@ impl ChatService {
         self.chat_members = Some(chat_members.clone());
         let url = api_url_get(&chat_members);
         let req = Request::get(url).body(Nothing).unwrap();
-        self.task = request(self.new_messages_callback.clone(), req).ok();
+        let callback = self.callback.clone();
+        let handler = move |response: Response<
+            Json<Result<Vec<devand_core::chat::ChatMessage>, anyhow::Error>>,
+        >| {
+            let (meta, Json(data)) = response.into_parts();
+            if let Ok(data) = data {
+                callback.emit(ChatServiceContent::NewMessagess(data));
+            } else {
+                log::error!("{:?}", &meta);
+            }
+        };
+
+        self.task = FetchService::fetch(req, handler.into()).ok();
     }
 
     pub fn send_message(&mut self, txt: String) {
@@ -88,7 +111,19 @@ impl ChatService {
             let url = api_url_post(chat_members);
             let json = serde_json::to_string(&txt).map_err(|_| anyhow::anyhow!("Cannot serialize"));
             let req = Request::post(url).body(json).unwrap();
-            self.task = request(self.new_messages_callback.clone(), req).ok();
+            let callback = self.callback.clone();
+            let handler = move |response: Response<
+                Json<Result<Vec<devand_core::chat::ChatMessage>, anyhow::Error>>,
+            >| {
+                let (meta, Json(data)) = response.into_parts();
+                if let Ok(data) = data {
+                    callback.emit(ChatServiceContent::NewMessagess(data));
+                } else {
+                    log::error!("{:?}", &meta);
+                }
+            };
+
+            self.task = FetchService::fetch(req, handler.into()).ok();
         } else {
             log::error!("Cannot send message without knowing chat members");
         }
@@ -98,26 +133,19 @@ impl ChatService {
         if let Some(chat_members) = &self.chat_members {
             let url = api_url_poll(chat_members, last_message);
             let req = Request::get(url).body(Nothing).unwrap();
-            self.task = request(self.new_messages_callback.clone(), req).ok();
+            let callback = self.callback.clone();
+            let handler = move |response: Response<
+                Json<Result<Vec<devand_core::chat::ChatMessage>, anyhow::Error>>,
+            >| {
+                let (meta, Json(data)) = response.into_parts();
+                if let Ok(data) = data {
+                    callback.emit(ChatServiceContent::NewMessagess(data));
+                } else {
+                    log::error!("{:?}", &meta);
+                }
+            };
+
+            self.task = FetchService::fetch(req, handler.into()).ok();
         }
     }
-}
-
-fn request<R>(
-    callback: Callback<Vec<ChatMessage>>,
-    r: http::request::Request<R>,
-) -> Result<FetchTask, anyhow::Error>
-where
-    R: std::convert::Into<std::result::Result<std::string::String, anyhow::Error>>,
-{
-    let handler = move |response: Response<Json<Result<Vec<ChatMessage>, anyhow::Error>>>| {
-        let (meta, Json(data)) = response.into_parts();
-        if let Ok(data) = data {
-            callback.emit(data);
-        } else {
-            log::error!("{:?}", &meta);
-        }
-    };
-
-    FetchService::fetch(r, handler.into())
 }

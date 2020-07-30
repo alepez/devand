@@ -1,6 +1,6 @@
 use crate::app::components::ChatInput;
 use crate::app::elements::busy_indicator;
-use crate::app::services::ChatService;
+use crate::app::services::{ChatService, ChatServiceContent};
 use devand_core::chat::ChatMessage;
 use devand_core::{PublicUserProfile, UserId};
 use yew::services::interval::{IntervalService, IntervalTask};
@@ -23,8 +23,7 @@ pub struct Props {
 }
 
 pub enum Msg {
-    OtherUserLoaded(Option<PublicUserProfile>),
-    AddMessages(Vec<ChatMessage>),
+    ChatServiceContentFetched(ChatServiceContent),
     SendMessage(String),
     Poll,
 }
@@ -41,10 +40,7 @@ impl Component for ChatPage {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let new_messages_callback = link.callback(Msg::AddMessages);
-        let other_user_loaded_callback = link.callback(Msg::OtherUserLoaded);
-
-        let mut service = ChatService::new(new_messages_callback, other_user_loaded_callback);
+        let mut service = ChatService::new(link.callback(Msg::ChatServiceContentFetched));
 
         service.load_other_user(&props.chat_with);
 
@@ -66,25 +62,24 @@ impl Component for ChatPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::OtherUserLoaded(user) => {
-                if let Some(user) = &user {
+            Msg::ChatServiceContentFetched(content) => match content {
+                ChatServiceContent::OtherUser(other_user) => {
                     let me = self.props.me.id;
-                    let other = user.id;
-                    let members = vec![other, me];
+                    let other_user_id = other_user.id;
+                    let members = vec![other_user_id, me];
+                    self.state.other_user = Some(other_user);
                     self.service.load_history(members);
-                } else {
-                    // TODO Display error
+                    true
                 }
-                self.state.other_user = user;
-                true
-            }
-            Msg::AddMessages(messages) => {
-                self.state.pending = false;
-                for msg in messages {
-                    self.state.messages.push(msg);
+                ChatServiceContent::NewMessagess(new_messages) => {
+                    self.state.pending = false;
+                    for msg in new_messages {
+                        self.state.messages.push(msg);
+                    }
+                    true
                 }
-                true
-            }
+                    _ => false,
+            },
             Msg::SendMessage(txt) => {
                 self.service.send_message(txt);
                 false

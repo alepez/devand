@@ -62,8 +62,8 @@ impl TryInto<devand_core::User> for User {
 
 #[derive(Queryable)]
 pub struct ChatMessage {
-    pub id: i32,
-    pub chat_id: i32,
+    pub id: uuid::Uuid,
+    pub chat_id: uuid::Uuid,
     pub created_at: chrono::NaiveDateTime,
     pub txt: String,
     pub author: i32,
@@ -72,7 +72,7 @@ pub struct ChatMessage {
 #[derive(Insertable)]
 #[table_name = "messages"]
 pub struct NewChatMessage {
-    pub chat_id: i32,
+    pub chat_id: uuid::Uuid,
     pub created_at: chrono::NaiveDateTime,
     pub txt: String,
     pub author: i32,
@@ -80,15 +80,15 @@ pub struct NewChatMessage {
 
 #[derive(Queryable)]
 pub struct Chat {
-    pub id: i32,
-    pub members: serde_json::Value,
+    pub id: uuid::Uuid,
+    pub members: Vec<i32>,
 }
 
 impl TryInto<devand_core::chat::Chat> for Chat {
     type Error = Error;
     fn try_into(self) -> Result<devand_core::chat::Chat, Self::Error> {
-        let members: Vec<devand_core::UserId> = serde_json::from_value(self.members)
-            .map_err(|e| Error::CannotDeserializeChatMembers(e.to_string()))?;
+        let members: Vec<devand_core::UserId> =
+            self.members.into_iter().map(devand_core::UserId).collect();
 
         let chat = devand_core::chat::Chat {
             id: devand_core::chat::ChatId(self.id),
@@ -102,7 +102,7 @@ impl TryInto<devand_core::chat::Chat> for Chat {
 #[derive(Insertable)]
 #[table_name = "chats"]
 pub struct NewChat {
-    pub members: serde_json::Value,
+    pub members: Vec<i32>,
 }
 
 impl Into<devand_core::chat::ChatMessage> for ChatMessage {
@@ -120,7 +120,7 @@ impl Into<devand_core::chat::ChatMessage> for ChatMessage {
 #[table_name = "unread_messages"]
 pub struct UnreadMessage {
     pub user_id: i32,
-    pub message_id: i32,
+    pub message_id: uuid::Uuid,
 }
 
 #[derive(Debug)]

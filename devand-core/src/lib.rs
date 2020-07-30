@@ -25,6 +25,7 @@ pub struct UserId(pub i32);
 pub struct UserChat {
     pub chat: chat::Chat,
     pub new_messages: usize,
+    pub members: Vec<PublicUserProfile>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]

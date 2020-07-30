@@ -314,6 +314,12 @@ fn dashboard_chat(auth_data: AuthData, _username: String) -> Template {
     dashboard(auth_data)
 }
 
+#[get("/chat")]
+fn dashboard_chats(auth_data: AuthData) -> Template {
+    dashboard(auth_data)
+}
+
+
 #[get("/schedule")]
 fn dashboard_schedule(auth_data: AuthData) -> Template {
     dashboard(auth_data)
@@ -497,6 +503,7 @@ pub fn routes() -> Vec<Route> {
         dashboard_code_now,
         dashboard_schedule,
         dashboard_chat,
+        dashboard_chats,
         dashboard_settings_password,
         dashboard_user_profile,
         privacy,

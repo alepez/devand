@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct ChatMessage {
-    pub id: i32, // FIXME UUID
+    pub id: uuid::Uuid,
     pub created_at: DateTime<Utc>,
     pub author: UserId,
     pub txt: String,
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub struct ChatId(pub i32);
+pub struct ChatId(pub uuid::Uuid);
 
 impl std::fmt::Display for ChatId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

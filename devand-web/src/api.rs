@@ -19,6 +19,7 @@ pub fn routes() -> Vec<Route> {
         affinities,
         code_now,
         availability_match,
+        chats,
         chat_messages_get,
         chat_messages_post,
         chat_messages_poll,
@@ -108,6 +109,13 @@ fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<
     let res = wsm.find_all_users_matching_in_week(id, next_week, availability);
     // TODO [optimization] users with same availability time can bee lots. Sort by affinity and keep only first n
     Json(res)
+}
+
+/// Retrieve all chats
+#[get("/chats")]
+fn chats(user: LoggedUser, conn: PgDevandConn) -> Option<Json<devand_core::UserChats>> {
+    let result = devand_db::load_chats_by_member(user.id, &conn);
+    Some(Json(result))
 }
 
 /// Retrieve all messages in a chat, given its members
