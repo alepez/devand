@@ -12,6 +12,7 @@ pub fn is_valid_password(s: &str) -> bool {
     s.len() >= 15 || (s.len() >= 8 && has_number(s) && has_lowercase(s))
 }
 
+/// Make sure it does not start with a number and is all lowercase (or numbers)
 pub fn is_valid_username(s: &str) -> bool {
     const MIN_LEN: usize = 3;
     let is_valid_char = |x: char| x.is_ascii_lowercase() || x.is_ascii_digit();
