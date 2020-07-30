@@ -44,4 +44,3 @@ fn fake_languages(rng: &mut StdRng) -> Languages {
 
     Languages(languages)
 }
-

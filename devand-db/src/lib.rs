@@ -7,11 +7,13 @@ mod models;
 mod schema;
 mod schema_view;
 
+use chrono::prelude::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
 use std::convert::TryInto;
 use std::env;
+
 #[macro_use]
 extern crate diesel_migrations;
 
@@ -62,6 +64,29 @@ pub fn load_user_by_email(email: &str, conn: &PgConnection) -> Option<devand_cor
         .ok()?;
 
     user.try_into().map_err(|e| dbg!(e)).ok()
+}
+
+// TODO [optimization] create a psql view, call db once
+pub fn load_full_user_by_id(
+    id: devand_core::UserId,
+    conn: &PgConnection,
+) -> Option<devand_core::User> {
+    let user: models::User = schema::users::table
+        .filter(schema::users::dsl::id.eq(id.0))
+        .first(conn)
+        .ok()?;
+
+    let unread_messages: i64 = schema::unread_messages::table
+        .filter(schema::unread_messages::dsl::user_id.eq(user.id))
+        .select(diesel::dsl::count(schema::unread_messages::dsl::message_id))
+        .first(conn)
+        .unwrap_or(0);
+
+    let mut user: devand_core::User = user.try_into().map_err(|e| dbg!(e)).ok()?;
+
+    user.unread_messages = unread_messages as usize;
+
+    Some(user)
 }
 
 pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
@@ -132,21 +157,20 @@ pub fn load_chat_history_by_id(
     chat_id: devand_core::chat::ChatId,
     conn: &PgConnection,
 ) -> Vec<devand_core::chat::ChatMessage> {
-    let result: Option<Vec<devand_core::chat::ChatMessage>> = schema::messages::table
+    schema::messages::table
         .filter(schema::messages::dsl::chat_id.eq(chat_id.0))
         .load(conn)
-        .ok()
-        .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect());
-
-    result.unwrap_or(Vec::default())
+        .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect())
+        .unwrap_or(Vec::default())
 }
 
 fn find_chat_id_by_members(
     members: &[devand_core::UserId],
     conn: &PgConnection,
 ) -> Option<devand_core::chat::ChatId> {
-    let members = serde_json::to_value(members).unwrap();
+    let members: Vec<_> = members.iter().map(|x| x.0).collect();
 
+    // TODO eq may not be good, what if members are in different order?
     schema::chats::table
         .filter(schema::chats::dsl::members.eq(members))
         .select(schema::chats::id)
@@ -162,9 +186,9 @@ fn find_or_create_chat_by_members(
     if let Some(chat_id) = find_chat_id_by_members(members, conn) {
         Ok(chat_id)
     } else {
-        let new_chat = models::NewChat {
-            members: serde_json::to_value(members).unwrap(),
-        };
+        let members: Vec<_> = members.iter().map(|x| x.0).collect();
+        let new_chat = models::NewChat { members };
+
         diesel::insert_into(schema::chats::table)
             .values(new_chat)
             .get_result(conn)
@@ -174,6 +198,83 @@ fn find_or_create_chat_by_members(
             })
             .map(|x: models::Chat| devand_core::chat::ChatId(x.id))
     }
+}
+
+fn load_user_chat_by_id(
+    user: devand_core::UserId,
+    id: uuid::Uuid,
+    conn: &PgConnection,
+) -> Option<devand_core::UserChat> {
+    // TODO [refactoring] Create PublicUserProfile model
+    let members: Vec<devand_core::PublicUserProfile> = schema_view::chat_members::table
+        .filter(schema_view::chat_members::chat_id.eq(id))
+        .select((
+            schema_view::chat_members::user_id,
+            schema_view::chat_members::username,
+            schema_view::chat_members::visible_name,
+            schema_view::chat_members::languages,
+        ))
+        .load(conn)
+        .unwrap_or(Vec::default())
+        .into_iter()
+        .filter(|(user_id, _, _, _)| *user_id != user.0)
+        .filter_map(|(user_id, username, visible_name, languages)| {
+            let languages: devand_core::Languages = serde_json::from_value(languages).ok()?;
+
+            let profile = devand_core::PublicUserProfile {
+                id: devand_core::UserId(user_id),
+                username,
+                visible_name,
+                languages,
+            };
+
+            Some(profile)
+        })
+        .collect();
+
+    let members_ids = members.iter().map(|u| u.id).collect();
+
+    let unread_messages: i64 = schema_view::unread_messages_full::table
+        .filter(schema_view::unread_messages_full::chat_id.eq(id))
+        .filter(schema_view::unread_messages_full::user_id.eq(user.0))
+        .select(diesel::dsl::count(
+            schema_view::unread_messages_full::dsl::message_id,
+        ))
+        .first(conn)
+        .ok()?;
+
+    let unread_messages = unread_messages as usize;
+
+    let chat = devand_core::UserChat {
+        chat: devand_core::chat::Chat {
+            id: devand_core::chat::ChatId(id),
+            members: members_ids,
+        },
+        unread_messages,
+        members,
+    };
+
+    Some(chat)
+}
+
+pub fn load_chats_by_member(
+    member: devand_core::UserId,
+    conn: &PgConnection,
+) -> devand_core::UserChats {
+    let chats = schema::chats::table
+        .filter(schema::chats::members.contains(vec![member.0]))
+        .select(schema::chats::id)
+        .load(conn)
+        .ok()
+        .map(|chats: Vec<uuid::Uuid>| {
+            chats
+                .into_iter()
+                .filter_map(|id| load_user_chat_by_id(member, id, conn))
+                .collect()
+        })
+        .unwrap_or(Vec::default());
+
+    devand_core::UserChats(chats)
 }
 
 pub fn load_chat_history_by_members(
@@ -187,35 +288,95 @@ pub fn load_chat_history_by_members(
     }
 }
 
+pub fn mark_messages_as_read_by(
+    user_id: devand_core::UserId,
+    messages: &[devand_core::chat::ChatMessage],
+    conn: &PgConnection,
+) {
+    for message in messages {
+        let res = diesel::delete(
+            schema::unread_messages::table
+                .filter(schema::unread_messages::user_id.eq(user_id.0))
+                .filter(schema::unread_messages::message_id.eq(message.id)),
+        )
+        .execute(conn);
+
+        if let Err(err) = res {
+            log::warn!("Cannot mark as read message: {:?}", err);
+        }
+    }
+}
+
+fn mark_message_as_unread(message: &models::ChatMessage, conn: &PgConnection) {
+    let models::ChatMessage {
+        id,
+        author,
+        chat_id,
+        ..
+    } = message;
+
+    let message_id = *id;
+
+    schema::chats::table
+        .filter(schema::chats::dsl::id.eq(chat_id))
+        .first(conn)
+        .ok()
+        .and_then(|x: models::Chat| x.try_into().ok())
+        .map(|chat: devand_core::chat::Chat| chat.members)
+        .unwrap_or(Vec::default())
+        .into_iter()
+        .map(|x| x.0)
+        .filter(|x| x != author)
+        .for_each(|user_id| {
+            let values = models::UnreadMessage {
+                user_id,
+                message_id,
+            };
+
+            let res = diesel::insert_into(schema::unread_messages::table)
+                .values(values)
+                .execute(conn);
+
+            if let Err(err) = res {
+                log::warn!("Error: {:?}", err);
+            }
+        });
+}
+
 pub fn add_chat_message_by_id(
     chat_id: devand_core::chat::ChatId,
-    new_message: devand_core::chat::ChatMessage,
+    author: devand_core::UserId,
+    txt: String,
     conn: &PgConnection,
 ) -> Result<devand_core::chat::ChatMessage, Error> {
     let new_message = models::NewChatMessage {
         chat_id: chat_id.0,
-        created_at: new_message.created_at.naive_utc(),
-        txt: new_message.txt,
-        author: new_message.author.0,
+        created_at: Utc::now().naive_utc(),
+        txt,
+        author: author.0,
     };
 
-    diesel::insert_into(schema::messages::table)
+    let message: models::ChatMessage = diesel::insert_into(schema::messages::table)
         .values(new_message)
         .get_result(conn)
         .map_err(|err| {
             dbg!(err);
             Error::Unknown
-        })
-        .map(|x: models::ChatMessage| x.into())
+        })?;
+
+    mark_message_as_unread(&message, conn);
+
+    Ok(message.into())
 }
 
 pub fn add_chat_message_by_members(
     members: &[devand_core::UserId],
-    new_message: devand_core::chat::ChatMessage,
+    author: devand_core::UserId,
+    txt: String,
     conn: &PgConnection,
 ) -> Option<devand_core::chat::ChatMessage> {
     if let Ok(chat_id) = find_or_create_chat_by_members(members, conn) {
-        add_chat_message_by_id(chat_id, new_message, conn).ok()
+        add_chat_message_by_id(chat_id, author, txt, conn).ok()
     } else {
         None
     }

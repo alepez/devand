@@ -3,8 +3,8 @@ mod elements;
 mod services;
 
 use self::components::{
-    AffinitiesPage, ChatPage, CodeNowPage, NotFoundPage, SchedulePage, SecuritySettingsPage,
-    SettingsPage, UserProfilePage,
+    AffinitiesPage, ChatPage, ChatsPage, CodeNowPage, NotFoundPage, SchedulePage,
+    SecuritySettingsPage, SettingsPage, UserProfilePage,
 };
 use self::elements::busy_indicator;
 use self::services::UserService;
@@ -34,6 +34,8 @@ pub enum AppRoute {
     SecuritySettings,
     #[to = "/chat/{username}"]
     Chat(String),
+    #[to = "/chat"]
+    Chats,
     #[to = "/u/{username}"]
     UserProfile(String),
 }
@@ -93,6 +95,7 @@ impl Component for App {
             }
             Msg::UserFetchOk(user) => {
                 log::debug!("User fetch ok");
+                // TODO Extract chats
                 self.state.user = Some(user);
                 self.state.pending_save = false;
                 true
@@ -123,7 +126,7 @@ impl App {
     fn view_ok(&self, user: &User) -> VNode {
         html! {
             <>
-            { view_menu() }
+            { view_menu(user) }
             { self.view_routes(&user) }
             </>
         }
@@ -145,6 +148,7 @@ impl App {
                         AppRoute::CodeNow=> html!{ <CodeNowPage/> },
                         AppRoute::Schedule=> html!{ <SchedulePage me=pub_user_profile.clone()/> },
                         AppRoute::Chat(username) => html!{ <ChatPage chat_with=username me=pub_user_profile.clone() />},
+                        AppRoute::Chats => html!{ <ChatsPage />},
                         AppRoute::NotFound(Permissive(missed_route)) => html!{ <NotFoundPage missed_route=missed_route/>},
                         AppRoute::SecuritySettings => html!{ <SecuritySettingsPage /> },
                         AppRoute::UserProfile(username) => html!{ <UserProfilePage username=username /> },
@@ -156,7 +160,7 @@ impl App {
     }
 }
 
-fn view_menu() -> VNode {
+fn view_menu(user: &User) -> VNode {
     html! {
     <ul class=("devand-menu")>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
@@ -164,6 +168,22 @@ fn view_menu() -> VNode {
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(user.unread_messages) }</RouterAnchor></li>
     </ul>
+    }
+}
+
+fn view_messages(unread_messages: usize) -> VNode {
+    html! {
+    <span>
+        <span>{ "Messages"}</span>
+        {
+            if unread_messages > 0 {
+                html! { <span class="devand-messages-count">{ format!("{}", unread_messages) }</span> }
+            } else {
+                html! { }
+            }
+        }
+    </span>
     }
 }

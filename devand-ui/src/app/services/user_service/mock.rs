@@ -19,6 +19,23 @@ impl UserService {
     pub fn verify_email(&mut self) {}
 }
 
+fn mock_chats() -> devand_core::UserChats {
+    use devand_core::chat::*;
+    use devand_core::*;
+
+    let mut chats = Vec::default();
+
+    chats.push(UserChat {
+        chat: Chat {
+            id: ChatId(1),
+            members: vec![UserId(43), UserId(67)],
+        },
+        new_messages: 5,
+    });
+
+    devand_core::UserChats(chats)
+}
+
 fn mock_user() -> devand_core::User {
     use devand_core::*;
     use std::collections::BTreeMap;
@@ -83,5 +100,6 @@ fn mock_user() -> devand_core::User {
                 sun: DaySchedule::never(),
             }),
         },
+        unread_messages: 5,
     }
 }

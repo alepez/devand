@@ -1,5 +1,4 @@
 use super::FetchCallback;
-use devand_core::CodeNow;
 use devand_core::*;
 use fake::faker::internet::raw::*;
 use fake::faker::name::raw::*;
@@ -76,5 +75,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::User {
             schedule: Availability::default(),
             vacation_mode: false,
         },
+        unread_messages: 5,
     }
 }

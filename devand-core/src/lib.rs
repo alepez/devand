@@ -20,7 +20,19 @@ pub use schedule::{Availability, DaySchedule, WeekSchedule};
 #[serde(rename_all = "snake_case")]
 pub struct UserId(pub i32);
 
-#[derive(Default, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct UserChat {
+    pub chat: chat::Chat,
+    pub unread_messages: usize,
+    pub members: Vec<PublicUserProfile>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct UserChats(pub Vec<UserChat>);
+
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
     /// This is unique and cannot be changed
@@ -35,7 +47,10 @@ pub struct User {
     pub settings: UserSettings,
     /// Email must be verified to enable some feature (notifications, ...)
     pub email_verified: bool,
+    /// User's chats
+    pub unread_messages: usize,
 }
+// FIXME User contains too many fields. UserChats should be in another type, like FullUser
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -70,7 +85,7 @@ impl Languages {
     }
 }
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserSettings {
     /// User can set language preferences

@@ -166,3 +166,14 @@
 .devand-affinity-tag.devand-affinity-high {
   color: rgb(28, 184, 65);
 }
+
+.devand-messages-count {
+  position: relative;
+  padding: .2em;
+  border: 1px solid transparent;
+  border-radius: 5em;
+  margin-left: 0.2em;
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}

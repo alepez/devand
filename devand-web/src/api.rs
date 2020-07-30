@@ -13,12 +13,13 @@ const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
 
 pub fn routes() -> Vec<Route> {
     routes![
-        settings,
-        settings_put,
+        user,
+        user_put,
         verify_email,
         affinities,
         code_now,
         availability_match,
+        chats,
         chat_messages_get,
         chat_messages_post,
         chat_messages_poll,
@@ -30,14 +31,14 @@ pub fn routes() -> Vec<Route> {
 }
 
 /// Retrieve user settings
-#[get("/settings")]
-fn settings(user: LoggedUser) -> Json<User> {
+#[get("/user")]
+fn user(user: LoggedUser) -> Json<User> {
     Json(user.into())
 }
 
 /// Update user settings
-#[put("/settings", data = "<user>")]
-fn settings_put(
+#[put("/user", data = "<user>")]
+fn user_put(
     auth_data: AuthData,
     user: Json<User>,
     conn: PgDevandConn,
@@ -110,6 +111,13 @@ fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<
     Json(res)
 }
 
+/// Retrieve all chats
+#[get("/chats")]
+fn chats(user: LoggedUser, conn: PgDevandConn) -> Option<Json<devand_core::UserChats>> {
+    let result = devand_db::load_chats_by_member(user.id, &conn);
+    Some(Json(result))
+}
+
 /// Retrieve all messages in a chat, given its members
 #[get("/chat/<members>/messages")]
 fn chat_messages_get(
@@ -126,6 +134,11 @@ fn chat_messages_get(
     }
 
     let result = devand_db::load_chat_history_by_members(&members, &conn);
+
+    if !result.is_empty() {
+        devand_db::mark_messages_as_read_by(user.id, &result, &conn);
+    }
+
     Some(Json(result))
 }
 
@@ -138,12 +151,8 @@ fn chat_messages_post(
     mailer: State<Mailer>,
     conn: PgDevandConn,
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
-    let new_message = devand_core::chat::ChatMessage {
-        author: user.id,
-        txt: txt.0,
-        created_at: Utc::now(),
-    };
-
+    let author = user.id;
+    let txt = txt.0;
     let members = parse_members(&members);
 
     // TODO [refactoring] Authorize using request guard
@@ -160,7 +169,7 @@ fn chat_messages_post(
         &members,
     );
 
-    if let Some(new_message) = devand_db::add_chat_message_by_members(&members, new_message, &conn)
+    if let Some(new_message) = devand_db::add_chat_message_by_members(&members, author, txt, &conn)
     {
         Some(Json(vec![new_message]))
     } else {
@@ -187,10 +196,15 @@ fn chat_messages_poll(
 
     // TODO [optimization] It could be better loading from db only messages created after the
     // threshold, instead of filtering here.
-    let result = devand_db::load_chat_history_by_members(&members, &conn)
+    let result: Vec<_> = devand_db::load_chat_history_by_members(&members, &conn)
         .into_iter()
         .filter(|x| x.created_at.timestamp() > after)
         .collect();
+
+    if !result.is_empty() {
+        devand_db::mark_messages_as_read_by(user.id, &result, &conn);
+    }
+
     Some(Json(result))
 }
 

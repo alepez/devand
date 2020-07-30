@@ -4,16 +4,26 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct ChatMessage {
+    pub id: uuid::Uuid,
     pub created_at: DateTime<Utc>,
     pub author: UserId,
     pub txt: String,
 }
 
-#[derive(Copy, Clone)]
-pub struct ChatId(pub i32);
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub struct ChatId(pub uuid::Uuid);
 
 impl std::fmt::Display for ChatId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Chat {
+    pub id: ChatId,
+    pub members: Vec<UserId>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct Chats(pub Vec<Chat>);

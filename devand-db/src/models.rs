@@ -1,4 +1,4 @@
-use super::schema::{auth, chats, messages, users};
+use super::schema::{auth, chats, messages, unread_messages, users};
 use chrono::{DateTime, Utc};
 use serde_json;
 use std::convert::TryInto;
@@ -53,6 +53,7 @@ impl TryInto<devand_core::User> for User {
             email_verified: self.email_verified,
             visible_name,
             settings,
+            unread_messages: 0,
         };
 
         Ok(user)
@@ -61,8 +62,8 @@ impl TryInto<devand_core::User> for User {
 
 #[derive(Queryable)]
 pub struct ChatMessage {
-    pub id: i32,
-    pub chat_id: i32,
+    pub id: uuid::Uuid,
+    pub chat_id: uuid::Uuid,
     pub created_at: chrono::NaiveDateTime,
     pub txt: String,
     pub author: i32,
@@ -71,7 +72,7 @@ pub struct ChatMessage {
 #[derive(Insertable)]
 #[table_name = "messages"]
 pub struct NewChatMessage {
-    pub chat_id: i32,
+    pub chat_id: uuid::Uuid,
     pub created_at: chrono::NaiveDateTime,
     pub txt: String,
     pub author: i32,
@@ -79,24 +80,47 @@ pub struct NewChatMessage {
 
 #[derive(Queryable)]
 pub struct Chat {
-    pub id: i32,
-    pub members: serde_json::Value,
+    pub id: uuid::Uuid,
+    pub members: Vec<i32>,
+}
+
+impl TryInto<devand_core::chat::Chat> for Chat {
+    type Error = Error;
+    fn try_into(self) -> Result<devand_core::chat::Chat, Self::Error> {
+        let members: Vec<devand_core::UserId> =
+            self.members.into_iter().map(devand_core::UserId).collect();
+
+        let chat = devand_core::chat::Chat {
+            id: devand_core::chat::ChatId(self.id),
+            members,
+        };
+
+        Ok(chat)
+    }
 }
 
 #[derive(Insertable)]
 #[table_name = "chats"]
 pub struct NewChat {
-    pub members: serde_json::Value,
+    pub members: Vec<i32>,
 }
 
 impl Into<devand_core::chat::ChatMessage> for ChatMessage {
     fn into(self) -> devand_core::chat::ChatMessage {
         devand_core::chat::ChatMessage {
+            id: self.id,
             created_at: DateTime::from_utc(self.created_at, Utc),
             txt: self.txt,
             author: devand_core::UserId(self.author),
         }
     }
+}
+
+#[derive(Insertable, Queryable)]
+#[table_name = "unread_messages"]
+pub struct UnreadMessage {
+    pub user_id: i32,
+    pub message_id: uuid::Uuid,
 }
 
 #[derive(Debug)]
