@@ -45,10 +45,10 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
     let settings = serde_json::to_value(settings).map_err(|_| Error::Unknown)?;
 
     let new_user = models::NewUser {
+        visible_name: username.clone(),
         username,
         email,
         settings,
-        visible_name: None,
     };
 
     let user: models::User = diesel::insert_into(users::table)

@@ -1,0 +1,2 @@
+ALTER TABLE users
+ALTER COLUMN visible_name DROP NOT NULL;

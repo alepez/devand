@@ -9,7 +9,7 @@ pub struct NewUser {
     pub username: String,
     pub email: String,
     pub settings: serde_json::Value,
-    pub visible_name: Option<String>,
+    pub visible_name: String,
 }
 
 #[derive(Queryable)]
@@ -18,7 +18,7 @@ pub struct User {
     pub username: String,
     pub email: String,
     pub settings: serde_json::Value,
-    pub visible_name: Option<String>,
+    pub visible_name: String,
     pub email_verified: bool,
     pub created_at: chrono::NaiveDateTime,
 }
@@ -44,14 +44,12 @@ impl TryInto<devand_core::User> for User {
         let settings = serde_json::from_value(self.settings)
             .map_err(|e| Error::CannotDeserializeUserSettings(e.to_string()))?;
 
-        let visible_name = self.visible_name.unwrap_or(self.username.clone());
-
         let user = devand_core::User {
             id: devand_core::UserId(self.id),
             username: self.username,
             email: self.email,
             email_verified: self.email_verified,
-            visible_name,
+            visible_name: self.visible_name,
             settings,
             unread_messages: 0,
         };

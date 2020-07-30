@@ -35,7 +35,7 @@ table! {
         username -> Varchar,
         email -> Varchar,
         settings -> Jsonb,
-        visible_name -> Nullable<Varchar>,
+        visible_name -> Varchar,
         email_verified -> Bool,
         created_at -> Timestamp,
     }
