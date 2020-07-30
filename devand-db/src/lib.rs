@@ -121,6 +121,13 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
         log::warn!("Email changed, it now needs to be verified again");
     }
 
+    // visible_name cannot be empty. Set it to be equal to username as fallback
+    let visible_name = if visible_name.is_empty() {
+        &user.username
+    } else {
+        &visible_name
+    };
+
     diesel::update(schema::users::table.filter(schema::users::dsl::id.eq(user.id.0)))
         .set((
             schema::users::dsl::settings.eq(settings),
