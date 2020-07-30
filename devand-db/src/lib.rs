@@ -141,6 +141,12 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
 }
 
 pub fn is_username_available(username: &str, conn: &PgConnection) -> bool {
+    // We have a username blocklist. Instead of check if the name is valid,
+    // just pretend it is not available
+    if !username_blocklist::validate(username) {
+        return false;
+    }
+
     let count: i64 = schema::users::table
         .filter(schema::users::dsl::username.eq(username))
         .select(diesel::dsl::count(schema::users::dsl::id))
