@@ -155,7 +155,24 @@ fn view_bubble(me: UserId, msg: &ChatMessage) -> Html {
     html! {
         <div class=("devand-chat-message-bubble", from_me_class)>
             <span class=("devand-chat-message-txt")>{ &msg.txt }</span>
-            <span class=("devand-timestamp")>{ format!("{:?}", msg.created_at) }</span>
+            <span class=("devand-timestamp")>{ view_timestamp(&msg.created_at) }</span>
         </div>
+    }
+}
+
+fn view_timestamp(t: &chrono::DateTime<chrono::Utc>) -> impl ToString {
+    t.format("%B %d - %R")
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn timestamp_format() {
+        use chrono::offset::TimeZone;
+        let t = chrono::Utc.ymd(2020, 8, 2).and_hms_milli(20, 0, 1, 444);
+        let formatted_t = view_timestamp(&t);
+        assert_eq!("August 02 - 20:00", formatted_t.to_string());
     }
 }

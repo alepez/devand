@@ -148,7 +148,7 @@ impl SchedulePage {
     fn view_slot(&self, t: &DateTime<Utc>, users: Vec<ExpandedUser>) -> Html {
         html! {
             <>
-            <span class="devand-slot-time">{ t.to_string() }</span>
+            <span class="devand-slot-time">{ view_timestamp(t) }</span>
             <span class="devand-slot-users">
             { for users.into_iter().map(|u| self.view_user_profile(u)) }
             </span>
@@ -198,4 +198,21 @@ impl SchedulePage {
 struct ExpandedUser {
     user: devand_core::PublicUserProfile,
     affinity: Affinity,
+}
+
+fn view_timestamp(t: &chrono::DateTime<chrono::Utc>) -> impl ToString {
+    t.format("%A, %B %d - %R")
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn timestamp_format() {
+        use chrono::offset::TimeZone;
+        let t = chrono::Utc.ymd(2020, 8, 2).and_hms_milli(20, 0, 1, 444);
+        let formatted_t = view_timestamp(&t);
+        assert_eq!("Sunday, August 02 - 20:00", formatted_t.to_string());
+    }
 }
