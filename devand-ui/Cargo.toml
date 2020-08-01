@@ -25,6 +25,7 @@ gloo = "0.2"
 chrono = { version = "0.4", features = ["serde"] }
 fake = { version = "2", optional = true, features = ["derive", "chrono"] }
 rand = { version = "0.7", optional = true }
+uuid = { version = ">=0.2.0, <0.7.0", optional = true }
 
 [dependencies.yew]
 git = "https://github.com/yewstack/yew.git"
@@ -53,4 +54,4 @@ opt-level = 'z'
 
 [features]
 default = []
-mock_http = ["fake", "rand"]
+mock_http = ["fake", "rand", "uuid"]

@@ -11,7 +11,7 @@ impl UserService {
     }
 
     pub fn restore(&mut self) {
-        self.callback.emit(Ok(mock_user()))
+        self.callback.emit(Ok(fake_user()))
     }
 
     pub fn store(&mut self, _user: &User) {}
@@ -19,24 +19,7 @@ impl UserService {
     pub fn verify_email(&mut self) {}
 }
 
-fn mock_chats() -> devand_core::UserChats {
-    use devand_core::chat::*;
-    use devand_core::*;
-
-    let mut chats = Vec::default();
-
-    chats.push(UserChat {
-        chat: Chat {
-            id: ChatId(1),
-            members: vec![UserId(43), UserId(67)],
-        },
-        new_messages: 5,
-    });
-
-    devand_core::UserChats(chats)
-}
-
-fn mock_user() -> devand_core::User {
+fn fake_user() -> devand_core::User {
     use devand_core::*;
     use std::collections::BTreeMap;
     use std::convert::TryFrom;

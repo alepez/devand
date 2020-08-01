@@ -58,6 +58,7 @@ impl ChatService {
         let t: i64 = 1592475298;
         self.callback
             .emit(ChatServiceContent::NewMessagess(vec![ChatMessage {
+                id: fake_uuid(&mut self.rng),
                 created_at: chrono::Utc.timestamp(t, 0),
                 author: UserId(1),
                 txt,
@@ -76,6 +77,11 @@ impl ChatService {
     }
 }
 
+fn fake_uuid(rng: &mut StdRng) -> uuid::Uuid {
+    let bytes: [u8; 16] = rng.gen();
+    uuid::Uuid::from_bytes(&bytes).unwrap()
+}
+
 fn fake_messages(rng: &mut StdRng, n: usize, me: UserId, other: UserId) -> Vec<ChatMessage> {
     let mut history = Vec::new();
     let mut t: i64 = 1592475298;
@@ -86,7 +92,7 @@ fn fake_messages(rng: &mut StdRng, n: usize, me: UserId, other: UserId) -> Vec<C
         t += t_diff;
 
         history.push(ChatMessage {
-            id: rng.gen(),
+            id: fake_uuid(rng),
             created_at: chrono::Utc.timestamp(t, 0),
             author: if from_me { me } else { other },
             txt: Sentence(1..30).fake_with_rng(rng),
@@ -100,7 +106,7 @@ fn fake_message(rng: &mut StdRng, author: UserId) -> ChatMessage {
     let t: i64 = 1592475298;
 
     ChatMessage {
-        id: rng.gen(),
+        id: fake_uuid(rng),
         created_at: chrono::Utc.timestamp(t, 0),
         author,
         txt: Sentence(1..30).fake_with_rng(rng),
@@ -108,5 +114,20 @@ fn fake_message(rng: &mut StdRng, author: UserId) -> ChatMessage {
 }
 
 fn fake_chats(rng: &mut StdRng) -> UserChats {
-    todo!()
+    use devand_core::chat::{Chat, ChatId};
+    use devand_core::{PublicUserProfile, UserChat};
+
+    UserChats(vec![UserChat {
+        chat: Chat {
+            id: ChatId(fake_uuid(rng)),
+            members: vec![UserId(rng.gen()), UserId(rng.gen())],
+        },
+        unread_messages: rng.gen_range(1, 100),
+        members: vec![PublicUserProfile {
+            id: UserId(2),
+            languages: devand_core::Languages::default(),
+            username: "foobar".into(),
+            visible_name: "Foo Bar".into(),
+        }],
+    }])
 }
