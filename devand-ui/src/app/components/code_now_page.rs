@@ -102,6 +102,11 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
             <p> { "No matching users online" }</p>
         }
     } else {
-        view_affinities_table(&affinities)
+        html! {
+        <>
+            <p>{ "In the table below, you can see a list of online developers, sorted by analogy. Just click the chat icon to start chatting and organizing your next pair-programming session." }</p>
+            { view_affinities_table(&affinities) }
+        </>
+        }
     }
 }

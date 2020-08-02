@@ -89,7 +89,12 @@ fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
     if affinities.is_empty() {
         view_no_affinities()
     } else {
-        view_affinities_table(affinities)
+        html! {
+        <>
+            <p>{ "In the table below, you can see a list of developers who love the same languages as you. Just click the chat icon to start chatting and organizing your next pair-programming session." }</p>
+            { view_affinities_table(affinities) }
+        </>
+        }
     }
 }
 
