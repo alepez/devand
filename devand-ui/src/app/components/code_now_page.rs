@@ -1,8 +1,7 @@
-use crate::app::components::LanguageTag;
+use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
 use crate::app::services::CodeNowService;
-use crate::app::{AppRoute, RouterAnchor, RouterButton};
-use devand_core::{CodeNow, PublicUserProfile, UserAffinity};
+use devand_core::CodeNow;
 use yew::{prelude::*, Properties};
 
 #[derive(Default)]
@@ -97,45 +96,12 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     let user = current_user.into();
     let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
     affinities.sort_unstable_by_key(|x| x.affinity);
-    let affinities = affinities.into_iter().rev().map(|a| view_affinity(a));
 
     if affinities.is_empty() {
         html! {
             <p> { "No matching users online" }</p>
         }
     } else {
-        html! {
-            <table class="user-affinities pure-table-striped">
-            { for affinities }
-            </table>
-        }
-    }
-}
-
-fn view_affinity(affinity: UserAffinity) -> Html {
-    let UserAffinity { user, affinity } = affinity;
-
-    let PublicUserProfile {
-        visible_name,
-        languages,
-        username,
-        ..
-    } = user;
-
-    let languages = languages.clone().to_sorted_vec();
-
-    let languages_tags = languages.iter().map(|(lang, pref)| {
-        html! {
-            <LanguageTag lang=lang pref=pref />
-        }
-    });
-
-    html! {
-        <tr class=("user-affinity")>
-            <td class="start-chat"><RouterButton route=AppRoute::Chat(username.clone())>{ "💬" }</RouterButton></td>
-            <td class="affinity">{ affinity.to_string() }</td>
-            <td class="visible_name"><RouterAnchor route=AppRoute::UserProfile(username.clone()) >{ visible_name }</RouterAnchor></td>
-            <td class="languages"> { for languages_tags } </td>
-        </tr>
+        view_affinities_table(&affinities)
     }
 }

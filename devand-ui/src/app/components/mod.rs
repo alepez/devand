@@ -1,4 +1,5 @@
 mod affinities_page;
+mod affinities_table;
 mod availability_table;
 mod chat_input;
 mod chat_page;
@@ -27,3 +28,4 @@ pub use schedule_page::SchedulePage;
 pub use security_settings_page::SecuritySettingsPage;
 pub use settings_page::SettingsPage;
 pub use user_profile_page::UserProfilePage;
+pub use affinities_table::view_affinities_table;
