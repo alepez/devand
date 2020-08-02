@@ -154,7 +154,7 @@ impl AddLanguageComponent {
                     Msg::Nope
                 }
             } )>
-            { for Priority::iter().map(|x| {
+            { for Priority::iter().rev().map(|x| {
                 html! {
                     <option value=x>{ x }</option>
                 }
