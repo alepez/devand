@@ -104,7 +104,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     } else {
         html! {
         <>
-            <p>{ "In the table below, you can see a list of online developers, sorted by analogy. Just click the chat icon to start chatting and organizing your next pair-programming session." }</p>
+            <p>{ "In the table below, you can see a list of online developers, sorted by analogy. Just click the chat icon to start chatting and organize your next pair-programming session." }</p>
             { view_affinities_table(&affinities) }
         </>
         }

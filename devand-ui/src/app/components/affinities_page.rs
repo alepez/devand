@@ -91,7 +91,7 @@ fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
     } else {
         html! {
         <>
-            <p>{ "In the table below, you can see a list of developers who love the same languages as you. Just click the chat icon to start chatting and organizing your next pair-programming session." }</p>
+            <p>{ "In the table below, you can see a list of developers who love the same languages as you. Just click the chat icon to start chatting and organize your next pair-programming session." }</p>
             { view_affinities_table(affinities) }
         </>
         }
