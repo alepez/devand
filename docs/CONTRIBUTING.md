@@ -90,3 +90,14 @@ DATABASE_URL=postgres://postgres:password@localhost/devand
 
 Change smtp address and credentials as needed. `DEVAND_SECRET` must be the same
 used by `devand-web`.
+
+## Setting up local environment with docker
+In folder `development` there is an example of `.env` files and a `docker-compose.yml` to set up 4 docker container used to try it on localhost:8000.
+
+- `cd development`
+- `docker-compose up`
+- connect to `localhost:8000` on you browser
+
+Please make attention to:
+- file in `db.env` `PGADMIN_DEFAULT_EMAIL` use a valid email
+- to generate secrets you can use `openssl rand -base64 32`

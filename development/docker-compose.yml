@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  db:
+    restart: always
+    image: postgres:12-alpine
+    env_file:
+      - ./db.env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  web:
+    restart: always
+    image: docker.pkg.github.com/alepez/devand/devand-web:latest
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ./web.env
+      - ./db.env
+    depends_on:
+      - db
+
+  mailer:
+    restart: always
+    image: docker.pkg.github.com/alepez/devand/devand-mailer:latest
+    environment:
+      RUST_LOG: info
+    env_file:
+      - ./mailer.env
+      - ./db.env
+
+  pgadmin:
+    image: dpage/pgadmin4:4.22
+    restart: always
+    env_file:
+      - ./db.env
+    ports:
+      - "127.0.0.1:3000:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+
+volumes:
+  pgadmin-data:
+  db-data:
