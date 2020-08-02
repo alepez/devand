@@ -101,12 +101,12 @@ fn code_now(user: LoggedUser, code_now_users: State<CodeNowUsers>) -> Json<devan
 #[get("/availability-match")]
 fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<AvailabilityMatch> {
     let now = Utc::now();
-    let next_week = now.checked_add_signed(Duration::days(7)).unwrap();
+    let start = now.checked_add_signed(Duration::hours(2)).unwrap();
     let User { settings, id, .. } = user.into();
     let availability = settings.schedule;
     let wsm = wsm.0.read().unwrap();
     let wsm = wsm.get();
-    let res = wsm.find_all_users_matching_in_week(id, next_week, availability);
+    let res = wsm.find_all_users_matching_in_week(id, start, availability);
     // TODO [optimization] users with same availability time can bee lots. Sort by affinity and keep only first n
     Json(res)
 }
