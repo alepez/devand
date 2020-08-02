@@ -1,3 +1,7 @@
+button {
+  cursor: pointer;
+}
+
 .devand-language-tag,
 .devand-slot-user {
   background-color: #ffffff;
@@ -9,6 +13,7 @@
   padding: 0.2em 0.4em;
   vertical-align: middle;
   line-height: 2em;
+  white-space: nowrap;
 }
 
 .devand-language-tag.devand-language-priority-no {
@@ -165,6 +170,10 @@
 }
 .devand-affinity-tag.devand-affinity-high {
   color: rgb(28, 184, 65);
+}
+
+.devand-visible-name {
+  white-space: nowrap;
 }
 
 .devand-messages-count {

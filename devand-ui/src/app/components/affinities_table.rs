@@ -1,6 +1,6 @@
+use crate::app::components::user_affinity_bubble;
 use crate::app::components::LanguageTag;
-use crate::app::{AppRoute, RouterAnchor, RouterButton};
-use devand_core::{PublicUserProfile, UserAffinity};
+use devand_core::UserAffinity;
 use yew::prelude::*;
 
 pub fn view_affinities_table(affinities: &Vec<UserAffinity>) -> Html {
@@ -12,30 +12,17 @@ pub fn view_affinities_table(affinities: &Vec<UserAffinity>) -> Html {
     }
 }
 
-fn view_affinity(affinity: &UserAffinity) -> Html {
-    let UserAffinity { user, affinity } = affinity;
-
-    let PublicUserProfile {
-        visible_name,
-        languages,
-        username,
-        ..
-    } = user;
-
-    let languages = languages.clone().to_sorted_vec();
+fn view_affinity(user_affinity: &UserAffinity) -> Html {
+    let languages = user_affinity.user.languages.clone().to_sorted_vec();
 
     let languages_tags = languages.iter().map(|(lang, pref)| {
-        html! {
-            <LanguageTag lang=lang pref=pref />
-        }
+        html! { <LanguageTag lang=lang pref=pref /> }
     });
 
     html! {
-        <tr class=("user-affinity")>
-            <td class="start-chat"><RouterButton route=AppRoute::Chat(username.clone())>{ "💬" }</RouterButton></td>
-            <td class="affinity">{ affinity.to_string() }</td>
-            <td class="visible_name"><RouterAnchor route=AppRoute::UserProfile(username.clone()) >{ visible_name }</RouterAnchor></td>
-            <td class="languages"> { for languages_tags } </td>
-        </tr>
+    <tr class=("user-affinity")>
+        <td>{ user_affinity_bubble(user_affinity) }</td>
+        <td class="languages"> { for languages_tags } </td>
+    </tr>
     }
 }
