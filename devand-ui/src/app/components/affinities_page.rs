@@ -1,3 +1,4 @@
+use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
 use crate::app::services::AffinitiesService;
 use devand_core::UserAffinity;
@@ -70,16 +71,16 @@ impl Component for AffinitiesPage {
 
     fn view(&self) -> Html {
         html! {
-            <>
-                <h1>{ "Affinities" }</h1>
-                {
-                if let Some(affinities) = &self.state.affinities {
-                    view_affinities(affinities)
-                } else {
-                    busy_indicator()
-                }
-                }
-            </>
+        <>
+        <h1>{ "Affinities" }</h1>
+        {
+            if let Some(affinities) = &self.state.affinities {
+                view_affinities(affinities)
+            } else {
+                busy_indicator()
+            }
+        }
+        </>
         }
     }
 }
@@ -88,7 +89,7 @@ fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
     if affinities.is_empty() {
         view_no_affinities()
     } else {
-        crate::app::components::affinities_table::view_affinities_table(affinities)
+        view_affinities_table(affinities)
     }
 }
 
