@@ -12,9 +12,11 @@ mod not_found_page;
 mod schedule_page;
 mod security_settings_page;
 mod settings_page;
+mod user_bubble;
 mod user_profile_page;
 
 pub use affinities_page::AffinitiesPage;
+pub use affinities_table::view_affinities_table;
 pub use availability_table::AvailabilityTable;
 pub use chat_input::ChatInput;
 pub use chat_page::ChatPage;
@@ -27,5 +29,5 @@ pub use not_found_page::NotFoundPage;
 pub use schedule_page::SchedulePage;
 pub use security_settings_page::SecuritySettingsPage;
 pub use settings_page::SettingsPage;
+pub use user_bubble::user_affinity_bubble;
 pub use user_profile_page::UserProfilePage;
-pub use affinities_table::view_affinities_table;

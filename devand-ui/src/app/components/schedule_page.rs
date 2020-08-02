@@ -1,8 +1,9 @@
+use crate::app::components::user_affinity_bubble;
 use crate::app::services::{ScheduleService, ScheduleServiceContent};
 use crate::app::{AppRoute, RouterButton};
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
-use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserId};
+use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserAffinity, UserId};
 use yew::{prelude::*, Properties};
 // use crate::app::components::LanguageTag;
 use crate::app::RouterAnchor;
@@ -145,36 +146,18 @@ impl SchedulePage {
         }
     }
 
-    fn view_slot(&self, t: &DateTime<Utc>, users: Vec<ExpandedUser>) -> Html {
+    fn view_slot(&self, t: &DateTime<Utc>, users: Vec<UserAffinity>) -> Html {
         html! {
             <>
             <span class="devand-slot-time">{ view_timestamp(t) }</span>
             <span class="devand-slot-users">
-            { for users.into_iter().map(|u| self.view_user_profile(u)) }
+            { for users.into_iter().map(|u| user_affinity_bubble(&u)) }
             </span>
             </>
         }
     }
 
-    fn view_user_profile(&self, u: ExpandedUser) -> Html {
-        let ExpandedUser { user, affinity } = u;
-
-        let (affinity_class, affinity_title) = match affinity.normalize() {
-            x if x >= 0.6 => ("devand-affinity-high", "High affinity"),
-            x if x >= 0.3 => ("devand-affinity-medium", "Medium affinity"),
-            _ => ("devand-affinity-low", "Low affinity"),
-        };
-
-        html! {
-        <span class="devand-slot-user">
-            <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(user.username.clone())>{ "💬" }</RouterButton></span>
-            <span class=("devand-affinity-tag", affinity_class) title=affinity_title>{ affinity.to_string() }</span>
-            <span class="devand-visible-name"><RouterAnchor route=AppRoute::UserProfile(user.username.clone()) >{ user.visible_name }</RouterAnchor></span>
-        </span>
-        }
-    }
-
-    fn expand_user(&self, user_id: UserId) -> Option<ExpandedUser> {
+    fn expand_user(&self, user_id: UserId) -> Option<UserAffinity> {
         if let Some(user) = self.state.users.get(&user_id) {
             let my_aff_params =
                 AffinityParams::new().with_languages(self.props.me.languages.clone());
@@ -183,7 +166,7 @@ impl SchedulePage {
             let affinity = Affinity::from_params(&my_aff_params, &u_aff_params);
 
             // TODO [optimization] Avoid clone
-            Some(ExpandedUser {
+            Some(UserAffinity {
                 user: user.clone(),
                 affinity,
             })
@@ -193,11 +176,6 @@ impl SchedulePage {
             None
         }
     }
-}
-
-struct ExpandedUser {
-    user: devand_core::PublicUserProfile,
-    affinity: Affinity,
 }
 
 fn view_timestamp(t: &chrono::DateTime<chrono::Utc>) -> impl ToString {
