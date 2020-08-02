@@ -97,3 +97,7 @@ In folder `development` there is an example of `.env` files and a `docker-compos
 - `cd development`
 - `docker-compose up`
 - connect to `localhost:8000` on you browser
+
+Please make attention to:
+- file in `db.env` `PGADMIN_DEFAULT_EMAIL` use a valid email
+- to generate secrets you can use `openssl rand -base64 32`
