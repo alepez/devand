@@ -6,6 +6,7 @@ pub enum ChatServiceContent {
     OtherUser(PublicUserProfile),
     NewMessagess(Vec<ChatMessage>),
     AllChats(UserChats),
+    OtherUserExtended(bool),
 }
 
 // type NewMessagesCallback = Callback<Vec<ChatMessage>>;

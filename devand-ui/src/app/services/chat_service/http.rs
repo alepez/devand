@@ -98,6 +98,7 @@ impl ChatService {
             let (meta, Json(data)) = response.into_parts();
             if let Ok(data) = data {
                 callback.emit(ChatServiceContent::NewMessagess(data));
+                callback.emit(ChatServiceContent::OtherUserExtended(true))
             } else {
                 log::error!("{:?}", &meta);
             }
