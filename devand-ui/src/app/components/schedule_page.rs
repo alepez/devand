@@ -1,6 +1,6 @@
 use crate::app::components::user_affinity_bubble;
 use crate::app::services::{ScheduleService, ScheduleServiceContent};
-use crate::app::{AppRoute, RouterButton};
+use crate::app::AppRoute;
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserAffinity, UserId};
