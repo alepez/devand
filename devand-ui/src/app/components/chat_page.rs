@@ -79,8 +79,8 @@ impl Component for ChatPage {
                     }
                     true
                 }
-                ChatServiceContent::OtherUserExtended(verified_email) => {
-                    self.state.verified_email = Some(verified_email);
+                ChatServiceContent::OtherUserExtended(members_info) => {
+                    self.state.verified_email = Some(members_info.verified_email);
                     true
                 }
                 _ => false,

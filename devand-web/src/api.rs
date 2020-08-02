@@ -20,6 +20,7 @@ pub fn routes() -> Vec<Route> {
         code_now,
         availability_match,
         chats,
+        chat,
         chat_messages_get,
         chat_messages_post,
         chat_messages_poll,
@@ -139,6 +140,34 @@ fn chat_messages_get(
         devand_db::mark_messages_as_read_by(user.id, &result, &conn);
     }
 
+    Some(Json(result))
+}
+
+/// Retrieve all messages in a chat, given its members
+#[get("/chat/<members>")]
+fn chat(
+    user: LoggedUser,
+    members: String,
+    conn: PgDevandConn,
+) -> Option<Json<devand_core::chat::ChatInfo>> {
+    let members = parse_members(&members);
+
+    // TODO [refactoring] Authorize using request guard
+    let authorized = members.contains(&user.id);
+    if !authorized {
+        return None;
+    }
+
+    let messages = devand_db::load_chat_history_by_members(&members, &conn);
+
+    if !messages.is_empty() {
+        devand_db::mark_messages_as_read_by(user.id, &messages, &conn);
+    }
+
+    // let members_info = vec![devand_core::chat::ChatMemberInfo{user_id: UserId(), verified_email: false}];
+    let members_info = members.iter().map(|&user_id|devand_core::chat::ChatMemberInfo{user_id, verified_email: false}).collect();
+
+    let result = devand_core::chat::ChatInfo{members_info, messages};
     Some(Json(result))
 }
 
