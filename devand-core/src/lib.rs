@@ -161,7 +161,7 @@ impl Default for LanguagePreference {
     fn default() -> Self {
         Self {
             level: Level::Novice,
-            priority: Priority::No,
+            priority: Priority::High,
         }
     }
 }
