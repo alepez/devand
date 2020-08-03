@@ -21,6 +21,7 @@ pub struct User {
     pub visible_name: String,
     pub email_verified: bool,
     pub created_at: chrono::NaiveDateTime,
+    pub bio: String,
 }
 
 #[derive(Insertable)]
