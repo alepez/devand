@@ -139,9 +139,11 @@ impl ChatPage {
             <>
                 <h1>{ format!("Chat with {}", &other_user.visible_name) }</h1>
                 {
-                    if unverified_email { html! {
-                        <span>{"email not verified by user"}</span>
-                    } } else { html! {} }
+                if unverified_email {
+                    view_unverified_email()
+                } else {
+                    html! { }
+                }
                 }
                 <div class="devand-chat-container">
                     <div class="devand-chat-messages">
@@ -153,6 +155,14 @@ impl ChatPage {
                 </div>
             </>
         }
+    }
+}
+
+fn view_unverified_email() -> Html {
+    html! {
+    <div class=("alert", "alert-warning")>
+        { "This user may not receive email notification of this message (email not verified yet)" }
+    </div>
     }
 }
 

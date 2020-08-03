@@ -164,10 +164,25 @@ fn chat(
         devand_db::mark_messages_as_read_by(user.id, &messages, &conn);
     }
 
-    // let members_info = vec![devand_core::chat::ChatMemberInfo{user_id: UserId(), verified_email: false}];
-    let members_info = members.iter().map(|&user_id|devand_core::chat::ChatMemberInfo{user_id, verified_email: false}).collect();
+    let members_info = members
+        .iter()
+        .filter_map(|&user_id| {
+            // TODO [optimization] do not load full user info, only needed
+            // TODO [optimization] for multiple users, just do only one call to db
+            let user = devand_db::load_full_user_by_id(user_id, &conn)?;
 
-    let result = devand_core::chat::ChatInfo{members_info, messages};
+            Some(devand_core::chat::ChatMemberInfo {
+                user_id,
+                verified_email: user.email_verified,
+            })
+        })
+        .collect();
+
+    let result = devand_core::chat::ChatInfo {
+        members_info,
+        messages,
+    };
+
     Some(Json(result))
 }
 
