@@ -17,7 +17,7 @@ fn api_url_get_user(u: &str) -> String {
 }
 
 fn api_url_get(chat_members: &[UserId]) -> String {
-    format!("/api/chat/{}/messages", encode_chat_members(chat_members))
+    format!("/api/chat/{}", encode_chat_members(chat_members))
 }
 
 fn api_url_post(chat_members: &[UserId]) -> String {
@@ -93,11 +93,14 @@ impl ChatService {
         let req = Request::get(url).body(Nothing).unwrap();
         let callback = self.callback.clone();
         let handler = move |response: Response<
-            Json<Result<Vec<devand_core::chat::ChatMessage>, anyhow::Error>>,
+            Json<Result<devand_core::chat::ChatInfo, anyhow::Error>>,
         >| {
             let (meta, Json(data)) = response.into_parts();
             if let Ok(data) = data {
-                callback.emit(ChatServiceContent::NewMessagess(data));
+                callback.emit(ChatServiceContent::NewMessagess(data.messages));
+                for member in data.members_info {
+                    callback.emit(ChatServiceContent::OtherUserExtended(member))
+                }
             } else {
                 log::error!("{:?}", &meta);
             }

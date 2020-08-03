@@ -33,6 +33,7 @@ struct State {
     messages: Vec<ChatMessage>,
     other_user: Option<PublicUserProfile>,
     pending: bool,
+    verified_email: Option<bool>,
 }
 
 impl Component for ChatPage {
@@ -76,6 +77,10 @@ impl Component for ChatPage {
                     for msg in new_messages {
                         self.state.messages.push(msg);
                     }
+                    true
+                }
+                ChatServiceContent::OtherUserExtended(members_info) => {
+                    self.state.verified_email = Some(members_info.verified_email);
                     true
                 }
                 _ => false,
@@ -123,6 +128,7 @@ impl Component for ChatPage {
 
 impl ChatPage {
     fn view_messages(&self, other_user: &PublicUserProfile) -> Html {
+        let unverified_email = self.state.verified_email == Some(false);
         let msg_bubbles = self
             .state
             .messages
@@ -132,6 +138,13 @@ impl ChatPage {
         html! {
             <>
                 <h1>{ format!("Chat with {}", &other_user.visible_name) }</h1>
+                {
+                if unverified_email {
+                    view_unverified_email()
+                } else {
+                    html! { }
+                }
+                }
                 <div class="devand-chat-container">
                     <div class="devand-chat-messages">
                         { for msg_bubbles }
@@ -142,6 +155,14 @@ impl ChatPage {
                 </div>
             </>
         }
+    }
+}
+
+fn view_unverified_email() -> Html {
+    html! {
+    <div class=("alert", "alert-warning")>
+        { "This user may not receive email notification of this message (email not verified yet)" }
+    </div>
     }
 }
 

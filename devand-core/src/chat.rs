@@ -2,7 +2,7 @@ use crate::UserId;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ChatMessage {
     pub id: uuid::Uuid,
     pub created_at: DateTime<Utc>,
@@ -27,3 +27,15 @@ pub struct Chat {
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Chats(pub Vec<Chat>);
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChatMemberInfo {
+    pub user_id: UserId,
+    pub verified_email: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChatInfo {
+    pub members_info: Vec<ChatMemberInfo>,
+    pub messages: Vec<ChatMessage>,
+}

@@ -6,6 +6,7 @@ pub enum ChatServiceContent {
     OtherUser(PublicUserProfile),
     NewMessagess(Vec<ChatMessage>),
     AllChats(UserChats),
+    OtherUserExtended(devand_core::chat::ChatMemberInfo),
 }
 
 // type NewMessagesCallback = Callback<Vec<ChatMessage>>;
