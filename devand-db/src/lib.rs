@@ -103,6 +103,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
         settings,
         visible_name,
         email,
+        bio,
         ..
     } = user;
 
@@ -134,6 +135,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
             schema::users::dsl::visible_name.eq(visible_name),
             schema::users::dsl::email.eq(email),
             schema::users::dsl::email_verified.eq(email_verified),
+            schema::users::dsl::bio.eq(bio),
         ))
         .get_result(conn)
         .ok()

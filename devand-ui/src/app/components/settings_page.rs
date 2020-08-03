@@ -8,6 +8,7 @@ use crate::app::components::AvailabilityTable;
 
 pub enum Msg {
     UpdateVisibleName(String),
+    UpdateBio(String),
     UpdateEmail(String),
     ToggleVacationMode,
     AddLanguage((Language, LanguagePreference)),
@@ -54,6 +55,11 @@ impl Component for SettingsPage {
             Msg::UpdateVisibleName(s) => {
                 self.update_user(move |user| {
                     user.visible_name = s;
+                });
+            }
+            Msg::UpdateBio(s) => {
+                self.update_user(move |user| {
+                    user.bio = s;
                 });
             }
             Msg::UpdateEmail(s) => {
@@ -168,6 +174,11 @@ impl SettingsPage {
                 <div class="pure-control-group">
                     <label for="visible_name">{ "Visible name:" }</label>
                     <input type="text" name="visible_name" id="visible_name" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
+                </div>
+                <div class="pure-control-group">
+                    <label for="bio">{ "Bio:" }</label>
+                    <input type="text" name="bio" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
+                    <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ " Vacation mode" }</label>

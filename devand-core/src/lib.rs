@@ -49,7 +49,7 @@ pub struct User {
     pub email_verified: bool,
     /// User's chats
     pub unread_messages: usize,
-    /// User's bio (max 320 char)
+    /// User's bio (max 160 char)
     pub bio: String,
 }
 // FIXME User contains too many fields. UserChats should be in another type, like FullUser
