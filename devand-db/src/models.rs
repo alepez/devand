@@ -21,6 +21,7 @@ pub struct User {
     pub visible_name: String,
     pub email_verified: bool,
     pub created_at: chrono::NaiveDateTime,
+    pub bio: String,
 }
 
 #[derive(Insertable)]
@@ -52,6 +53,7 @@ impl TryInto<devand_core::User> for User {
             visible_name: self.visible_name,
             settings,
             unread_messages: 0,
+            bio: self.bio,
         };
 
         Ok(user)

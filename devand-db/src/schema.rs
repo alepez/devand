@@ -38,6 +38,7 @@ table! {
         visible_name -> Varchar,
         email_verified -> Bool,
         created_at -> Timestamp,
+        bio -> Varchar,
     }
 }
 

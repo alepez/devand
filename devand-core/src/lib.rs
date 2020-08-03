@@ -49,6 +49,8 @@ pub struct User {
     pub email_verified: bool,
     /// User's chats
     pub unread_messages: usize,
+    /// User's bio (max 160 char)
+    pub bio: String,
 }
 // FIXME User contains too many fields. UserChats should be in another type, like FullUser
 
@@ -246,6 +248,7 @@ pub struct PublicUserProfile {
     pub username: String,
     pub visible_name: String,
     pub languages: Languages,
+    pub bio: String,
 }
 
 impl PublicUserProfile {
@@ -271,6 +274,7 @@ impl From<User> for PublicUserProfile {
             username: user.username,
             visible_name: user.visible_name,
             languages: user.settings.languages,
+            bio: user.bio,
         }
     }
 }

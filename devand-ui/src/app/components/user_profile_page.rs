@@ -82,6 +82,7 @@ impl Component for UserProfilePage {
             <>
                 <h1><RouterButton route=AppRoute::Chat(other_user.username.clone())>{ "💬 " }</RouterButton>{ other_user.full_name() }</h1>
                 <h2>{"Languages"}</h2>
+                <p class="devand-user-bio">{ &other_user.bio }</p>
                 <div>
                     { for languages_tags }
                 </div>
