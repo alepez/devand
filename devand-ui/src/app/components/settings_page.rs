@@ -188,6 +188,15 @@ impl SettingsPage {
                 <div class="pure-g">
                     <legend class="pure-u-1">{ "Languages" }</legend>
                     <div class="pure-u-1">
+                    {
+                        if !at_least_one_language_with_priority(languages) {
+                            view_no_priority_warning()
+                        } else {
+                            html! {}
+                        }
+                    }
+                    </div>
+                    <div class="pure-u-1">
                         { for languages_tags }
                     </div>
                     <div class="pure-u-1">
@@ -210,5 +219,49 @@ impl SettingsPage {
             f(user);
             self.props.on_change.emit(user.clone());
         }
+    }
+}
+
+fn view_no_priority_warning() -> Html {
+    html! {
+    <div class=("alert", "alert-warning")>
+        { "Please, select at least one language with Low or High priority" }
+    </div>
+    }
+}
+
+fn at_least_one_language_with_priority(languages: &Languages) -> bool {
+    languages.iter().any(|(_, pref)| pref.priority != devand_core::Priority::No)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use devand_core::*;
+
+    #[test]
+    fn no_language_no_one_with_priority() {
+        let languages = Languages::default();
+        assert!(at_least_one_language_with_priority(&languages) == false);
+    }
+
+    #[test]
+    fn some_languages_no_one_with_priority() {
+        let mut languages = Languages::default();
+        languages.insert(Language::Ada, LanguagePreference{
+            level: Level::Novice,
+            priority: Priority::No,
+        });
+        assert!(at_least_one_language_with_priority(&languages) == false);
+    }
+
+    #[test]
+    fn some_languages_someone_with_priority() {
+        let mut languages = Languages::default();
+        languages.insert(Language::Ada, LanguagePreference{
+            level: Level::Novice,
+            priority: Priority::High,
+        });
+        assert!(at_least_one_language_with_priority(&languages));
     }
 }
