@@ -28,6 +28,7 @@ pub fn user() -> User {
             }),
         },
         unread_messages: 5,
+        bio: "Ciao".to_string(),
     }
 }
 

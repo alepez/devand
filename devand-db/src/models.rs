@@ -53,6 +53,7 @@ impl TryInto<devand_core::User> for User {
             visible_name: self.visible_name,
             settings,
             unread_messages: 0,
+            bio: self.bio,
         };
 
         Ok(user)

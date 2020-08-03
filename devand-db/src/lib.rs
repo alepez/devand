@@ -239,6 +239,7 @@ fn load_user_chat_by_id(
                 username,
                 visible_name,
                 languages,
+                bio: "".to_string(), // FIXME
             };
 
             Some(profile)
