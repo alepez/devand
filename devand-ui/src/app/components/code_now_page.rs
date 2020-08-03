@@ -1,6 +1,7 @@
 use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
 use crate::app::services::CodeNowService;
+use crate::app::{AppRoute, RouterAnchor};
 use devand_core::CodeNow;
 use yew::{prelude::*, Properties};
 
@@ -99,7 +100,9 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
 
     if affinities.is_empty() {
         html! {
-            <p> { "No matching users online" }</p>
+            <div class=("alert", "alert-warning")>
+                {"Sorry, no matching online users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+            </div>
         }
     } else {
         html! {

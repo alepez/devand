@@ -1,6 +1,7 @@
 use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
 use crate::app::services::AffinitiesService;
+use crate::app::{AppRoute, RouterAnchor};
 use devand_core::UserAffinity;
 use yew::{prelude::*, Properties};
 use yewtil::NeqAssign;
@@ -100,6 +101,8 @@ fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
 
 fn view_no_affinities() -> Html {
     html! {
-        <p>{ "No matching users found" }</p>
+        <div class=("alert", "alert-warning")>
+            {"Sorry, no matching users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+        </div>
     }
 }

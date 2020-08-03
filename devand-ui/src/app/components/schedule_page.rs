@@ -118,7 +118,17 @@ impl SchedulePage {
         }
     }
 
+    fn view_all_slots_empty(&self) -> Html {
+        html! {
+            <div class=("alert", "alert-warning")>
+                {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+            </div>
+        }
+    }
+
     fn view_slots(&self, slots: &Vec<(DateTime<Utc>, Vec<UserId>)>) -> Html {
+        let mut at_least_one_non_empty_slot = false;
+
         let slots: Vec<_> = slots
             .iter()
             .map(|(t, users)| {
@@ -127,6 +137,8 @@ impl SchedulePage {
                     .filter_map(|&u| self.expand_user(u))
                     .filter(|u| !u.affinity.is_zero())
                     .collect();
+
+                at_least_one_non_empty_slot |= !users.is_empty();
 
                 users.sort_by_key(|u| std::cmp::Reverse(u.affinity));
 
@@ -139,10 +151,14 @@ impl SchedulePage {
             .into_iter()
             .map(|(t, users)| html! { <li> { self.view_slot(t, users) } </li> });
 
-        html! {
-            <ul class="devand-schedule-slots">
-                { for slots_view }
-            </ul>
+        if at_least_one_non_empty_slot {
+            html! {
+                <ul class="devand-schedule-slots">
+                    { for slots_view }
+                </ul>
+            }
+        } else {
+            self.view_all_slots_empty()
         }
     }
 
