@@ -78,7 +78,13 @@ fn view_chats(chats: &UserChats) -> Html {
     if chats.0.is_empty() {
         view_no_chats()
     } else {
-        let chats = chats.0.iter().rev().map(|a| view_chat(a));
+        let chats = chats
+            .0
+            .iter()
+            .rev()
+            .filter(|c| !c.members.is_empty())
+            .map(|c| view_chat(c));
+
         html! {
             <ul class="user-chats pure-table-striped">
             { for chats}
@@ -89,7 +95,7 @@ fn view_chats(chats: &UserChats) -> Html {
 
 fn view_chat(chat: &UserChat) -> Html {
     match chat.members.len() {
-        0 => unimplemented!(),
+        0 => html! { },
         1 => view_direct_chat(chat),
         _ => view_group_chat(chat),
     }
