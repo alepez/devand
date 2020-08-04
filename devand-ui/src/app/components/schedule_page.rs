@@ -195,7 +195,7 @@ impl SchedulePage {
 }
 
 fn view_timestamp(t: &chrono::DateTime<chrono::Utc>) -> impl ToString {
-    t.format("%A, %B %d - %R")
+    t.format("%A, %B %d - %R UTC")
 }
 
 #[cfg(test)]
@@ -207,6 +207,6 @@ mod test {
         use chrono::offset::TimeZone;
         let t = chrono::Utc.ymd(2020, 8, 2).and_hms_milli(20, 0, 1, 444);
         let formatted_t = view_timestamp(&t);
-        assert_eq!("Sunday, August 02 - 20:00", formatted_t.to_string());
+        assert_eq!("Sunday, August 02 - 20:00 UTC", formatted_t.to_string());
     }
 }
