@@ -120,7 +120,7 @@ impl SettingsPage {
         let settings = &user.settings;
 
         html! {
-            <div class="pure-form pure-form-stacked">
+            <form class="pure-form pure-form-stacked">
                 { self.view_profile_panel(user) }
                 {
                     if user.settings.vacation_mode {
@@ -130,7 +130,7 @@ impl SettingsPage {
                     }
                 }
                 { self.view_languages_panel(&settings.languages) }
-            </div>
+            </form>
         }
     }
 
@@ -159,33 +159,31 @@ impl SettingsPage {
 
     fn view_profile_panel(&self, user: &User) -> Html {
         html! {
-            <form class="pure-form">
-                <fieldset>
-                    <legend>{ "Profile" }</legend>
-                    <div class="pure-control-group">
-                        <label for="username">{ "Username:" }</label>
-                        <input type="text" name="username" id="username" value=&user.username readonly=true />
-                        <span class="pure-form-message-inline">{ "Username cannot be changed" }</span>
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="email">{ "Email:" }</label>
-                        <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) />
-                        { self.view_verify_email_button(user) }
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="visible_name">{ "Visible name:" }</label>
-                        <input type="text" name="visible_name" id="visible_name" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="bio">{ "Bio:" }</label>
-                        <textarea name="bio" class="pure-input-1-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
-                        <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
-                    </div>
-                    <div class="pure-control-group">
-                        <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ " Vacation mode" }</label>
-                    </div>
-                </fieldset>
-            </form>
+            <fieldset>
+                <legend>{ "Profile" }</legend>
+                <div class="pure-control-group">
+                    <label for="username">{ "Username:" }</label>
+                    <input type="text" name="username" id="username" value=&user.username readonly=true />
+                    <span class="pure-form-message-inline">{ "Username cannot be changed" }</span>
+                </div>
+                <div class="pure-control-group">
+                    <label for="email">{ "Email:" }</label>
+                    <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) />
+                    { self.view_verify_email_button(user) }
+                </div>
+                <div class="pure-control-group">
+                    <label for="visible_name">{ "Visible name:" }</label>
+                    <input type="text" name="visible_name" id="visible_name" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
+                </div>
+                <div class="pure-control-group">
+                    <label for="bio">{ "Bio:" }</label>
+                    <textarea name="bio" class="pure-input-1-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
+                    <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
+                </div>
+                <div class="pure-control-group">
+                    <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ " Vacation mode" }</label>
+                </div>
+            </fieldset>
         }
     }
 
