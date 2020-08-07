@@ -120,7 +120,7 @@ impl SettingsPage {
         let settings = &user.settings;
 
         html! {
-            <div class="pure-form pure-form-stacked">
+            <form class="pure-form pure-form-stacked">
                 { self.view_profile_panel(user) }
                 {
                     if user.settings.vacation_mode {
@@ -130,7 +130,7 @@ impl SettingsPage {
                     }
                 }
                 { self.view_languages_panel(&settings.languages) }
-            </div>
+            </form>
         }
     }
 
@@ -177,7 +177,7 @@ impl SettingsPage {
                 </div>
                 <div class="pure-control-group">
                     <label for="bio">{ "Bio:" }</label>
-                    <input type="text" name="bio" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
+                    <textarea name="bio" class="pure-input-1-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
                     <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
                 </div>
                 <div class="pure-control-group">
