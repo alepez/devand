@@ -27,6 +27,7 @@ impl UserProfileService {
                 languages: fake_languages(&mut self.rng),
                 username: username.into(),
                 visible_name: "Foo Bar".into(),
+                bio: "This is the bio".to_string(),
             }))
     }
 }

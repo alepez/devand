@@ -84,5 +84,6 @@ fn fake_user() -> devand_core::User {
             }),
         },
         unread_messages: 5,
+        bio: "This is the bio".to_string(),
     }
 }

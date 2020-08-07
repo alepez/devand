@@ -33,6 +33,7 @@ impl ChatService {
                 languages: devand_core::Languages::default(),
                 username: username.into(),
                 visible_name: "Foo Bar".into(),
+                bio: "This is the bio".to_string(),
             },
         ))
     }
@@ -128,6 +129,7 @@ fn fake_chats(rng: &mut StdRng) -> UserChats {
             languages: devand_core::Languages::default(),
             username: "foobar".into(),
             visible_name: "Foo Bar".into(),
+            bio: "This is the bio".to_string(),
         }],
     }])
 }

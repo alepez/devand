@@ -71,5 +71,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
             .collect(),
         visible_name: name.to_string(),
         languages: fake_languages(rng),
+        bio: "This is the bio".to_string(),
     }
 }

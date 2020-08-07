@@ -47,6 +47,7 @@ fn fake_public_profile(rng: &mut StdRng, user_id: UserId) -> PublicUserProfile {
         languages: fake_languages(rng),
         username,
         visible_name: name,
+        bio: "This is the bio".to_string(),
     }
 }
 

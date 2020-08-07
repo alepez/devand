@@ -76,5 +76,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::User {
             vacation_mode: false,
         },
         unread_messages: 5,
+        bio: "This is the bio".to_string(),
     }
 }
