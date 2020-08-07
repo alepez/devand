@@ -50,3 +50,23 @@ pub enum Language {
     TypeScript,
     VBA,
 }
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Copy,
+    Clone,
+    EnumIter,
+    Display,
+    EnumString,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum LanguageSpoken {
+    English,
+    Italian,
+}

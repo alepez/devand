@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub use affinity::{Affinity, AffinityParams};
-pub use languages::Language;
+pub use languages::*;
 pub use schedule::{Availability, DaySchedule, WeekSchedule};
 
 /// Identifies univocally an user
@@ -87,6 +87,10 @@ impl Languages {
     }
 }
 
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct LanguagesSpoken(pub Vec<LanguageSpoken>);
+
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserSettings {
@@ -96,6 +100,8 @@ pub struct UserSettings {
     pub schedule: Availability,
     /// User can disable all activities without losing schedule
     pub vacation_mode: bool,
+    /// User can set spoken language level
+    pub languages_spoken: LanguagesSpoken,
 }
 
 #[derive(
