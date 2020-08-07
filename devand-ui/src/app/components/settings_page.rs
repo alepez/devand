@@ -93,8 +93,8 @@ impl Component for SettingsPage {
 
     fn view(&self) -> Html {
         html! {
-            <div class="dashboard">
-                <h1>{ "Settings" }</h1>
+            <div class="dashboard pure-g">
+                <h1 class="pure-u-1">{ "Settings" }</h1>
                 {
                 if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)
@@ -109,7 +109,7 @@ impl Component for SettingsPage {
 
 fn view_vacation_mode_panel() -> Html {
     html! {
-        <fieldset>
+        <fieldset class="pure-u-1">
             <legend>{ "You are currently in vacation mode" }</legend>
         </fieldset>
     }
@@ -159,25 +159,25 @@ impl SettingsPage {
 
     fn view_profile_panel(&self, user: &User) -> Html {
         html! {
-            <fieldset>
+            <fieldset class="pure-u-1 pure-u-md-1-2 pure-u-xl-1-4">
                 <legend>{ "Profile" }</legend>
                 <div class="pure-control-group">
                     <label for="username">{ "Username:" }</label>
-                    <input type="text" name="username" id="username" value=&user.username readonly=true />
+                    <input type="text" name="username" id="username" class="pure-input-1" value=&user.username readonly=true />
                     <span class="pure-form-message-inline">{ "Username cannot be changed" }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
-                    <input type="text" name="email" id="email" value=&user.email oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) />
+                    <input type="text" name="email" id="email" value=&user.email class="pure-input-1" oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) />
                     { self.view_verify_email_button(user) }
                 </div>
                 <div class="pure-control-group">
                     <label for="visible_name">{ "Visible name:" }</label>
-                    <input type="text" name="visible_name" id="visible_name" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
+                    <input type="text" name="visible_name" id="visible_name" class="pure-input-1" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
                 </div>
                 <div class="pure-control-group">
                     <label for="bio">{ "Bio:" }</label>
-                    <textarea name="bio" class="pure-input-1-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
+                    <textarea name="bio" class="pure-input-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
                     <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
                 </div>
                 <div class="pure-control-group">
@@ -195,7 +195,7 @@ impl SettingsPage {
         });
 
         html! {
-            <fieldset>
+            <fieldset class="pure-u-1">
                 <div class="pure-g">
                     <legend class="pure-u-1">{ "Languages" }</legend>
                     <div class="pure-u-1">

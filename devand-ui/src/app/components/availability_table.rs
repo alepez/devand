@@ -63,7 +63,7 @@ impl AvailabilityTable {
 
     fn view_week(&self, schedule: &WeekSchedule) -> Html {
         html! {
-            <fieldset>
+            <fieldset class="pure-u-1">
                 <legend>{ "Your current weekly schedule. Check your available hours. All hours are in UTC" }</legend>
                 { self.view_days(schedule) }
             </fieldset>
