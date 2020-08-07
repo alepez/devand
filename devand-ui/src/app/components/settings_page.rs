@@ -177,7 +177,7 @@ impl SettingsPage {
                 </div>
                 <div class="pure-control-group">
                     <label for="bio">{ "Bio:" }</label>
-                    <input type="text" name="bio" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
+                    <textarea name="bio" cols=40 rows=6 id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
                     <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
                 </div>
                 <div class="pure-control-group">
