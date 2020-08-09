@@ -91,6 +91,19 @@ impl Languages {
 #[serde(rename_all = "snake_case")]
 pub struct LanguagesSpoken(pub Vec<LanguageSpoken>);
 
+impl std::ops::Deref for LanguagesSpoken {
+    type Target = Vec<LanguageSpoken>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for LanguagesSpoken {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserSettings {

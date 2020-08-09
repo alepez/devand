@@ -1,7 +1,7 @@
 use crate::app::components::AddLanguageComponent;
 use crate::app::components::EditableLanguageTag;
 use crate::app::elements::busy_indicator;
-use devand_core::{Availability, Language, LanguagePreference, Languages, User};
+use devand_core::{Availability, Language, LanguageSpoken LanguagePreference, Languages, User};
 use yew::{prelude::*, Properties};
 
 use crate::app::components::AvailabilityTable;
@@ -11,6 +11,7 @@ pub enum Msg {
     UpdateBio(String),
     UpdateEmail(String),
     ToggleVacationMode,
+    AddLanguageSpoken(LanguageSpoken),
     AddLanguage((Language, LanguagePreference)),
     RemoveLanguage(Language),
     UpdateSchedule(Availability),
@@ -40,6 +41,11 @@ impl Component for SettingsPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::AddLanguageSpoken(lang) => {
+                self.update_user(move |user| {
+                    user.settings.languages_spoken.append(lang)
+                });
+            }
             Msg::AddLanguage((lang, preferences)) => {
                 self.update_user(move |user| {
                     user.settings
