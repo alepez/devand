@@ -1,5 +1,6 @@
 use super::OtherUserLoadedCallback;
 use devand_core::*;
+use maplit::btreeset;
 use rand::rngs::StdRng;
 use rand::seq::IteratorRandom;
 use rand::Rng;
@@ -28,6 +29,7 @@ impl UserProfileService {
                 username: username.into(),
                 visible_name: "Foo Bar".into(),
                 bio: "This is the bio".to_string(),
+                spoken_languages: SpokenLanguages(btreeset![devand_core::SpokenLanguage::English]),
             }))
     }
 }

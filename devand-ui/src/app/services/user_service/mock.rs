@@ -1,5 +1,6 @@
 use super::FetchCallback;
 use devand_core::User;
+use maplit::btreeset;
 
 pub struct UserService {
     callback: FetchCallback,
@@ -14,7 +15,9 @@ impl UserService {
         self.callback.emit(Ok(fake_user()))
     }
 
-    pub fn store(&mut self, _user: &User) {}
+    pub fn store(&mut self, user: &User) {
+        log::debug!("Store {:?}", user);
+    }
 
     pub fn verify_email(&mut self) {}
 }
@@ -82,6 +85,7 @@ fn fake_user() -> devand_core::User {
                 sat: DaySchedule::always(),
                 sun: DaySchedule::never(),
             }),
+            spoken_languages: SpokenLanguages(btreeset![devand_core::SpokenLanguage::English]),
         },
         unread_messages: 5,
         bio: "This is the bio".to_string(),

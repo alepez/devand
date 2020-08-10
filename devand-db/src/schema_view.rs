@@ -15,7 +15,9 @@ table! {
         user_id -> Int4,
         username -> Varchar,
         visible_name -> Varchar,
+        bio -> Varchar,
         languages -> Jsonb,
+        spoken_languages -> Jsonb,
     }
 }
 

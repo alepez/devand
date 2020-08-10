@@ -1,11 +1,11 @@
 use super::FetchCallback;
 use devand_core::Affinity;
 use devand_core::UserAffinity;
-
 use devand_core::*;
 use fake::faker::name::raw::*;
 use fake::locales::*;
 use fake::Fake;
+use maplit::btreeset;
 use rand::rngs::StdRng;
 use rand::seq::IteratorRandom;
 use rand::Rng;
@@ -72,5 +72,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
         visible_name: name.to_string(),
         languages: fake_languages(rng),
         bio: "This is the bio".to_string(),
+        spoken_languages: SpokenLanguages(btreeset![devand_core::SpokenLanguage::English]),
     }
 }

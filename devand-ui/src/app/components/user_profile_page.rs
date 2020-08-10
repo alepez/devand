@@ -70,7 +70,12 @@ impl Component for UserProfilePage {
 
     fn view(&self) -> Html {
         if let Some(other_user) = &self.state.other_user {
-            let PublicUserProfile { languages, .. } = other_user;
+            let PublicUserProfile {
+                languages,
+                spoken_languages,
+                visible_name,
+                ..
+            } = other_user;
 
             let languages = languages.clone().to_sorted_vec();
 
@@ -78,14 +83,22 @@ impl Component for UserProfilePage {
                 html! { <LanguageTag lang=lang pref=pref /> }
             });
 
+            let spoken_languages = spoken_languages.iter().map(|x| html! { <li>{ x }</li> });
+
             html! {
             <>
                 <h1><RouterButton route=AppRoute::Chat(other_user.username.clone())>{ "💬 " }</RouterButton>{ other_user.full_name() }</h1>
-                <h2>{"Languages"}</h2>
                 <p class="devand-user-bio">{ &other_user.bio }</p>
+
+                <h2>{"Languages"}</h2>
                 <div>
                     { for languages_tags }
                 </div>
+
+                <h2>{ format!("{} speaks:", visible_name) }</h2>
+                <ul>
+                    <li>{ for spoken_languages }</li>
+                </ul>
             </>
             }
         } else {
