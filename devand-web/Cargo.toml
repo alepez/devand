@@ -5,7 +5,8 @@ authors = ["Alessandro Pezzato <alessandro@pezzato.net>"]
 edition = "2018"
 
 [dependencies]
-captcha = "*"
+# Note: using a forked (and mantained) captch crate, because it fixes https://rustsec.org/advisories/RUSTSEC-2019-0014.html
+captcha = { git = "https://github.com/robatipoor/captcha", rev = "8c8f9d2" }
 chrono = { version = "0.4", features = ["serde"] }
 devand-core = { path = "../devand-core" }
 devand-crypto = { path = "../devand-crypto" }
