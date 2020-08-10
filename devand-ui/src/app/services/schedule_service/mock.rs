@@ -6,6 +6,7 @@ use fake::faker::internet::raw::*;
 use fake::faker::name::raw::*;
 use fake::locales::*;
 use fake::Fake;
+use maplit::btreeset;
 use rand::rngs::StdRng;
 use rand::seq::IteratorRandom;
 use rand::Rng;
@@ -48,6 +49,9 @@ fn fake_public_profile(rng: &mut StdRng, user_id: UserId) -> PublicUserProfile {
         username,
         visible_name: name,
         bio: "This is the bio".to_string(),
+        spoken_languages: devand_core::SpokenLanguages(btreeset![
+            devand_core::SpokenLanguage::English
+        ]),
     }
 }
 

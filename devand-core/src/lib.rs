@@ -271,6 +271,7 @@ pub struct PublicUserProfile {
     pub visible_name: String,
     pub languages: Languages,
     pub bio: String,
+    pub spoken_languages: SpokenLanguages,
 }
 
 impl PublicUserProfile {
@@ -297,6 +298,7 @@ impl From<User> for PublicUserProfile {
             visible_name: user.visible_name,
             languages: user.settings.languages,
             bio: user.bio,
+            spoken_languages: user.settings.spoken_languages,
         }
     }
 }

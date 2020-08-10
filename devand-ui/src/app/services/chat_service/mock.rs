@@ -4,6 +4,7 @@ use devand_core::chat::ChatMessage;
 use devand_core::{UserChats, UserId};
 use fake::faker::lorem::en::*;
 use fake::Fake;
+use maplit::btreeset;
 use rand::rngs::StdRng;
 use rand::Rng;
 use rand::SeedableRng;
@@ -34,6 +35,9 @@ impl ChatService {
                 username: username.into(),
                 visible_name: "Foo Bar".into(),
                 bio: "This is the bio".to_string(),
+                spoken_languages: devand_core::SpokenLanguages(btreeset![
+                    devand_core::SpokenLanguage::English
+                ]),
             },
         ))
     }
@@ -130,6 +134,9 @@ fn fake_chats(rng: &mut StdRng) -> UserChats {
             username: "foobar".into(),
             visible_name: "Foo Bar".into(),
             bio: "This is the bio".to_string(),
+            spoken_languages: devand_core::SpokenLanguages(btreeset![
+                devand_core::SpokenLanguage::English
+            ]),
         }],
     }])
 }
