@@ -119,7 +119,6 @@ fn availability_match(user: LoggedUser, wsm: State<WeekScheduleMatrix>) -> Json<
 #[get("/chats")]
 fn chats(user: LoggedUser, conn: PgDevandConn) -> Option<Json<devand_core::UserChats>> {
     let result = devand_db::load_chats_by_member(user.id, &conn);
-    dbg!(&result);
     Some(Json(result))
 }
 

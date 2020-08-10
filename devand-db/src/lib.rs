@@ -314,11 +314,9 @@ pub fn load_chat_history_by_members(
     members: &[devand_core::UserId],
     conn: &PgConnection,
 ) -> Vec<devand_core::chat::ChatMessage> {
-    if let Ok(chat_id) = find_or_create_chat_by_members(members, conn) {
-        load_chat_history_by_id(chat_id, conn)
-    } else {
-        Vec::default()
-    }
+    find_chat_id_by_members(members, conn)
+        .map(|chat_id| load_chat_history_by_id(chat_id, conn))
+        .unwrap_or(Vec::default())
 }
 
 pub fn mark_messages_as_read_by(
