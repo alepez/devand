@@ -4,6 +4,7 @@ use fake::faker::internet::raw::*;
 use fake::faker::name::raw::*;
 use fake::locales::*;
 use fake::Fake;
+use maplit::btreeset;
 use rand::rngs::StdRng;
 use rand::seq::IteratorRandom;
 use rand::Rng;
@@ -74,7 +75,7 @@ fn fake_user(rng: &mut StdRng) -> devand_core::User {
             languages: Languages(languages),
             schedule: Availability::default(),
             vacation_mode: false,
-            spoken_languages: SpokenLanguages(vec![devand_core::SpokenLanguage::English]),
+            spoken_languages: SpokenLanguages(btreeset![devand_core::SpokenLanguage::English]),
         },
         unread_messages: 5,
         bio: "This is the bio".to_string(),

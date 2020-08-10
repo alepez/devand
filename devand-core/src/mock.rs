@@ -1,5 +1,6 @@
 use super::*;
 use maplit::btreemap;
+use maplit::btreeset;
 use std::convert::TryFrom;
 
 pub fn user() -> User {
@@ -26,7 +27,7 @@ pub fn user() -> User {
                 sat: DaySchedule::always(),
                 sun: DaySchedule::never(),
             }),
-            spoken_languages: SpokenLanguages(vec! {SpokenLanguage::English}),
+            spoken_languages: SpokenLanguages(btreeset! {SpokenLanguage::English}),
         },
         unread_messages: 5,
         bio: "Ciao".to_string(),

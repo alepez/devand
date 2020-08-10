@@ -45,20 +45,13 @@ impl Component for SettingsPage {
         match msg {
             Msg::ToggleSpokenLanguage(lang) => {
                 self.update_user(move |user| {
-                    // FIXME spoken_languages should be a Set
-                    let is_set = user.settings.spoken_languages.0.contains(&lang);
+                    let spoken_languages = &mut user.settings.spoken_languages;
+                    let is_set = spoken_languages.0.contains(&lang);
 
                     if is_set {
-                        user.settings.spoken_languages.0 = user
-                            .settings
-                            .spoken_languages
-                            .0
-                            .iter()
-                            .filter(|&x| x != &lang)
-                            .map(|x| x.to_owned())
-                            .collect();
+                        spoken_languages.0.remove(&lang);
                     } else {
-                        user.settings.spoken_languages.push(lang)
+                        spoken_languages.0.insert(lang);
                     }
                 });
             }
