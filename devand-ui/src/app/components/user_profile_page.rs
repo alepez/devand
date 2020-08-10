@@ -83,6 +83,8 @@ impl Component for UserProfilePage {
                 html! { <LanguageTag lang=lang pref=pref /> }
             });
 
+            let spoken_languages = spoken_languages.iter().map(|x| html! { <li>{ x }</li> });
+
             html! {
             <>
                 <h1><RouterButton route=AppRoute::Chat(other_user.username.clone())>{ "💬 " }</RouterButton>{ other_user.full_name() }</h1>
@@ -95,7 +97,7 @@ impl Component for UserProfilePage {
 
                 <h2>{ format!("{} speaks:", visible_name) }</h2>
                 <ul>
-                    <li>{ for spoken_languages.iter() }</li>
+                    <li>{ for spoken_languages }</li>
                 </ul>
             </>
             }
