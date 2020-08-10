@@ -2,3 +2,4 @@
 ./devand-db/target
 ./devand-core/target
 ./devand-ui/target
+/target

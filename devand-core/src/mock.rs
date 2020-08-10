@@ -26,7 +26,7 @@ pub fn user() -> User {
                 sat: DaySchedule::always(),
                 sun: DaySchedule::never(),
             }),
-            languages_spoken: LanguagesSpoken(vec! {LanguageSpoken::English}),
+            spoken_languages: SpokenLanguages(vec! {SpokenLanguage::English}),
         },
         unread_messages: 5,
         bio: "Ciao".to_string(),

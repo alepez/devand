@@ -2,6 +2,7 @@ mod affinity;
 pub mod auth;
 pub mod chat;
 mod languages;
+mod spoken_languages;
 pub mod mock;
 mod schedule;
 pub mod schedule_matcher;
@@ -12,7 +13,8 @@ use std::collections::BTreeMap;
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub use affinity::{Affinity, AffinityParams};
-pub use languages::*;
+pub use languages::Language;
+pub use spoken_languages::SpokenLanguage;
 pub use schedule::{Availability, DaySchedule, WeekSchedule};
 
 /// Identifies univocally an user
@@ -89,16 +91,16 @@ impl Languages {
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
-pub struct LanguagesSpoken(pub Vec<LanguageSpoken>);
+pub struct SpokenLanguages(pub Vec<SpokenLanguage>);
 
-impl std::ops::Deref for LanguagesSpoken {
-    type Target = Vec<LanguageSpoken>;
+impl std::ops::Deref for SpokenLanguages {
+    type Target = Vec<SpokenLanguage>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl std::ops::DerefMut for LanguagesSpoken {
+impl std::ops::DerefMut for SpokenLanguages {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -114,7 +116,7 @@ pub struct UserSettings {
     /// User can disable all activities without losing schedule
     pub vacation_mode: bool,
     /// User can set spoken language level
-    pub languages_spoken: LanguagesSpoken,
+    pub spoken_languages: SpokenLanguages,
 }
 
 #[derive(
