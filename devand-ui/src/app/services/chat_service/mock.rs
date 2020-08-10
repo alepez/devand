@@ -49,7 +49,18 @@ impl ChatService {
 
     pub fn load_history(&mut self, mut chat_members: Vec<UserId>) {
         chat_members.sort();
+
         self.chat_members = Some(chat_members.clone());
+
+        for member in &chat_members {
+            self.callback.emit(ChatServiceContent::OtherUserExtended(
+                devand_core::chat::ChatMemberInfo {
+                    user_id: *member,
+                    verified_email: self.rng.gen_bool(0.9),
+                },
+            ))
+        }
+
         self.callback
             .emit(ChatServiceContent::NewMessagess(fake_messages(
                 &mut self.rng,
