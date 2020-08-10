@@ -73,7 +73,10 @@ fn verify_email(user: LoggedUser, mailer: State<Mailer>) -> Json<()> {
 /// Retrieve user's affinities
 #[get("/affinities")]
 fn affinities(user: LoggedUser, conn: PgDevandConn) -> Option<Json<Vec<UserAffinity>>> {
+    // TODO Optimize query for public profiles
     let users = devand_db::load_users(&conn.0)?;
+    let user: User = user.into();
+    let users = users.into_iter().map(|u| u.into());
     let affinities = devand_core::calculate_affinities(&user.into(), users);
     Some(Json(affinities.collect()))
 }

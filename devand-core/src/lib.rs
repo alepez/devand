@@ -217,41 +217,27 @@ impl From<&PublicUserProfile> for AffinityParams {
     }
 }
 
-/// Calculate affinities between `user` and all `users` passed
-pub fn calculate_affinities(
-    user: &User,
-    users: impl IntoIterator<Item = User>,
-) -> impl Iterator<Item = UserAffinity> {
-    let user_id = user.id;
-    let user_params = AffinityParams::from(user);
-
-    users
-        .into_iter()
-        // There may be same user in the list, just skip it
-        .filter(move |u| u.id != user_id)
-        // Calculate the affinity
-        .map(move |u| {
-            let u_params = AffinityParams::from(&u);
-            // TODO Avoid cloning logged user params
-            let affinity = Affinity::from_params(&user_params, &u_params);
-            UserAffinity::new(u.into(), affinity)
-        })
-        // Remove users who do not have any affinity
-        .filter(|aff| aff.affinity != Affinity::NONE)
+/// Check is users have compatible languages. Users without any language set
+/// are compatible with everybody by default.
+pub fn are_spoken_language_compatible(l: &SpokenLanguages, r: &SpokenLanguages) -> bool {
+    l.0.is_empty() || r.0.is_empty() || l.0.iter().any(|x| r.0.iter().any(|y| x == y))
 }
 
-// TODO This is very similar to above. Can we generalize?
-pub fn calculate_affinities_2(
+/// Calculate affinities between `user` and all `users` passed
+pub fn calculate_affinities(
     user: &PublicUserProfile,
     users: impl IntoIterator<Item = PublicUserProfile>,
 ) -> impl Iterator<Item = UserAffinity> {
     let username = user.username.clone();
     let user_params = AffinityParams::from(user);
+    let spoken_languages = user.spoken_languages.clone();
 
     users
         .into_iter()
         // There may be same user in the list, just skip it
         .filter(move |u| u.username != username)
+        // Remove users with incompatible spoken languages
+        .filter(move |u| are_spoken_language_compatible(&u.spoken_languages, &spoken_languages))
         // Calculate the affinity
         .map(move |u| {
             let u_params = AffinityParams::from(&u);
@@ -324,6 +310,7 @@ pub struct PasswordEdit {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use maplit::btreeset;
 
     #[test]
     fn user_example() {
@@ -378,5 +365,33 @@ mod tests {
         assert!(languages[2].0 == Language::JavaScript);
         assert!(languages[3].0 == Language::CPlusPlus);
         assert!(languages[4].0 == Language::Go);
+    }
+
+    #[test]
+    fn are_spoken_language_compatible_empty_is_yes() {
+        assert!(are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![]),
+            &SpokenLanguages(btreeset![SpokenLanguage::English]),
+        ));
+        assert!(are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![SpokenLanguage::English]),
+            &SpokenLanguages(btreeset![]),
+        ));
+    }
+
+    #[test]
+    fn are_spoken_language_compatible_yes() {
+        assert!(are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![SpokenLanguage::English]),
+            &SpokenLanguages(btreeset![SpokenLanguage::English])
+        ));
+    }
+
+    #[test]
+    fn are_spoken_language_compatible_no() {
+        assert!(!are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![SpokenLanguage::Italian]),
+            &SpokenLanguages(btreeset![SpokenLanguage::English])
+        ));
     }
 }

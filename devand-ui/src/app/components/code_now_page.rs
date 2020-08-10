@@ -95,7 +95,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
         .filter(|u| u.username != code_now.current_user.username);
 
     let user = current_user.into();
-    let mut affinities: Vec<_> = devand_core::calculate_affinities_2(&user, users).collect();
+    let mut affinities: Vec<_> = devand_core::calculate_affinities(&user, users).collect();
     affinities.sort_unstable_by_key(|x| x.affinity);
 
     if affinities.is_empty() {
