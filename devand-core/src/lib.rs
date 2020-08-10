@@ -217,7 +217,7 @@ impl From<&PublicUserProfile> for AffinityParams {
     }
 }
 
-/// Check is users have compatible languages. Users without any language set
+/// Check if users have compatible languages. Users without any language set
 /// are compatible with everybody by default.
 pub fn are_spoken_language_compatible(l: &SpokenLanguages, r: &SpokenLanguages) -> bool {
     l.0.is_empty() || r.0.is_empty() || l.0.iter().any(|x| r.0.iter().any(|y| x == y))
