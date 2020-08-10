@@ -116,6 +116,7 @@ pub struct UserSettings {
     /// User can disable all activities without losing schedule
     pub vacation_mode: bool,
     /// User can set spoken language
+    #[serde(default)]
     pub spoken_languages: SpokenLanguages,
 }
 
