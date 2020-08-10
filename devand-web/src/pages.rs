@@ -319,7 +319,6 @@ fn dashboard_chats(auth_data: AuthData) -> Template {
     dashboard(auth_data)
 }
 
-
 #[get("/schedule")]
 fn dashboard_schedule(auth_data: AuthData) -> Template {
     dashboard(auth_data)

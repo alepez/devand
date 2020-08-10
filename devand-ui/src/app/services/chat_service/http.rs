@@ -92,19 +92,18 @@ impl ChatService {
         let url = api_url_get(&chat_members);
         let req = Request::get(url).body(Nothing).unwrap();
         let callback = self.callback.clone();
-        let handler = move |response: Response<
-            Json<Result<devand_core::chat::ChatInfo, anyhow::Error>>,
-        >| {
-            let (meta, Json(data)) = response.into_parts();
-            if let Ok(data) = data {
-                callback.emit(ChatServiceContent::NewMessagess(data.messages));
-                for member in data.members_info {
-                    callback.emit(ChatServiceContent::OtherUserExtended(member))
+        let handler =
+            move |response: Response<Json<Result<devand_core::chat::ChatInfo, anyhow::Error>>>| {
+                let (meta, Json(data)) = response.into_parts();
+                if let Ok(data) = data {
+                    callback.emit(ChatServiceContent::NewMessagess(data.messages));
+                    for member in data.members_info {
+                        callback.emit(ChatServiceContent::OtherUserExtended(member))
+                    }
+                } else {
+                    log::error!("{:?}", &meta);
                 }
-            } else {
-                log::error!("{:?}", &meta);
-            }
-        };
+            };
 
         self.task = FetchService::fetch(req, handler.into()).ok();
     }

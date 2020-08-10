@@ -9,8 +9,7 @@ fn main() {
         .init();
 
     let conf = ClientConf {
-        url: std::env::var("DEVAND_MAILER_SERVER_URL")
-            .unwrap_or("http://127.0.0.1:80".to_string()),
+        url: std::env::var("DEVAND_MAILER_SERVER_URL").unwrap_or("http://127.0.0.1:80".to_string()),
     };
 
     let conn = devand_db::establish_connection();

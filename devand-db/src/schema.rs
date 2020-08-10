@@ -42,10 +42,4 @@ table! {
     }
 }
 
-allow_tables_to_appear_in_same_query!(
-    auth,
-    chats,
-    messages,
-    unread_messages,
-    users,
-);
+allow_tables_to_appear_in_same_query!(auth, chats, messages, unread_messages, users,);

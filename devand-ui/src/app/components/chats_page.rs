@@ -95,7 +95,7 @@ fn view_chats(chats: &UserChats) -> Html {
 
 fn view_chat(chat: &UserChat) -> Html {
     match chat.members.len() {
-        0 => html! { },
+        0 => html! {},
         1 => view_direct_chat(chat),
         _ => view_group_chat(chat),
     }
