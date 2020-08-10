@@ -58,18 +58,18 @@ fn fake_languages(rng: &mut StdRng) -> Languages {
 }
 
 fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
-    let name: String = Name(EN).fake_with_rng(rng);
+    let visible_name: String = Name(EN).fake_with_rng(rng);
     let user_id: i32 = rng.gen_range(1, 1_000_000_000);
 
     PublicUserProfile {
         id: UserId(user_id),
-        username: name
+        username: visible_name
             .to_string()
             .to_lowercase()
             .chars()
             .filter(|x| x.is_alphabetic())
             .collect(),
-        visible_name: name.to_string(),
+        visible_name,
         languages: fake_languages(rng),
         bio: "This is the bio".to_string(),
         spoken_languages: SpokenLanguages(btreeset![devand_core::SpokenLanguage::English]),

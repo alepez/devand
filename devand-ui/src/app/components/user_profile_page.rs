@@ -77,7 +77,7 @@ impl Component for UserProfilePage {
                 ..
             } = other_user;
 
-            let languages = languages.clone().to_sorted_vec();
+            let languages = languages.clone().into_sorted_vec();
 
             let languages_tags = languages.iter().map(|(lang, pref)| {
                 html! { <LanguageTag lang=lang pref=pref /> }

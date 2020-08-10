@@ -38,7 +38,7 @@ fn fake_code_now_users(rng: &mut StdRng) -> CodeNow {
     }
 
     CodeNow {
-        current_user: current_user.clone(),
+        current_user,
         all_users,
     }
 }
@@ -63,7 +63,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::User {
     User {
         id: UserId(user_id),
         username: name
-            .to_string()
             .to_lowercase()
             .chars()
             .filter(|x| x.is_alphabetic())

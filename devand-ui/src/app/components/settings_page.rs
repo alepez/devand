@@ -59,7 +59,7 @@ impl Component for SettingsPage {
                 self.update_user(move |user| {
                     user.settings
                         .languages
-                        .insert(lang.clone(), preferences.clone());
+                        .insert(lang.clone(), preferences);
                 });
             }
             Msg::RemoveLanguage(lang) => {

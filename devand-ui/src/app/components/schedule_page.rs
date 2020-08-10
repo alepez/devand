@@ -126,14 +126,14 @@ impl SchedulePage {
         }
     }
 
-    fn view_slots(&self, slots: &Vec<(DateTime<Utc>, Vec<UserId>)>) -> Html {
+    fn view_slots(&self, slots: &[(DateTime<Utc>, Vec<UserId>)]) -> Html {
         let mut at_least_one_non_empty_slot = false;
 
         let slots: Vec<_> = slots
             .iter()
             .map(|(t, users)| {
                 let mut users: Vec<_> = users
-                    .into_iter()
+                    .iter()
                     .filter_map(|&u| self.expand_user(u))
                     .filter(|u| !u.affinity.is_zero())
                     .collect();
