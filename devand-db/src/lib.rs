@@ -227,25 +227,31 @@ fn load_user_chat_by_id(
             schema_view::chat_members::user_id,
             schema_view::chat_members::username,
             schema_view::chat_members::visible_name,
+            schema_view::chat_members::bio,
             schema_view::chat_members::languages,
+            schema_view::chat_members::spoken_languages,
         ))
         .load(conn)
         .unwrap_or(Vec::default())
         .into_iter()
-        .filter(|(user_id, _, _, _)| *user_id != user.0)
-        .filter_map(|(user_id, username, visible_name, languages)| {
-            let languages: devand_core::Languages = serde_json::from_value(languages).ok()?;
+        .filter(|(user_id, _, _, _, _, _)| *user_id != user.0)
+        .filter_map(
+            |(user_id, username, visible_name, bio, languages, spoken_languages)| {
+                let languages = serde_json::from_value(languages).ok()?;
+                let spoken_languages = serde_json::from_value(spoken_languages).ok()?;
 
-            let profile = devand_core::PublicUserProfile {
-                id: devand_core::UserId(user_id),
-                username,
-                visible_name,
-                languages,
-                bio: "".to_string(), // FIXME
-            };
+                let profile = devand_core::PublicUserProfile {
+                    id: devand_core::UserId(user_id),
+                    username,
+                    visible_name,
+                    languages,
+                    bio,
+                    spoken_languages,
+                };
 
-            Some(profile)
-        })
+                Some(profile)
+            },
+        )
         .collect();
 
     let members_ids = members.iter().map(|u| u.id).collect();
