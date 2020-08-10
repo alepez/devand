@@ -6,7 +6,7 @@ use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 fn encode_chat_members(chat_members: &[UserId]) -> String {
     chat_members
-        .into_iter()
+        .iter()
         .map(|x| x.0.to_string())
         .collect::<Vec<_>>()
         .join("-")

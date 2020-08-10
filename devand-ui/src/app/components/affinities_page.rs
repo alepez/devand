@@ -86,7 +86,7 @@ impl Component for AffinitiesPage {
     }
 }
 
-fn view_affinities(affinities: &Vec<UserAffinity>) -> Html {
+fn view_affinities(affinities: &[UserAffinity]) -> Html {
     if affinities.is_empty() {
         view_no_affinities()
     } else {

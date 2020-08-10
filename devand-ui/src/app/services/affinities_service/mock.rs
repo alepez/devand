@@ -64,7 +64,6 @@ fn fake_user(rng: &mut StdRng) -> devand_core::PublicUserProfile {
     PublicUserProfile {
         id: UserId(user_id),
         username: visible_name
-            .to_string()
             .to_lowercase()
             .chars()
             .filter(|x| x.is_alphabetic())

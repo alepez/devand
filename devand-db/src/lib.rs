@@ -24,7 +24,8 @@ pub fn establish_connection() -> PgConnection {
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
+    PgConnection::establish(&database_url)
+        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
 #[derive(Debug)]
@@ -116,7 +117,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
         .first(conn)
         .ok()?;
 
-    let email_changed = &current_email != &email;
+    let email_changed = current_email != email;
     let email_verified = current_email_verified && !email_changed;
 
     if email_verified != current_email_verified {
@@ -177,7 +178,7 @@ pub fn load_chat_history_by_id(
         .filter(schema::messages::dsl::chat_id.eq(chat_id.0))
         .load(conn)
         .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect())
-        .unwrap_or(Vec::default())
+        .unwrap_or_default()
 }
 
 fn find_chat_id_by_members(
@@ -305,7 +306,7 @@ pub fn load_chats_by_member(
                 })
                 .collect()
         })
-        .unwrap_or(Vec::default());
+        .unwrap_or_default();
 
     devand_core::UserChats(chats)
 }
@@ -316,7 +317,7 @@ pub fn load_chat_history_by_members(
 ) -> Vec<devand_core::chat::ChatMessage> {
     find_chat_id_by_members(members, conn)
         .map(|chat_id| load_chat_history_by_id(chat_id, conn))
-        .unwrap_or(Vec::default())
+        .unwrap_or_default()
 }
 
 pub fn mark_messages_as_read_by(
@@ -354,7 +355,7 @@ fn mark_message_as_unread(message: &models::ChatMessage, conn: &PgConnection) {
         .ok()
         .and_then(|x: models::Chat| x.try_into().ok())
         .map(|chat: devand_core::chat::Chat| chat.members)
-        .unwrap_or(Vec::default())
+        .unwrap_or_default()
         .into_iter()
         .map(|x| x.0)
         .filter(|x| x != author)

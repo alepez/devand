@@ -14,7 +14,8 @@ fn main() {
             .unwrap()
             .parse()
             .unwrap(),
-        from_name: std::env::var("DEVAND_MAILER_FROM_NAME").unwrap_or("DevAndDev".to_string()),
+        from_name: std::env::var("DEVAND_MAILER_FROM_NAME")
+            .unwrap_or_else(|_| "DevAndDev".to_string()),
     };
     let server = Server::new(conf);
     server.wait();

@@ -57,12 +57,12 @@ impl Component for UserProfilePage {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let mut changed = false;
-
-        if self.props.username != props.username {
+        let changed = if self.props.username != props.username {
             self.service.load_other_user(&props.username);
-            changed = true;
-        }
+            true
+        } else {
+            false
+        };
 
         self.props = props;
         changed

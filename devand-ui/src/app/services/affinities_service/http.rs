@@ -44,7 +44,7 @@ impl GetHandler {
 impl AffinitiesService {
     pub fn new(callback: FetchCallback) -> Self {
         let get_handler = GetHandler {
-            callback: callback.clone(),
+            callback,
             task: None,
         };
 

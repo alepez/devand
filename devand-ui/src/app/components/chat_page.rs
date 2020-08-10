@@ -101,12 +101,12 @@ impl Component for ChatPage {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let mut changed = false;
-
-        if self.props.chat_with != props.chat_with {
+        let changed = if self.props.chat_with != props.chat_with {
             self.service.load_other_user(&props.chat_with);
-            changed = true;
-        }
+            true
+        } else {
+            false
+        };
 
         if self.props.me.id != props.me.id {
             // Changing `me` does not make any sense

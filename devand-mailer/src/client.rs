@@ -39,7 +39,6 @@ impl Client {
             .map_err(|_| Error::Unknown)?;
 
         client
-            .clone()
             .send_email(recipients, subject, text)
             .wait()
             .map_err(|_| Error::Unknown)?;
@@ -64,7 +63,6 @@ impl Client {
             .map_err(|_| Error::Unknown)?;
 
         client
-            .clone()
             .verify_address(address)
             .wait()
             .map_err(|_| Error::Unknown)?;

@@ -457,9 +457,7 @@ fn verify_email_token_post(
     let verified_data = EmailVerification::try_from_token(&token, &crypto_decoder);
 
     let verified = if let Some(EmailVerification { address }) = verified_data {
-        devand_db::set_verified_email(&address, &conn)
-            .ok()
-            .expect("Email can be verified");
+        devand_db::set_verified_email(&address, &conn).expect("Email can be verified");
         true
     } else {
         false

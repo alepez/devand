@@ -51,7 +51,7 @@ impl PostHandler {
 impl CodeNowService {
     pub fn new(callback: FetchCallback) -> Self {
         let post_handler = PostHandler {
-            callback: callback.clone(),
+            callback,
             task: None,
         };
 
