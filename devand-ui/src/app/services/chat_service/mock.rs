@@ -68,7 +68,6 @@ impl ChatService {
                 chat_members[0],
                 chat_members[1],
             )));
-
     }
 
     pub fn send_message(&mut self, txt: String) {

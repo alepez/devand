@@ -57,9 +57,7 @@ impl Component for SettingsPage {
             }
             Msg::AddLanguage((lang, preferences)) => {
                 self.update_user(move |user| {
-                    user.settings
-                        .languages
-                        .insert(lang.clone(), preferences);
+                    user.settings.languages.insert(lang.clone(), preferences);
                 });
             }
             Msg::RemoveLanguage(lang) => {

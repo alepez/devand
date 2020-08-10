@@ -9,7 +9,9 @@ fn main() {
 
     let client = Client::new(conf);
 
-    client.verify_address("admin@devand.dev".to_string()).unwrap();
+    client
+        .verify_address("admin@devand.dev".to_string())
+        .unwrap();
 }
 
 #[cfg(not(feature = "client"))]
