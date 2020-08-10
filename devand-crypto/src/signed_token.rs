@@ -63,7 +63,7 @@ impl Encoder {
     fn encode_claims(&self, claims: Claims) -> Option<SignedToken> {
         encode(&Header::default(), &claims, &self.encoding_key)
             .ok()
-            .map(|x| SignedToken(x))
+            .map(SignedToken)
     }
 
     /// Encode any Signable type
