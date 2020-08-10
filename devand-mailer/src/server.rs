@@ -1,4 +1,4 @@
-use crate::api::Rpc;
+use crate::api::server::Rpc;
 use crate::mailer::Mailer;
 use jsonrpc_core::{IoHandler, Result};
 use jsonrpc_http_server::*;

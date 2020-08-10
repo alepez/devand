@@ -26,7 +26,7 @@ impl Client {
         subject: String,
         text: String,
     ) -> Result<(), Error> {
-        use crate::api::GenClient;
+        use crate::api::client::GenClient;
         use jsonrpc_core::futures::future::Future;
         use jsonrpc_core_client::transports::http;
         use tokio::runtime::Runtime;
@@ -51,7 +51,7 @@ impl Client {
 
     #[cfg(not(feature = "mock"))]
     pub fn verify_address(&self, address: String) -> Result<(), Error> {
-        use crate::api::GenClient;
+        use crate::api::client::GenClient;
         use jsonrpc_core::futures::future::Future;
         use jsonrpc_core_client::transports::http;
         use tokio::runtime::Runtime;
