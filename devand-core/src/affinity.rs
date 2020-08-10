@@ -123,9 +123,9 @@ impl Affinity {
         let matching_languages = find_matching_languages(&a.languages, &b.languages);
 
         if let Some(best_lang) = matching_languages.find_max_affinity() {
-            return Self((best_lang.1).0);
+            Self((best_lang.1).0)
         } else {
-            return Self::NONE;
+            Self::NONE
         }
     }
 

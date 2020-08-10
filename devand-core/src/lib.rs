@@ -75,7 +75,7 @@ impl std::ops::DerefMut for Languages {
 
 impl Languages {
     /// Sort languages by priority, then by level
-    pub fn to_sorted_vec(self: Languages) -> Vec<(Language, LanguagePreference)> {
+    pub fn into_sorted_vec(self: Languages) -> Vec<(Language, LanguagePreference)> {
         let mut languages: Vec<_> = self.0.into_iter().collect();
 
         languages.sort_by(|(_, l), (_, r)| {
@@ -243,7 +243,7 @@ pub fn calculate_affinities(
             let u_params = AffinityParams::from(&u);
             // TODO Avoid cloning logged user params
             let affinity = Affinity::from_params(&user_params, &u_params);
-            UserAffinity::new(u.into(), affinity)
+            UserAffinity::new(u, affinity)
         })
         // Remove users who do not have any affinity
         .filter(|aff| aff.affinity != Affinity::NONE)
@@ -358,7 +358,7 @@ mod tests {
             },
         );
 
-        let languages = languages.to_sorted_vec();
+        let languages = languages.into_sorted_vec();
 
         assert!(languages[0].0 == Language::Rust);
         assert!(languages[1].0 == Language::C);

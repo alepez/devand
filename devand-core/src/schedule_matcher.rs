@@ -235,7 +235,7 @@ impl WeekScheduleMatrix {
     fn match_all_week(
         &self,
         user: UserId,
-        target: &Vec<(Date<Utc>, DaySchedule)>,
+        target: &[(Date<Utc>, DaySchedule)],
     ) -> Vec<(DateTime<Utc>, Vec<UserId>)> {
         target
             .iter()
@@ -348,7 +348,6 @@ fn attach_schedule(
 
 fn days_from(n: usize, from: DateTime<Utc>) -> Vec<Date<Utc>> {
     (0..n)
-        .into_iter()
         .filter_map(|x| from.checked_add_signed(Duration::days(x as i64)))
         .map(|x| x.date())
         .collect()
