@@ -7,13 +7,13 @@ const configurations = {
     distPath: path.resolve(__dirname, "../devand-web/static/ui-HASHPLACEHOLDER"),
     publicPath: '/static/ui-HASHPLACEHOLDER/',
     cargoFeatures: [],
-    entry: './bootstrap-prod.js',
+    entry: './bootstrap.js',
   },
   development: {
     distPath: path.resolve(__dirname, "dist"),
     publicPath: '/',
     cargoFeatures: ["mock_http"],
-    entry: './bootstrap-dev.js',
+    entry: './bootstrap.js',
   }
 };
 
