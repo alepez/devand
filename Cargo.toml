@@ -1,0 +1,10 @@
+[workspace]
+
+members = [
+  "devand-core",
+  "devand-crypto",
+  "devand-db",
+  "devand-mailer",
+  "devand-ui",
+  "devand-web",
+]
