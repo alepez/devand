@@ -9,7 +9,7 @@ use rocket::{Route, State};
 use rocket_contrib::json::Json;
 
 const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
-const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
+const DEFAULT_BASE_URL: &str = "http://localhost:8000";
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -58,7 +58,7 @@ fn user_put(
         .update(user.id, &user.settings.schedule);
 
     // Save new settings in db
-    devand_db::save_user(user.0, &conn.0).map(|x| Json(x))
+    devand_db::save_user(user.0, &conn.0).map(Json)
 }
 
 /// Send a verification email to the logged user
@@ -322,7 +322,7 @@ fn password_edit(
 
 /// Given a string with user ids separated by a dash, return a Vec of UserId
 fn parse_members(s: &str) -> Vec<UserId> {
-    s.split("-")
+    s.split('-')
         .filter_map(|x| x.parse().ok())
         .map(UserId)
         .collect()

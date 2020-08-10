@@ -11,7 +11,7 @@ use rocket_contrib::templates::Template;
 use serde::Serialize;
 
 const BASE_URL: Option<&'static str> = option_env!("DEVAND_BASE_URL");
-const DEFAULT_BASE_URL: &'static str = "http://localhost:8000";
+const DEFAULT_BASE_URL: &str = "http://localhost:8000";
 
 // Handle authentication request
 #[post("/login/<return_to>", data = "<credentials>")]
@@ -217,7 +217,6 @@ fn password_reset_token(
         Some(PasswordReset { user_id }) => {
             let user_id = devand_core::UserId(user_id);
             devand_db::auth::set_password(user_id, &password, &conn)
-                .ok()
                 .expect("Password to be updated on database");
             Ok(Flash::success(redirect_ok, ok_msg))
         }

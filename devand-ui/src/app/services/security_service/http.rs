@@ -3,8 +3,8 @@ use devand_core::PasswordEdit;
 use yew::format::Json;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
-const API_PASSWORD_CHECK_URL: &'static str = "/api/password-check";
-const API_PASSWORD_EDIT_URL: &'static str = "/api/password-edit";
+const API_PASSWORD_CHECK_URL: &str = "/api/password-check";
+const API_PASSWORD_EDIT_URL: &str = "/api/password-edit";
 
 pub struct SecurityService {
     callback: FetchCallback,

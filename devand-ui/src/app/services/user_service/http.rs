@@ -11,8 +11,8 @@ use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 const DELAY_MS: u32 = 2_000;
-const API_URL: &'static str = "/api/user";
-const API_URL_VERIFY_EMAIL: &'static str = "/api/verify_email";
+const API_URL: &str = "/api/user";
+const API_URL_VERIFY_EMAIL: &str = "/api/verify_email";
 
 pub struct UserService {
     // put_handler is wrapped in Arc<Mutex> so it can be passed to Timeout

@@ -15,6 +15,7 @@ pub(crate) fn notify_chat_members(
     let chat_url = format!("{}/chat/{}", base_url, &from.username);
 
     let subject = format!("DevAndDev - {} sent you a new message", &from.visible_name);
+
     let text = format!(
         "You have a message from {}. View on DevAndDev: {}",
         &from.visible_name, chat_url
@@ -26,10 +27,7 @@ pub(crate) fn notify_chat_members(
         .filter_map(|&user_id| devand_db::load_user_by_id(user_id, &conn).map(|u| u.email))
         .collect();
 
-    if mailer
-        .send_email(recipients, subject.to_string(), text.to_string())
-        .is_err()
-    {
+    if mailer.send_email(recipients, subject, text).is_err() {
         log::error!("Cannot send email");
     }
 }

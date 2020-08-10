@@ -4,7 +4,7 @@ use yew::format::{Json, Nothing};
 use yew::prelude::*;
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
-const API_URL: &'static str = "/api/affinities";
+const API_URL: &str = "/api/affinities";
 
 pub struct AffinitiesService {
     get_handler: GetHandler,

@@ -11,9 +11,9 @@ use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
 use validator_derive::Validate;
 
-const LOGIN_COOKIE_KEY: &'static str = "login";
-const JOIN_COOKIE_KEY: &'static str = "join";
-const JOIN_CAPTCHA_COOKIE_KEY: &'static str = "join_captcha";
+const LOGIN_COOKIE_KEY: &str = "login";
+const JOIN_COOKIE_KEY: &str = "join";
+const JOIN_CAPTCHA_COOKIE_KEY: &str = "join_captcha";
 
 #[derive(FromForm)]
 pub struct Credentials {
@@ -278,7 +278,7 @@ pub(crate) fn join(
     let join_data = db::auth::JoinData {
         username: username.clone(),
         password: password.clone(),
-        email: email.clone(),
+        email,
     };
 
     db::auth::join(join_data, &conn.0)
@@ -397,7 +397,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for RealIp {
 
         real_ip_from_header
             .or(remote_ip_from_sock)
-            .map(|x| RealIp(x))
+            .map(RealIp)
             .or_forward(())
     }
 }
@@ -412,7 +412,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for LoggedUser {
         let auth_data = request.guard::<AuthData>()?;
         // TODO load_full_user_by_id is expensive
         let user = devand_db::load_full_user_by_id(auth_data.user_id, &conn.0);
-        user.map(|x| LoggedUser(x)).or_forward(())
+        user.map(LoggedUser).or_forward(())
     }
 }
 

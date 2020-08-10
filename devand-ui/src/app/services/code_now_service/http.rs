@@ -8,7 +8,7 @@ use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
 const INTERVAL_MS: u32 = 5_000;
 
-const API_URL: &'static str = "/api/code-now";
+const API_URL: &str = "/api/code-now";
 
 pub struct CodeNowService {
     post_handler: Arc<Mutex<PostHandler>>,

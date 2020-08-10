@@ -26,7 +26,7 @@ struct PgDevandConn(diesel::PgConnection);
 pub struct StaticDir(pub String);
 
 fn static_files(rocket: Rocket) -> Result<Rocket, Rocket> {
-    const DEFAULT_DIR: &'static str = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+    const DEFAULT_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
 
     let dir = rocket
         .config()

@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use yew::format::{Json, Nothing};
 use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 
-const API_AFFINITIES_MATCH_URL: &'static str = "/api/availability-match";
+const API_AFFINITIES_MATCH_URL: &str = "/api/availability-match";
 
 fn api_url_get_user(user_id: UserId) -> String {
     format!("/api/u/{}", user_id.0)
