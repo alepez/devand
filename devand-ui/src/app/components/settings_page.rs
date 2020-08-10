@@ -1,7 +1,9 @@
 use crate::app::components::AddLanguageComponent;
 use crate::app::components::EditableLanguageTag;
 use crate::app::elements::busy_indicator;
-use devand_core::{Availability, Language, SpokenLanguage, LanguagePreference, Languages, User};
+use devand_core::{
+    Availability, Language, LanguagePreference, Languages, SpokenLanguage, SpokenLanguages, User,
+};
 use yew::{prelude::*, Properties};
 
 use crate::app::components::AvailabilityTable;
@@ -11,7 +13,7 @@ pub enum Msg {
     UpdateBio(String),
     UpdateEmail(String),
     ToggleVacationMode,
-    AddSpokenLanguage(SpokenLanguage),
+    ToggleSpokenLanguage(SpokenLanguage),
     AddLanguage((Language, LanguagePreference)),
     RemoveLanguage(Language),
     UpdateSchedule(Availability),
@@ -41,9 +43,23 @@ impl Component for SettingsPage {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::AddSpokenLanguage(lang) => {
+            Msg::ToggleSpokenLanguage(lang) => {
                 self.update_user(move |user| {
-                    user.settings.spoken_languages.push(lang)
+                    // FIXME spoken_languages should be a Set
+                    let is_set = user.settings.spoken_languages.0.contains(&lang);
+
+                    if is_set {
+                        user.settings.spoken_languages.0 = user
+                            .settings
+                            .spoken_languages
+                            .0
+                            .iter()
+                            .filter(|&x| x != &lang)
+                            .map(|x| x.to_owned())
+                            .collect();
+                    } else {
+                        user.settings.spoken_languages.push(lang)
+                    }
                 });
             }
             Msg::AddLanguage((lang, preferences)) => {
@@ -136,6 +152,7 @@ impl SettingsPage {
                     }
                 }
                 { self.view_languages_panel(&settings.languages) }
+                { self.view_spoken_languages_panel(&settings.spoken_languages) }
             </div>
         }
     }
@@ -224,6 +241,47 @@ impl SettingsPage {
         }
     }
 
+    fn view_spoken_languages_panel(&self, spoken_languages: &SpokenLanguages) -> Html {
+        use strum::IntoEnumIterator;
+
+        let options = SpokenLanguage::iter().map(|spoken_lang| {
+            let checked = spoken_languages.contains(&spoken_lang);
+            let input_id = format!("spoken-language-{}", spoken_lang);
+            html! {
+            <label for=input_id class="pure-checkbox">
+                <input
+                    type="checkbox"
+                    id=input_id
+                    value=spoken_lang
+                    checked=checked
+                    onclick=self.link.callback(move |_| Msg::ToggleSpokenLanguage(spoken_lang))
+                    />
+                { spoken_lang }
+            </label>
+            }
+        });
+
+        html! {
+            <fieldset>
+                <div class="pure-g">
+                    <legend class="pure-u-1">{ "Spoken Languages" }</legend>
+                    <div class="pure-u-1">
+                    {
+                        if spoken_languages.0.is_empty() {
+                            view_no_spoken_language_warning()
+                        } else {
+                            html! {}
+                        }
+                    }
+                    </div>
+                    <div class="pure-u-1">
+                        { for options }
+                    </div>
+                </div>
+            </fieldset>
+        }
+    }
+
     fn view_availability_panel(&self, schedule: &Availability) -> Html {
         html! { <AvailabilityTable schedule=schedule on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
     }
@@ -247,8 +305,18 @@ fn view_no_priority_warning() -> Html {
     }
 }
 
+fn view_no_spoken_language_warning() -> Html {
+    html! {
+    <div class=("alert", "alert-warning")>
+        { "Please, select at least one spoken language" }
+    </div>
+    }
+}
+
 fn at_least_one_language_with_priority(languages: &Languages) -> bool {
-    languages.iter().any(|(_, pref)| pref.priority != devand_core::Priority::No)
+    languages
+        .iter()
+        .any(|(_, pref)| pref.priority != devand_core::Priority::No)
 }
 
 #[cfg(test)]
@@ -265,20 +333,26 @@ mod test {
     #[test]
     fn some_languages_no_one_with_priority() {
         let mut languages = Languages::default();
-        languages.insert(Language::Ada, LanguagePreference{
-            level: Level::Novice,
-            priority: Priority::No,
-        });
+        languages.insert(
+            Language::Ada,
+            LanguagePreference {
+                level: Level::Novice,
+                priority: Priority::No,
+            },
+        );
         assert!(at_least_one_language_with_priority(&languages) == false);
     }
 
     #[test]
     fn some_languages_someone_with_priority() {
         let mut languages = Languages::default();
-        languages.insert(Language::Ada, LanguagePreference{
-            level: Level::Novice,
-            priority: Priority::High,
-        });
+        languages.insert(
+            Language::Ada,
+            LanguagePreference {
+                level: Level::Novice,
+                priority: Priority::High,
+            },
+        );
         assert!(at_least_one_language_with_priority(&languages));
     }
 }

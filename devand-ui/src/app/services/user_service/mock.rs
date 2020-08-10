@@ -14,7 +14,9 @@ impl UserService {
         self.callback.emit(Ok(fake_user()))
     }
 
-    pub fn store(&mut self, _user: &User) {}
+    pub fn store(&mut self, user: &User) {
+        log::debug!("Store {:?}", user);
+    }
 
     pub fn verify_email(&mut self) {}
 }
