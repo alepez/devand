@@ -123,6 +123,17 @@ pub struct UnreadMessage {
     pub message_id: uuid::Uuid,
 }
 
+#[derive(Queryable)]
+pub struct ChatMember {
+    pub chat_id: uuid::Uuid,
+    pub user_id: i32,
+    pub username: String,
+    pub visible_name: String,
+    pub bio: String,
+    pub languages: serde_json::Value,
+    pub spoken_languages: Option<serde_json::Value>,
+}
+
 #[derive(Debug)]
 pub enum Error {
     CannotDeserializeUserSettings(String),

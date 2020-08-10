@@ -30,6 +30,7 @@ pub fn establish_connection() -> PgConnection {
 #[derive(Debug)]
 pub enum Error {
     Unknown,
+    Generic(String),
 }
 
 // TODO This is very expensive. Should return an iterator and should be cached
@@ -219,39 +220,45 @@ fn load_user_chat_by_id(
     user: devand_core::UserId,
     id: uuid::Uuid,
     conn: &PgConnection,
-) -> Option<devand_core::UserChat> {
-    // TODO [refactoring] Create PublicUserProfile model
+) -> Result<devand_core::UserChat, Error> {
     let members: Vec<devand_core::PublicUserProfile> = schema_view::chat_members::table
         .filter(schema_view::chat_members::chat_id.eq(id))
-        .select((
-            schema_view::chat_members::user_id,
-            schema_view::chat_members::username,
-            schema_view::chat_members::visible_name,
-            schema_view::chat_members::bio,
-            schema_view::chat_members::languages,
-            schema_view::chat_members::spoken_languages,
-        ))
         .load(conn)
-        .unwrap_or(Vec::default())
+        .map_err(|e| Error::Generic(format!("Error loading members from database: {:?}", e)))?
         .into_iter()
-        .filter(|(user_id, _, _, _, _, _)| *user_id != user.0)
-        .filter_map(
-            |(user_id, username, visible_name, bio, languages, spoken_languages)| {
-                let languages = serde_json::from_value(languages).ok()?;
-                let spoken_languages = serde_json::from_value(spoken_languages).ok()?;
+        .filter_map(|chat_member: models::ChatMember| {
+            let models::ChatMember {
+                user_id,
+                username,
+                visible_name,
+                bio,
+                languages,
+                spoken_languages,
+                ..
+            } = chat_member;
 
-                let profile = devand_core::PublicUserProfile {
-                    id: devand_core::UserId(user_id),
-                    username,
-                    visible_name,
-                    languages,
-                    bio,
-                    spoken_languages,
-                };
+            // Ignore same user
+            if user_id == user.0 {
+                return None;
+            }
 
-                Some(profile)
-            },
-        )
+            let languages = serde_json::from_value(languages).ok()?;
+
+            let spoken_languages = spoken_languages
+                .and_then(|x| serde_json::from_value(x).ok())
+                .unwrap_or_default();
+
+            let profile = devand_core::PublicUserProfile {
+                id: devand_core::UserId(user_id),
+                username,
+                visible_name,
+                languages,
+                bio,
+                spoken_languages,
+            };
+
+            Some(profile)
+        })
         .collect();
 
     let members_ids = members.iter().map(|u| u.id).collect();
@@ -263,7 +270,7 @@ fn load_user_chat_by_id(
             schema_view::unread_messages_full::dsl::message_id,
         ))
         .first(conn)
-        .ok()?;
+        .map_err(|_| Error::Generic("Error loading unread messages from database".to_string()))?;
 
     let unread_messages = unread_messages as usize;
 
@@ -276,7 +283,7 @@ fn load_user_chat_by_id(
         members,
     };
 
-    Some(chat)
+    Ok(chat)
 }
 
 pub fn load_chats_by_member(
@@ -291,7 +298,11 @@ pub fn load_chats_by_member(
         .map(|chats: Vec<uuid::Uuid>| {
             chats
                 .into_iter()
-                .filter_map(|id| load_user_chat_by_id(member, id, conn))
+                .filter_map(|id| {
+                    load_user_chat_by_id(member, id, conn)
+                        .map_err(|e| log::error!("Error: {:?}", e))
+                        .ok()
+                })
                 .collect()
         })
         .unwrap_or(Vec::default());
