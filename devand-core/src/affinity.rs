@@ -287,4 +287,17 @@ mod tests {
         assert!(PairLevel::new(Level::Expert, Level::Novice) == PairLevel::MIN);
         assert!(PairLevel::new(Level::Novice, Level::Expert) == PairLevel::MIN);
     }
+
+    #[test]
+    fn convert_user_to_affinity_params() {
+        let user = crate::mock::user();
+        let _aff_params = AffinityParams::from(&user);
+    }
+
+    #[test]
+    fn convert_pub_user_prof_to_affinity_params() {
+        let user = crate::mock::user();
+        let public_user_profile: crate::PublicUserProfile = user.into();
+        let _aff_params = AffinityParams::from(&public_user_profile);
+    }
 }

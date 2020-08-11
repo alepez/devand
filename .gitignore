@@ -3,3 +3,4 @@
 ./devand-core/target
 ./devand-ui/target
 /target
+tarpaulin-report.html
