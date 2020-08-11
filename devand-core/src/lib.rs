@@ -310,7 +310,7 @@ pub struct PasswordEdit {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use maplit::btreeset;
+    use maplit::{btreemap, btreeset};
 
     #[test]
     fn user_example() {
@@ -320,43 +320,13 @@ mod tests {
 
     #[test]
     fn sort_languages_by_priority_then_level() {
-        let mut languages = Languages::default();
-
-        languages.insert(
-            Language::C,
-            LanguagePreference {
-                level: Level::Expert,
-                priority: Priority::Low,
-            },
-        );
-        languages.insert(
-            Language::JavaScript,
-            LanguagePreference {
-                level: Level::Proficient,
-                priority: Priority::Low,
-            },
-        );
-        languages.insert(
-            Language::CPlusPlus,
-            LanguagePreference {
-                level: Level::Novice,
-                priority: Priority::Low,
-            },
-        );
-        languages.insert(
-            Language::Rust,
-            LanguagePreference {
-                level: Level::Proficient,
-                priority: Priority::High,
-            },
-        );
-        languages.insert(
-            Language::Go,
-            LanguagePreference {
-                level: Level::Expert,
-                priority: Priority::No,
-            },
-        );
+        let languages = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
+            Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::CPlusPlus => LanguagePreference { level: Level::Novice, priority: Priority::Low, },
+            Language::Rust => LanguagePreference { level: Level::Proficient, priority: Priority::High, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+        ]);
 
         let languages = languages.into_sorted_vec();
 

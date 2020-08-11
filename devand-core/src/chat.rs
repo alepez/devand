@@ -39,3 +39,15 @@ pub struct ChatInfo {
     pub members_info: Vec<ChatMemberInfo>,
     pub messages: Vec<ChatMessage>,
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn chat_id_display() {
+        let s = "554119d7-554a-438a-ac33-7a0b1bf99437";
+        let u = uuid::Uuid::parse_str(s).unwrap();
+        assert_eq!(s, format!("{}", ChatId(u)));
+    }
+}
