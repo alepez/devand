@@ -46,6 +46,7 @@ jobs:
           echo "host    all             all             127.0.0.1/32            md5" > sudo tee -a /etc/postgresql/10/main/pg_hba.conf
           sudo service postgresql restart && sleep 3
           sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+          sudo -u postgres createdb devand
           sudo service postgresql restart && sleep 3
           echo '::set-env name=DATABASE_URL::postgres://postgres:postgres@localhost/devand'
       - name: Run cargo-tarpaulin
