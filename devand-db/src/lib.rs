@@ -446,23 +446,37 @@ pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunM
 mod tests {
     use super::*;
 
+    fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
+        use diesel::delete;
+        use schema::*;
+        delete(auth::table).execute(conn)?;
+        delete(chats::table).execute(conn)?;
+        delete(messages::table).execute(conn)?;
+        delete(unread_messages::table).execute(conn)?;
+        delete(users::table).execute(conn)?;
+        Ok(())
+    }
+
     fn fresh_db() -> PgConnection {
         let conn = establish_connection();
-        diesel::delete(schema::users::table).execute(&conn).unwrap();
-        diesel::delete(schema::auth::table).execute(&conn).unwrap();
+        run_migrations(&conn).unwrap();
+        clear_all(&conn).unwrap();
         conn
     }
 
+    fn fake_join_data() -> auth::JoinData {
+        auth::JoinData {
+            username: "foo".to_string(),
+            email: "foo@example.com".to_string(),
+            password: "ZXokdUB6dWplaW5nYXU3am".to_string(),
+        }
+    }
+
     #[test]
-    #[ignore]
     fn join_valid_user() {
         let conn = fresh_db();
 
-        let join_data = auth::JoinData {
-            username: "foo".to_string(),
-            email: "example@example.com".to_string(),
-            password: "ZXokdUB6dWplaW5nYXU3am".to_string(),
-        };
+        let join_data = fake_join_data();
 
         let credentials = auth::Credentials {
             username: join_data.username.clone(),
@@ -470,43 +484,30 @@ mod tests {
         };
 
         assert!(auth::join(join_data, &conn).is_ok());
-
         assert!(auth::login(credentials, &conn).is_ok())
     }
 
     #[test]
-    #[ignore]
     fn username_available() {
         let conn = fresh_db();
 
-        let username = "bar";
+        let join_data = fake_join_data();
+        let username = join_data.username.clone();
 
-        let join_data = auth::JoinData {
-            username: username.to_string(),
-            email: "example@example.com".to_string(),
-            password: "ZXokdUB6dWplaW5nYXU3am".to_string(),
-        };
-
-        assert!(is_username_available(username, &conn));
+        assert!(is_username_available(&username, &conn));
         assert!(auth::join(join_data, &conn).is_ok());
-        assert!(!is_username_available(username, &conn));
+        assert!(!is_username_available(&username, &conn));
     }
 
     #[test]
-    #[ignore]
     fn email_available() {
         let conn = fresh_db();
 
-        let email = "example@example.com";
+        let join_data = fake_join_data();
+        let email = join_data.email.clone();
 
-        let join_data = auth::JoinData {
-            username: "foo".to_string(),
-            email: email.to_string(),
-            password: "ZXokdUB6dWplaW5nYXU3am".to_string(),
-        };
-
-        assert!(is_email_available(email, &conn));
+        assert!(is_email_available(&email, &conn));
         assert!(auth::join(join_data, &conn).is_ok());
-        assert!(!is_email_available(email, &conn));
+        assert!(!is_email_available(&email, &conn));
     }
 }
