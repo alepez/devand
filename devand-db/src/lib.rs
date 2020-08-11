@@ -473,6 +473,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn join_valid_user() {
         let conn = fresh_db();
 
@@ -488,6 +489,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn username_available() {
         let conn = fresh_db();
 
@@ -500,6 +502,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn email_available() {
         let conn = fresh_db();
 
