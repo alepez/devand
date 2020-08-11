@@ -48,10 +48,6 @@ features = [
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
 
-[profile.release]
-lto = true
-opt-level = 'z'
-
 [features]
 default = []
 mock_http = ["fake", "rand", "uuid"]
