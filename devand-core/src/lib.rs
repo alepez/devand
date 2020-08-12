@@ -15,7 +15,7 @@ use strum_macros::{Display, EnumIter, EnumString};
 pub use affinity::{Affinity, AffinityParams};
 pub use languages::Language;
 pub use schedule::{Availability, DaySchedule, WeekSchedule};
-pub use spoken_languages::{SpokenLanguage, SpokenLanguages};
+pub use spoken_languages::*;
 
 /// Identifies univocally an user
 #[derive(Debug, Default, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
@@ -200,12 +200,6 @@ impl From<&PublicUserProfile> for AffinityParams {
     }
 }
 
-/// Check if users have compatible languages. Users without any language set
-/// are compatible with everybody by default.
-pub fn are_spoken_language_compatible(l: &SpokenLanguages, r: &SpokenLanguages) -> bool {
-    l.0.is_empty() || r.0.is_empty() || l.0.iter().any(|x| r.0.iter().any(|y| x == y))
-}
-
 /// Calculate affinities between `user` and all `users` passed
 pub fn calculate_affinities(
     user: &PublicUserProfile,
@@ -293,7 +287,7 @@ pub struct PasswordEdit {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use maplit::{btreemap, btreeset};
+    use maplit::btreemap;
 
     #[test]
     fn user_example() {
@@ -318,33 +312,5 @@ mod tests {
         assert!(languages[2].0 == Language::JavaScript);
         assert!(languages[3].0 == Language::CPlusPlus);
         assert!(languages[4].0 == Language::Go);
-    }
-
-    #[test]
-    fn are_spoken_language_compatible_empty_is_yes() {
-        assert!(are_spoken_language_compatible(
-            &SpokenLanguages(btreeset![]),
-            &SpokenLanguages(btreeset![SpokenLanguage::English]),
-        ));
-        assert!(are_spoken_language_compatible(
-            &SpokenLanguages(btreeset![SpokenLanguage::English]),
-            &SpokenLanguages(btreeset![]),
-        ));
-    }
-
-    #[test]
-    fn are_spoken_language_compatible_yes() {
-        assert!(are_spoken_language_compatible(
-            &SpokenLanguages(btreeset![SpokenLanguage::English]),
-            &SpokenLanguages(btreeset![SpokenLanguage::English])
-        ));
-    }
-
-    #[test]
-    fn are_spoken_language_compatible_no() {
-        assert!(!are_spoken_language_compatible(
-            &SpokenLanguages(btreeset![SpokenLanguage::Italian]),
-            &SpokenLanguages(btreeset![SpokenLanguage::English])
-        ));
     }
 }
