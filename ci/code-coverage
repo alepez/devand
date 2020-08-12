@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cargo tarpaulin \
+  --target-dir target/tarpaulin \
+  -o Html \
+  -- \
+    -Z unstable-options \
+    --test-threads=1 \
+    --include-ignored
