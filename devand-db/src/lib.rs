@@ -37,6 +37,7 @@ pub enum Error {
 // TODO This is very expensive. Should return an iterator and should be cached
 // somewhere. Or we could use a custom database when this is needed, like
 // when searching for user affinity
+/// Load all users
 pub fn load_users(conn: &PgConnection) -> Option<Vec<devand_core::User>> {
     schema::users::table
         .load(conn)
@@ -49,6 +50,7 @@ pub fn load_users(conn: &PgConnection) -> Option<Vec<devand_core::User>> {
         .ok()
 }
 
+/// Load single user by username (unique)
 pub fn load_user_by_username(username: &str, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table
         .filter(schema::users::dsl::username.eq(username))
@@ -58,6 +60,7 @@ pub fn load_user_by_username(username: &str, conn: &PgConnection) -> Option<deva
     user.try_into().map_err(|e| dbg!(e)).ok()
 }
 
+/// Load single user by email (unique)
 pub fn load_user_by_email(email: &str, conn: &PgConnection) -> Option<devand_core::User> {
     log::debug!("Load user by email {}", email);
     let user: models::User = schema::users::table
@@ -69,6 +72,9 @@ pub fn load_user_by_email(email: &str, conn: &PgConnection) -> Option<devand_cor
 }
 
 // TODO [optimization] create a psql view, call db once
+// TODO unread_messages should be outside User struct
+// TODO This functions smells of shortcut
+/// Load single user by id (unique) with more informations
 pub fn load_full_user_by_id(
     id: devand_core::UserId,
     conn: &PgConnection,
@@ -91,6 +97,7 @@ pub fn load_full_user_by_id(
     Some(user)
 }
 
+/// Load single user by id (unique)
 pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table
         .filter(schema::users::dsl::id.eq(id.0))
@@ -100,6 +107,9 @@ pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<d
     user.try_into().map_err(|e| dbg!(e)).ok()
 }
 
+/// Save the given user
+/// If the email has changed, it set as not verified
+/// If the visible_name is set to empty, it is set to username instead
 pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_core::User> {
     let devand_core::User {
         settings,
@@ -111,11 +121,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
 
     let settings = serde_json::to_value(settings).unwrap();
 
-    let (current_email, current_email_verified): (String, bool) = schema::users::table
-        .filter(schema::users::dsl::id.eq(user.id.0))
-        .select((schema::users::email, schema::users::email_verified))
-        .first(conn)
-        .ok()?;
+    let (current_email, current_email_verified) = has_verified_email(user.id, &conn).ok()?;
 
     let email_changed = current_email != email;
     let email_verified = current_email_verified && !email_changed;
@@ -144,6 +150,8 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
         .and_then(|x: models::User| x.try_into().ok())
 }
 
+// TODO Instead of panicing, return a Result
+/// Return true if username is available
 pub fn is_username_available(username: &str, conn: &PgConnection) -> bool {
     // We have a username blocklist. Instead of check if the name is valid,
     // just pretend it is not available
@@ -160,6 +168,8 @@ pub fn is_username_available(username: &str, conn: &PgConnection) -> bool {
     count == 0
 }
 
+// TODO Instead of panicing, return a Result
+/// Return true if email is available
 pub fn is_email_available(email: &str, conn: &PgConnection) -> bool {
     let count: i64 = schema::users::table
         .filter(schema::users::dsl::email.eq(email))
@@ -217,6 +227,7 @@ fn find_or_create_chat_by_members(
     }
 }
 
+// TODO This function is huge, needs refactoring
 fn load_user_chat_by_id(
     user: devand_core::UserId,
     id: uuid::Uuid,
@@ -414,6 +425,19 @@ pub fn add_chat_message_by_members(
     }
 }
 
+/// Return true if the given user has a verified email
+pub fn has_verified_email(
+    user_id: devand_core::UserId,
+    conn: &PgConnection,
+) -> Result<(String, bool), Error> {
+    schema::users::table
+        .filter(schema::users::dsl::id.eq(user_id.0))
+        .select((schema::users::email, schema::users::email_verified))
+        .first(conn)
+        .map_err(|_| Error::Unknown)
+}
+
+/// Return true if the email is verified
 pub fn is_verified_email(email_addr: &str, conn: &PgConnection) -> bool {
     schema::users::table
         .filter(schema::users::dsl::email.eq(email_addr))
@@ -422,6 +446,7 @@ pub fn is_verified_email(email_addr: &str, conn: &PgConnection) -> bool {
         .unwrap_or(false)
 }
 
+/// Mark the email address as verified
 pub fn set_verified_email(email_addr: &str, conn: &PgConnection) -> Result<(), Error> {
     diesel::update(schema::users::table.filter(schema::users::dsl::email.eq(email_addr)))
         .set((schema::users::dsl::email_verified.eq(true),))
@@ -430,6 +455,7 @@ pub fn set_verified_email(email_addr: &str, conn: &PgConnection) -> Result<(), E
         .map_err(|_| Error::Unknown)
 }
 
+/// List all unverified email addresses
 pub fn list_unverified_emails(conn: &PgConnection) -> Result<Vec<String>, Error> {
     schema::users::table
         .filter(schema::users::dsl::email_verified.eq(false))
@@ -438,6 +464,7 @@ pub fn list_unverified_emails(conn: &PgConnection) -> Result<Vec<String>, Error>
         .map_err(|_| Error::Unknown)
 }
 
+/// Run database migrations
 pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunMigrationsError> {
     embedded_migrations::run(&*conn)
 }
@@ -472,6 +499,15 @@ mod tests {
         }
     }
 
+    fn fresh_db_with_fake_user() -> (PgConnection, devand_core::User) {
+        let conn = fresh_db();
+        let join_data = fake_join_data();
+        let username = join_data.username.clone();
+        auth::join(join_data, &conn).unwrap();
+        let user = load_user_by_username(&username, &conn).unwrap();
+        (conn, user)
+    }
+
     #[test]
     #[ignore]
     fn join_valid_user() {
@@ -503,6 +539,13 @@ mod tests {
 
     #[test]
     #[ignore]
+    fn blocklist_username_unavailable() {
+        let conn = fresh_db();
+        assert!(!is_username_available("root", &conn));
+    }
+
+    #[test]
+    #[ignore]
     fn email_available() {
         let conn = fresh_db();
 
@@ -512,5 +555,87 @@ mod tests {
         assert!(is_email_available(&email, &conn));
         assert!(auth::join(join_data, &conn).is_ok());
         assert!(!is_email_available(&email, &conn));
+    }
+
+    #[test]
+    #[ignore]
+    fn load_no_users_ok() {
+        let conn = fresh_db();
+        let users = load_users(&conn).unwrap();
+        assert!(users.is_empty());
+    }
+
+    #[test]
+    #[ignore]
+    fn load_single_users_ok() {
+        let conn = fresh_db();
+        let join_data = fake_join_data();
+        auth::join(join_data, &conn).unwrap();
+        let users = load_users(&conn).unwrap();
+        assert_eq!(users.len(), 1);
+    }
+
+    #[test]
+    #[ignore]
+    fn load_user_ok() {
+        let (conn, user) = fresh_db_with_fake_user();
+
+        let user = load_user_by_username(&user.username, &conn).unwrap();
+        let user = load_user_by_id(user.id, &conn).unwrap();
+        let user = load_user_by_email(&user.email, &conn).unwrap();
+        let user = load_full_user_by_id(user.id, &conn).unwrap();
+        assert_eq!(user.email_verified, false);
+        assert_eq!(user.unread_messages, 0);
+    }
+
+    #[test]
+    #[ignore]
+    fn save_user_ok() {
+        let (conn, mut user) = fresh_db_with_fake_user();
+        let user_id = user.id;
+        let email = user.email.clone();
+
+        assert!(!user.email_verified);
+
+        user.visible_name = "Foo Bar".to_string();
+        save_user(user, &conn).unwrap();
+
+        set_verified_email(&email, &conn).unwrap();
+        let user = load_user_by_id(user_id, &conn).unwrap();
+        assert!(user.email_verified);
+    }
+
+    #[test]
+    #[ignore]
+    fn save_user_change_email_unverified() {
+        let (conn, user) = fresh_db_with_fake_user();
+        let user_id = user.id;
+        let email = user.email.clone();
+
+        set_verified_email(&email, &conn).unwrap();
+
+        let mut user = load_user_by_id(user_id, &conn).unwrap();
+        assert!(user.email_verified);
+
+        user.email = format!("changed_{}", user.email);
+        let user = save_user(user, &conn).unwrap();
+
+        assert!(!user.email_verified);
+    }
+
+    #[test]
+    #[ignore]
+    fn visible_name_is_equal_to_username_when_set_to_empty() {
+        let (conn, mut user) = fresh_db_with_fake_user();
+        let other_visible_name = "Gne Gne";
+
+        user.visible_name = other_visible_name.to_string();
+        let mut user = save_user(user, &conn).unwrap();
+        assert_eq!(user.visible_name, other_visible_name);
+
+        user.visible_name = String::default();
+        let user = save_user(user, &conn).unwrap();
+
+        assert_eq!(user.visible_name, user.username);
     }
 }

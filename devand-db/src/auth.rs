@@ -3,6 +3,7 @@ use argon2::{self, Config};
 use devand_core::UserId;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
+use std::convert::TryInto;
 
 fn generate_salt() -> [u8; 16] {
     use rand::Rng;
@@ -32,7 +33,7 @@ pub struct JoinData {
     pub password: String,
 }
 
-pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
+pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<devand_core::User, Error> {
     use schema::users;
 
     let JoinData {
@@ -60,7 +61,11 @@ pub fn join(join_data: JoinData, conn: &PgConnection) -> Result<(), Error> {
             Error::Unknown
         })?;
 
-    add_password(UserId(user.id), &password, conn)
+    add_password(UserId(user.id), &password, conn)?;
+
+    let user = user.try_into().map_err(|_| Error::Unknown)?;
+
+    Ok(user)
 }
 
 pub fn login(credentials: Credentials, conn: &PgConnection) -> Result<UserId, Error> {

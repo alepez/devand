@@ -13,5 +13,5 @@ fn main() {
         vec!["admin@devand.dev".to_string()],
         "Hei".to_string(),
         "Hello!\n\nThis is a **markdown** message.\n\n## This is a title".to_string(),
-    );
+    ).unwrap();
 }
