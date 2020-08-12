@@ -13,3 +13,4 @@ serde_json = "1"
 strum = "0.17"
 strum_macros = "0.17"
 uuid = { version = ">=0.2.0, <0.7.0", features = ["v4", "serde"] }
+isolang = { version = "1", features = ["serde_serialize"] }
