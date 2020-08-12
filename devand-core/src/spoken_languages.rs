@@ -68,9 +68,16 @@ impl std::ops::DerefMut for SpokenLanguages {
     }
 }
 
+/// Check if users have compatible languages. Users without any language set
+/// are compatible with everybody by default.
+pub fn are_spoken_language_compatible(l: &SpokenLanguages, r: &SpokenLanguages) -> bool {
+    l.0.is_empty() || r.0.is_empty() || l.0.iter().any(|x| r.0.iter().any(|y| x == y))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use maplit::btreeset;
 
     #[test]
     fn spoken_lang_serde() {
@@ -91,5 +98,33 @@ mod tests {
         let x = SpokenLanguage::Italian;
         let f = format!("{}", x);
         assert_eq!("Italian", f);
+    }
+
+    #[test]
+    fn are_spoken_language_compatible_empty_is_yes() {
+        assert!(are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![]),
+            &SpokenLanguages(btreeset![SpokenLanguage::English]),
+        ));
+        assert!(are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![SpokenLanguage::English]),
+            &SpokenLanguages(btreeset![]),
+        ));
+    }
+
+    #[test]
+    fn are_spoken_language_compatible_yes() {
+        assert!(are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![SpokenLanguage::English]),
+            &SpokenLanguages(btreeset![SpokenLanguage::English])
+        ));
+    }
+
+    #[test]
+    fn are_spoken_language_compatible_no() {
+        assert!(!are_spoken_language_compatible(
+            &SpokenLanguages(btreeset![SpokenLanguage::Italian]),
+            &SpokenLanguages(btreeset![SpokenLanguage::English])
+        ));
     }
 }
