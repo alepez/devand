@@ -15,7 +15,7 @@ use strum_macros::{Display, EnumIter, EnumString};
 pub use affinity::{Affinity, AffinityParams};
 pub use languages::Language;
 pub use schedule::{Availability, DaySchedule, WeekSchedule};
-pub use spoken_languages::SpokenLanguage;
+pub use spoken_languages::{SpokenLanguage, SpokenLanguages};
 
 /// Identifies univocally an user
 #[derive(Debug, Default, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
@@ -86,23 +86,6 @@ impl Languages {
         });
 
         languages
-    }
-}
-
-#[derive(Debug, Default, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "snake_case")]
-pub struct SpokenLanguages(pub std::collections::BTreeSet<SpokenLanguage>);
-
-impl std::ops::Deref for SpokenLanguages {
-    type Target = std::collections::BTreeSet<SpokenLanguage>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl std::ops::DerefMut for SpokenLanguages {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 
