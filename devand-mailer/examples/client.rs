@@ -9,9 +9,11 @@ fn main() {
 
     let client = Client::new(conf);
 
-    client.send_email(
-        vec!["admin@devand.dev".to_string()],
-        "Hei".to_string(),
-        "Hello!\n\nThis is a **markdown** message.\n\n## This is a title".to_string(),
-    ).unwrap();
+    client
+        .send_email(
+            vec!["admin@devand.dev".to_string()],
+            "Hei".to_string(),
+            "Hello!\n\nThis is a **markdown** message.\n\n## This is a title".to_string(),
+        )
+        .unwrap();
 }
