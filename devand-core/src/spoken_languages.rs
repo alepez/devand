@@ -57,9 +57,16 @@ mod tests {
 
     #[test]
     fn spoken_lang_serde() {
+        let x = vec![SpokenLanguage::Spa, SpokenLanguage::Fra];
+        let j = serde_json::to_string(&x).unwrap();
+        assert_eq!("[\"spa\",\"fra\"]", j);
+    }
+
+    #[test]
+    fn spoken_lang_serde_back_compatibility() {
         let x = vec![SpokenLanguage::English, SpokenLanguage::Italian];
         let j = serde_json::to_string(&x).unwrap();
-        assert_eq!("[\"eng\",\"ita\"]", j);
+        assert_eq!("[\"english\",\"italian\"]", j);
     }
 
     #[test]
