@@ -51,6 +51,23 @@ impl std::fmt::Display for SpokenLanguage {
     }
 }
 
+#[derive(Debug, Default, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "snake_case")]
+pub struct SpokenLanguages(pub std::collections::BTreeSet<SpokenLanguage>);
+
+impl std::ops::Deref for SpokenLanguages {
+    type Target = std::collections::BTreeSet<SpokenLanguage>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for SpokenLanguages {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
