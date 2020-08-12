@@ -3,6 +3,7 @@ use crate::app::elements::busy_indicator;
 use crate::app::services::UserProfileService;
 use crate::app::{AppRoute, RouterButton};
 use devand_core::PublicUserProfile;
+use devand_core::SpokenLanguages;
 use yew::{prelude::*, Properties};
 
 pub struct UserProfilePage {
@@ -83,8 +84,6 @@ impl Component for UserProfilePage {
                 html! { <LanguageTag lang=lang pref=pref /> }
             });
 
-            let spoken_languages = spoken_languages.iter().map(|x| html! { <li>{ x }</li> });
-
             html! {
             <>
                 <h1><RouterButton route=AppRoute::Chat(other_user.username.clone())>{ "💬 " }</RouterButton>{ other_user.full_name() }</h1>
@@ -95,10 +94,7 @@ impl Component for UserProfilePage {
                     { for languages_tags }
                 </div>
 
-                <h2>{ format!("{} speaks:", visible_name) }</h2>
-                <ul>
-                    <li>{ for spoken_languages }</li>
-                </ul>
+                { view_spoken_languages(&visible_name, &spoken_languages) }
             </>
             }
         } else {
@@ -107,4 +103,18 @@ impl Component for UserProfilePage {
     }
 }
 
-impl UserProfilePage {}
+fn view_spoken_languages(visible_name: &str, spoken_languages: &SpokenLanguages) -> Html {
+    if spoken_languages.is_empty() {
+        html! {}
+    } else {
+        let spoken_languages = spoken_languages.iter().map(|x| html! { <li>{ x }</li> });
+        html! {
+        <>
+            <h2>{ format!("{} speaks:", visible_name) }</h2>
+            <ul>
+                <li>{ for spoken_languages }</li>
+            </ul>
+        </>
+        }
+    }
+}
