@@ -16,12 +16,18 @@ use yew::worker::*;
 const INTERVAL_MS: u64 = 2_000;
 const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Request {
     Init,
-    LazySaveSelfUser(User),
+    Lazy(Box<Request>),
     SaveSelfUser(User),
     VerifyEmail,
+}
+
+impl Request {
+    pub fn lazy(self) -> Self {
+        Request::Lazy(Box::new(self))
+    }
 }
 
 // TODO Add Error
@@ -82,12 +88,12 @@ impl Agent for MainWorker {
         use self::http::request;
 
         match msg {
-            Request::LazySaveSelfUser(user) => {
+            Request::Lazy(req) => {
                 let duration = Duration::from_millis(LAZY_REQUEST_DELAY_MS);
 
                 let callback = self
                     .link
-                    .callback(move |_| Msg::Request(Request::SaveSelfUser(user.clone())));
+                    .callback(move |_| Msg::Request(*req.clone()));
 
                 self._timeout_task = Some(Box::new(TimeoutService::spawn(duration, callback)));
             }
