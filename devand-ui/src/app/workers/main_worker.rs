@@ -13,6 +13,7 @@ pub enum Request {
     Init,
 }
 
+// TODO Add Error
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Response {
     SelfUserFetched(User),
