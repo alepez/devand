@@ -95,10 +95,10 @@ impl Agent for MainWorker {
     }
 
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        // #[cfg(feature = "mock_http")]
-        // use self::mock::request;
+        #[cfg(feature = "mock_http")]
+        use self::mock::request;
 
-        // #[cfg(not(feature = "mock_http"))]
+        #[cfg(not(feature = "mock_http"))]
         use self::http::request;
 
         match msg {
