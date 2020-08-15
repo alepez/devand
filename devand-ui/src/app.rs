@@ -1,6 +1,7 @@
 mod components;
 mod elements;
 mod services;
+mod workers;
 
 use self::components::{
     AffinitiesPage, ChatPage, ChatsPage, CodeNowPage, NotFoundPage, SchedulePage,
@@ -8,6 +9,7 @@ use self::components::{
 };
 use self::elements::busy_indicator;
 use self::services::UserService;
+use self::workers::{main_worker, main_worker::MainWorker};
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
@@ -41,6 +43,7 @@ pub enum AppRoute {
 }
 
 pub struct App {
+    main_worker: Box<dyn Bridge<MainWorker>>,
     user_service: UserService,
     state: State,
     link: ComponentLink<Self>,
@@ -58,6 +61,8 @@ pub enum Msg {
     UserFetchOk(User),
     UserFetchErr,
     VerifyEmail,
+
+    MainWorkerRes(main_worker::Response),
 }
 
 impl Component for App {
@@ -76,7 +81,11 @@ impl Component for App {
         let mut user_service = UserService::new(fetch_callback);
         user_service.restore();
 
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(main_worker::Request::Init);
+
         App {
+            main_worker,
             user_service,
             state: State::default(),
             link,
@@ -108,6 +117,11 @@ impl Component for App {
                 log::debug!("Verify address");
                 self.user_service.verify_email();
                 self.state.verifying_email = true;
+                true
+            }
+            Msg::MainWorkerRes(res) => {
+                log::info!("Data received");
+                log::debug!("{:?}", res);
                 true
             }
         }
