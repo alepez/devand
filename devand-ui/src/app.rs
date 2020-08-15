@@ -8,7 +8,6 @@ use self::components::{
     SecuritySettingsPage, SettingsPage, UserProfilePage,
 };
 use self::elements::busy_indicator;
-use self::services::UserService;
 use self::workers::{main_worker, main_worker::MainWorker};
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
@@ -44,7 +43,6 @@ pub enum AppRoute {
 
 pub struct App {
     main_worker: Box<dyn Bridge<MainWorker>>,
-    user_service: UserService,
     state: State,
     link: ComponentLink<Self>,
 }
@@ -58,8 +56,6 @@ pub struct State {
 
 pub enum Msg {
     UserStore(User),
-    UserFetchOk(User),
-    UserFetchErr,
     VerifyEmail,
 
     MainWorkerRes(main_worker::Response),
@@ -70,23 +66,11 @@ impl Component for App {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let fetch_callback = link.callback(|result: Result<User, anyhow::Error>| match result {
-            Ok(user) => Msg::UserFetchOk(user),
-            Err(err) => {
-                log::error!("{:?}", err);
-                Msg::UserFetchErr
-            }
-        });
-
-        let mut user_service = UserService::new(fetch_callback);
-        // user_service.restore();
-
         let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
         main_worker.send(main_worker::Request::Init);
 
         App {
             main_worker,
-            user_service,
             state: State::default(),
             link,
         }
@@ -98,32 +82,19 @@ impl Component for App {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::MainWorkerRes(res) => self.handle_main_worker_res(res),
+
             Msg::UserStore(user) => {
                 self.main_worker
                     .send(main_worker::Request::SaveSelfUser(user));
                 false
             }
-            Msg::UserFetchOk(user) => {
-                log::debug!("User fetch ok");
-                // TODO Extract chats
-                self.state.user = Some(user);
-                self.state.pending_save = false;
-                true
-            }
-            Msg::UserFetchErr => {
-                log::error!("User fetch error");
-                false
-            }
+
             Msg::VerifyEmail => {
                 log::debug!("Verify address");
-                self.user_service.verify_email();
+                self.main_worker.send(main_worker::Request::VerifyEmail);
                 self.state.verifying_email = true;
                 true
-            }
-            Msg::MainWorkerRes(res) => {
-                log::info!("Data received");
-                log::debug!("{:?}", res);
-                self.handle_main_worker_res(res)
             }
         }
     }
