@@ -12,6 +12,7 @@ const INTERVAL_MS: u64 = 2_000;
 pub enum Request {
     Init,
     SaveSelfUser(User),
+    VerifyEmail,
 }
 
 // TODO Add Error
@@ -65,6 +66,10 @@ impl Agent for MainWorker {
                 log::info!("Saving user...");
                 // TODO put/get actual data
                 self.link.respond(who, Response::SelfUserFetched(user));
+            }
+            Request::VerifyEmail => {
+                log::info!("Verifing email...");
+                // TODO post actual data
             }
         }
     }
