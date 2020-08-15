@@ -11,6 +11,7 @@ const INTERVAL_MS: u64 = 2_000;
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Request {
     Init,
+    SaveSelfUser(User),
 }
 
 // TODO Add Error
@@ -56,8 +57,14 @@ impl Agent for MainWorker {
         log::info!("Request: {:?}", msg);
         match msg {
             Request::Init => {
-                // TODO fetch actual data
+                log::info!("Initializing...");
+                // TODO get actual data
                 self.link.respond(who, Response::SelfUserFetched(fake_user()));
+            }
+            Request::SaveSelfUser(user) => {
+                log::info!("Saving user...");
+                // TODO put/get actual data
+                self.link.respond(who, Response::SelfUserFetched(user));
             }
         }
     }
