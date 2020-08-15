@@ -11,9 +11,14 @@ fn api_url_verify_email() -> &'static str {
     "/api/verify_email"
 }
 
+fn api_url_code_now() -> &'static str {
+    "/api/code-now"
+}
+
 pub fn request(worker: &mut MainWorker, msg: Request, who: HandlerId) {
     match msg {
         Request::Init => {
+            log::debug!("Init {:?}", who);
             let url = api_url_self_user();
             let req = fetch::Request::get(url).body(Nothing).unwrap();
             worker._fetch_task = make_task(worker, who, req, Response::SelfUserFetched);
@@ -29,6 +34,13 @@ pub fn request(worker: &mut MainWorker, msg: Request, who: HandlerId) {
             let url = api_url_verify_email();
             let req = fetch::Request::post(url).body(Nothing).unwrap();
             worker._fetch_task = make_task(worker, who, req, Response::Done);
+        }
+
+        Request::LoadCodeNow => {
+            log::debug!("LoadCodeNow {:?}", who);
+            let url = api_url_code_now();
+            let req = fetch::Request::post(url).body(Nothing).unwrap();
+            worker._fetch_task = make_task(worker, who, req, Response::CodeNowFetched);
         }
 
         _ => {

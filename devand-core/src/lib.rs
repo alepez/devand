@@ -270,7 +270,7 @@ impl From<User> for PublicUserProfile {
 #[serde(rename_all = "snake_case")]
 pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub struct CodeNow {
     pub current_user: User,

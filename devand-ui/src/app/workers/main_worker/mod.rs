@@ -4,7 +4,6 @@ mod http;
 #[cfg(feature = "mock_http")]
 mod mock;
 
-use devand_core::User;
 use serde_derive::{Deserialize, Serialize};
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
@@ -18,15 +17,16 @@ use yew::services::timeout::TimeoutService;
 use yew::services::Task;
 use yew::worker::*;
 
-const INTERVAL_MS: u64 = 2_000;
+const INTERVAL_MS: u64 = 5_000;
 const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Request {
     Init,
     Lazy(Box<Request>),
-    SaveSelfUser(User),
+    SaveSelfUser(devand_core::User),
     VerifyEmail,
+    LoadCodeNow,
 }
 
 impl Request {
@@ -37,13 +37,14 @@ impl Request {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Response {
-    SelfUserFetched(User),
+    SelfUserFetched(devand_core::User),
+    CodeNowFetched(devand_core::CodeNow),
     Done(()),
     Error(String),
 }
 
 pub enum Msg {
-    AutoUpdate,
+    CodeNowUpdate,
     Request(Request),
 }
 
@@ -52,7 +53,7 @@ pub struct MainWorker {
 
     // TODO Prevent overwriting (canceling) of fetch task
     _fetch_task: Option<FetchTask>,
-    _interval_task: Box<dyn Task>,
+    _code_now_task: Box<dyn Task>,
     _timeout_task: Option<Box<dyn Task>>,
 
     _on_unload: Closure<dyn FnMut(BeforeUnloadEvent) -> ()>,
@@ -67,16 +68,14 @@ impl Agent for MainWorker {
     type Output = Response;
 
     fn create(link: AgentLink<Self>) -> Self {
-        let duration = Duration::from_millis(INTERVAL_MS);
-        let callback = link.callback(|_| Msg::AutoUpdate);
-        let task = IntervalService::spawn(duration, callback);
-
         let pending = Arc::new(AtomicBool::new(false));
+
+        let code_now_task = make_code_now_task(link.clone());
 
         MainWorker {
             link,
             _fetch_task: None,
-            _interval_task: Box::new(task),
+            _code_now_task: code_now_task,
             _timeout_task: None,
             _on_unload: make_on_unload_callback(pending.clone()),
             pending,
@@ -85,8 +84,10 @@ impl Agent for MainWorker {
 
     fn update(&mut self, msg: Self::Message) {
         match msg {
-            Msg::AutoUpdate => {
-                // TODO
+            Msg::CodeNowUpdate => {
+                log::debug!("CodeNowUpdate");
+                let req = Request::LoadCodeNow;
+                self.link.send_input(req);
             }
             Msg::Request(req) => {
                 self.link.send_input(req);
@@ -109,6 +110,13 @@ impl Agent for MainWorker {
             _ => request(self, msg, who),
         }
     }
+}
+
+fn make_code_now_task(link: AgentLink<MainWorker>) -> Box<dyn Task> {
+    let duration = Duration::from_millis(INTERVAL_MS);
+    let callback = link.callback(|_| Msg::CodeNowUpdate);
+    let task = IntervalService::spawn(duration, callback);
+    Box::new(task)
 }
 
 /// Delay this request by some seconds, so it can be overridden
