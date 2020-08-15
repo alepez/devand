@@ -99,7 +99,8 @@ impl Component for App {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::UserStore(user) => {
-                self.user_service.store(&user);
+                self.main_worker
+                    .send(main_worker::Request::SaveSelfUser(user));
                 false
             }
             Msg::UserFetchOk(user) => {
