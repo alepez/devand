@@ -79,7 +79,7 @@ impl Component for App {
         });
 
         let mut user_service = UserService::new(fetch_callback);
-        user_service.restore();
+        // user_service.restore();
 
         let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
         main_worker.send(main_worker::Request::Init);
@@ -122,7 +122,7 @@ impl Component for App {
             Msg::MainWorkerRes(res) => {
                 log::info!("Data received");
                 log::debug!("{:?}", res);
-                true
+                self.handle_main_worker_res(res)
             }
         }
     }
@@ -137,6 +137,18 @@ impl Component for App {
 }
 
 impl App {
+    fn handle_main_worker_res(&mut self, res: main_worker::Response) -> bool {
+        use main_worker::Response;
+
+        match res {
+            Response::SelfUserFetched(user) => {
+                self.state.user = Some(user);
+                self.state.pending_save = false;
+                true
+            }
+        }
+    }
+
     fn view_ok(&self, user: &User) -> VNode {
         html! {
             <>
