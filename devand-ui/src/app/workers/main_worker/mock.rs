@@ -3,7 +3,7 @@ use super::{MainWorker, Request, Response};
 use maplit::{btreemap, btreeset};
 use yew::worker::*;
 
-pub fn handle_input(worker: &mut MainWorker, msg: Request, who: HandlerId) {
+pub fn request(worker: &mut MainWorker, msg: Request, who: HandlerId) {
     log::info!("Request: {:?}", msg);
     match msg {
         Request::Init => {
@@ -21,6 +21,9 @@ pub fn handle_input(worker: &mut MainWorker, msg: Request, who: HandlerId) {
         Request::VerifyEmail => {
             log::info!("Verifing email...");
             // TODO post actual data
+        }
+        _ => {
+            log::debug!("ignored");
         }
     }
 }
