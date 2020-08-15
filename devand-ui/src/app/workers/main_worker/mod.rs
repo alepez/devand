@@ -30,7 +30,6 @@ impl Request {
     }
 }
 
-// TODO Add Error
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Response {
     SelfUserFetched(User),
@@ -38,7 +37,7 @@ pub enum Response {
 }
 
 pub enum Msg {
-    Updating,
+    AutoUpdate,
     Request(Request),
 }
 
@@ -57,7 +56,7 @@ impl Agent for MainWorker {
 
     fn create(link: AgentLink<Self>) -> Self {
         let duration = Duration::from_millis(INTERVAL_MS);
-        let callback = link.callback(|_| Msg::Updating);
+        let callback = link.callback(|_| Msg::AutoUpdate);
         let task = IntervalService::spawn(duration, callback);
         MainWorker {
             link,
@@ -69,8 +68,8 @@ impl Agent for MainWorker {
 
     fn update(&mut self, msg: Self::Message) {
         match msg {
-            Msg::Updating => {
-                log::info!("Tick...");
+            Msg::AutoUpdate => {
+                // TODO
             }
             Msg::Request(req) => {
                 self.link.send_input(req);
@@ -79,8 +78,6 @@ impl Agent for MainWorker {
     }
 
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        log::info!("Request: {:?}", msg);
-
         #[cfg(feature = "mock_http")]
         use self::mock::request;
 
