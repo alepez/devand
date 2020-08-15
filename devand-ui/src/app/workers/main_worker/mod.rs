@@ -33,6 +33,7 @@ impl Request {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Response {
     SelfUserFetched(User),
+    Done(()),
     Error(String),
 }
 
