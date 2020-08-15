@@ -6,7 +6,12 @@ mod mock;
 
 use devand_core::User;
 use serde_derive::{Deserialize, Serialize};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
+use std::sync::Arc;
 use std::time::Duration;
+use wasm_bindgen::prelude::*;
+use web_sys::BeforeUnloadEvent;
 use yew::services::fetch::FetchTask;
 use yew::services::interval::IntervalService;
 use yew::services::timeout::TimeoutService;
@@ -44,10 +49,15 @@ pub enum Msg {
 
 pub struct MainWorker {
     link: AgentLink<MainWorker>,
+
     // TODO Prevent overwriting (canceling) of fetch task
     _fetch_task: Option<FetchTask>,
     _interval_task: Box<dyn Task>,
     _timeout_task: Option<Box<dyn Task>>,
+
+    _on_unload: Closure<dyn FnMut(BeforeUnloadEvent) -> ()>,
+
+    pending: Arc<AtomicBool>,
 }
 
 impl Agent for MainWorker {
@@ -60,11 +70,16 @@ impl Agent for MainWorker {
         let duration = Duration::from_millis(INTERVAL_MS);
         let callback = link.callback(|_| Msg::AutoUpdate);
         let task = IntervalService::spawn(duration, callback);
+
+        let pending = Arc::new(AtomicBool::new(false));
+
         MainWorker {
             link,
             _fetch_task: None,
             _interval_task: Box::new(task),
             _timeout_task: None,
+            _on_unload: make_on_unload_callback(pending.clone()),
+            pending,
         }
     }
 
@@ -80,10 +95,10 @@ impl Agent for MainWorker {
     }
 
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        #[cfg(feature = "mock_http")]
-        use self::mock::request;
+        // #[cfg(feature = "mock_http")]
+        // use self::mock::request;
 
-        #[cfg(not(feature = "mock_http"))]
+        // #[cfg(not(feature = "mock_http"))]
         use self::http::request;
 
         match msg {
@@ -96,12 +111,48 @@ impl Agent for MainWorker {
     }
 }
 
+/// Delay this request by some seconds, so it can be overridden
+/// Example: users edit a field in theirs settings. Only after some seconds
+/// of "inactivity" it is actually sent.
 fn lazy_request(main_worker: &MainWorker, req: Request) -> Box<dyn Task> {
+    let pending = main_worker.pending.clone();
+
+    pending.store(true, Ordering::SeqCst);
+
     let duration = Duration::from_millis(LAZY_REQUEST_DELAY_MS);
 
-    let callback = main_worker
-        .link
-        .callback(move |_| Msg::Request(req.clone()));
+    // TODO [optimization] avoid cloning (or make cloning cheap)
+    let callback = main_worker.link.callback(move |_| {
+        pending.store(false, Ordering::SeqCst);
+        Msg::Request(req.clone())
+    });
 
     Box::new(TimeoutService::spawn(duration, callback))
+}
+
+/// _on_unload callback exists because we warn user of unsaved changes
+/// Changes are saved automatically, but only after DELAY_MS. User
+/// may leave the page before this delay has passed or the consequent
+/// request has finished. on_unload is triggered when the user leave
+/// the page and triggers an alert about unsaved changes. This is how GMail
+/// handles this case.
+fn make_on_unload_callback(
+    pending: Arc<AtomicBool>,
+) -> Closure<dyn FnMut(BeforeUnloadEvent) -> ()> {
+    use wasm_bindgen::JsCast;
+
+    let window = yew::utils::window();
+
+    let on_unload = Box::new(move |e: BeforeUnloadEvent| {
+        let pending = pending.load(Ordering::SeqCst);
+        if pending {
+            e.set_return_value("Changes you made may not be saved.");
+        }
+    }) as Box<dyn FnMut(BeforeUnloadEvent)>;
+
+    let on_unload = Closure::wrap(on_unload);
+
+    window.set_onbeforeunload(Some(&on_unload.as_ref().unchecked_ref()));
+
+    on_unload
 }
