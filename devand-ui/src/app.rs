@@ -119,6 +119,11 @@ impl App {
                 true
             }
 
+            Response::CodeNowFetched(code_now) => {
+                log::debug!("{:?}", code_now);
+                false
+            }
+
             Response::Error(err) => {
                 log::error!("Error: {}", err);
                 // TODO Show error alert

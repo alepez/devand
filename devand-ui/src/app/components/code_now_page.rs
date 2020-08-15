@@ -1,6 +1,6 @@
 use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
-use crate::app::services::CodeNowService;
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::CodeNow;
 use yew::{prelude::*, Properties};
@@ -11,15 +11,13 @@ pub struct State {
 }
 
 pub enum Msg {
-    CodeNowUsersFetchOk(CodeNow),
-    CodeNowUsersFetchErr,
+    MainWorkerRes(main_worker::Response),
 }
 
 pub struct CodeNowPage {
     props: Props,
     state: State,
-    #[allow(dead_code)]
-    service: CodeNowService,
+    _main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -32,35 +30,41 @@ impl Component for CodeNowPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
 
-        let callback = link.callback(|result: Result<CodeNow, anyhow::Error>| {
-            if let Ok(code_now) = result {
-                Msg::CodeNowUsersFetchOk(code_now)
-            } else {
-                Msg::CodeNowUsersFetchErr
-            }
-        });
-
-        let mut service = CodeNowService::new(callback);
-
-        service.restore();
+        log::debug!("MainWorker bridge");
+        let main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
 
         Self {
             props,
             state,
-            service,
+            _main_worker: main_worker,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        match msg {
-            Msg::CodeNowUsersFetchOk(code_now) => {
-                self.state.code_now = Some(code_now);
-            }
-            Msg::CodeNowUsersFetchErr => {
-                log::error!("CodeNow fetch error");
-            }
-        }
-        true
+    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+        // TODO This does not work (works in App instead)
+        // match msg {
+        //     Msg::MainWorkerRes(res) => {
+        //         log::debug!("{:?}", res);
+        //         use main_worker::Response;
+
+        //         match res {
+        //             Response::CodeNowFetched(code_now) => {
+        //                 log::debug!("{:?}", code_now);
+        //                 self.state.code_now = Some(code_now);
+        //                 true
+        //             }
+
+        //             Response::Error(err) => {
+        //                 log::error!("Error: {}", err);
+        //                 // TODO Show error alert
+        //                 false
+        //             }
+
+        //             _ => false,
+        //         }
+        //     }
+        // }
+        false
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
