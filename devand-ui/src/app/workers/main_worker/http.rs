@@ -1,5 +1,4 @@
-use super::MainWorker;
-use devand_core::User;
+use super::{MainWorker, Request, Response};
 use yew::format::{Json, Nothing, Text};
 use yew::services::fetch;
 use yew::worker::*;
@@ -12,10 +11,7 @@ fn api_url_verify_email() -> &'static str {
     "/api/verify_email"
 }
 
-pub fn request(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
-    use super::Request;
-    use super::Response;
-
+pub fn request(worker: &mut MainWorker, msg: Request, who: HandlerId) {
     match msg {
         Request::Init => {
             let url = api_url_self_user();
@@ -49,7 +45,7 @@ fn make_task<T, IN>(
     worker: &MainWorker,
     who: HandlerId,
     req: fetch::Request<IN>,
-    ctor: impl Fn(T) -> super::Response + 'static,
+    ctor: impl Fn(T) -> Response + 'static,
 ) -> Option<fetch::FetchTask>
 where
     IN: Into<Text>,
@@ -64,7 +60,7 @@ where
             link.respond(who, ctor(data));
         } else {
             let error = anyhow::anyhow!(meta.status);
-            link.respond(who, super::Response::Error(error.to_string()));
+            link.respond(who, Response::Error(error.to_string()));
         }
     };
 
