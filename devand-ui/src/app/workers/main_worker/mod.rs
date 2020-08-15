@@ -1,7 +1,7 @@
-// #[cfg(not(feature = "mock_http"))]
+#[cfg(not(feature = "mock_http"))]
 mod http;
 
-// #[cfg(feature = "mock_http")]
+#[cfg(feature = "mock_http")]
 mod mock;
 
 use devand_core::User;
