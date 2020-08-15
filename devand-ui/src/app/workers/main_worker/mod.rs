@@ -89,9 +89,7 @@ impl Agent for MainWorker {
             Request::Lazy(req) => {
                 let duration = Duration::from_millis(LAZY_REQUEST_DELAY_MS);
 
-                let callback = self
-                    .link
-                    .callback(move |_| Msg::Request(*req.clone()));
+                let callback = self.link.callback(move |_| Msg::Request(*req.clone()));
 
                 self._timeout_task = Some(Box::new(TimeoutService::spawn(duration, callback)));
             }
