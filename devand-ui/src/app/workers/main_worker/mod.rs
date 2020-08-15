@@ -87,13 +87,19 @@ impl Agent for MainWorker {
 
         match msg {
             Request::Lazy(req) => {
-                let duration = Duration::from_millis(LAZY_REQUEST_DELAY_MS);
-
-                let callback = self.link.callback(move |_| Msg::Request(*req.clone()));
-
-                self._timeout_task = Some(Box::new(TimeoutService::spawn(duration, callback)));
+                self._timeout_task = Some(lazy_request(self, *req));
             }
             _ => request(self, msg, who),
         }
     }
+}
+
+fn lazy_request(main_worker: &MainWorker, req: Request) -> Box<dyn Task> {
+    let duration = Duration::from_millis(LAZY_REQUEST_DELAY_MS);
+
+    let callback = main_worker
+        .link
+        .callback(move |_| Msg::Request(req.clone()));
+
+    Box::new(TimeoutService::spawn(duration, callback))
 }
