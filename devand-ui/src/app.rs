@@ -118,6 +118,12 @@ impl App {
                 self.state.pending_save = false;
                 true
             }
+
+            Response::Error(err) => {
+                log::error!("Error: {}", err);
+                // TODO Show error alert
+                false
+            }
         }
     }
 

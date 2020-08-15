@@ -25,16 +25,16 @@ pub enum Request {
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Response {
     SelfUserFetched(User),
+    Error(String),
 }
 
 pub enum Msg {
     Updating,
-    Response(Result<Response, anyhow::Error>),
 }
 
 pub struct MainWorker {
     link: AgentLink<MainWorker>,
-    fetch_task: Option<FetchTask>,
+    _fetch_task: Option<FetchTask>,
     _interval_task: Box<dyn Task>,
 }
 
@@ -50,7 +50,7 @@ impl Agent for MainWorker {
         let task = IntervalService::spawn(duration, callback);
         MainWorker {
             link,
-            fetch_task: None,
+            _fetch_task: None,
             _interval_task: Box::new(task),
         }
     }
@@ -60,15 +60,6 @@ impl Agent for MainWorker {
             Msg::Updating => {
                 log::info!("Tick...");
             }
-            Msg::Response(res) => match res {
-                Ok(res) => {
-                    // TODO
-                    log::debug!("Response: {:?}", res);
-                }
-                Err(err) => {
-                    log::error!("Error: {}", err);
-                }
-            },
         }
     }
 
