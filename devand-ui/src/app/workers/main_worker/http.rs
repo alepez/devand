@@ -8,6 +8,10 @@ fn api_url_self_user() -> &'static str {
     "/api/user"
 }
 
+fn api_url_verify_email() -> &'static str {
+    "/api/verify_email"
+}
+
 pub fn request(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
     use super::Request;
 
@@ -32,7 +36,6 @@ pub fn request(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
         }
 
         Request::SaveSelfUser(user) => {
-            log::info!("Saving user...");
             let url = api_url_self_user();
             let json = serde_json::to_string(&user).map_err(|_| anyhow::anyhow!("bo!"));
             let req = fetch::Request::put(url).body(json).unwrap();
@@ -53,7 +56,15 @@ pub fn request(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
         }
 
         Request::VerifyEmail => {
-            log::info!("Verifing email...");
+            let url = api_url_verify_email();
+            let req = fetch::Request::post(url).body(Nothing).unwrap();
+
+            let handler = move |_response: fetch::Response<Json<Result<(), anyhow::Error>>>| {
+                // TODO Handle error
+                // Just ignore the response
+            };
+
+            worker._fetch_task = fetch::FetchService::fetch(req, handler.into()).ok();
         }
 
         _ => {

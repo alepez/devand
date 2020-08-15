@@ -43,6 +43,7 @@ pub enum Msg {
 
 pub struct MainWorker {
     link: AgentLink<MainWorker>,
+    // TODO Prevent overwriting (canceling) of fetch task
     _fetch_task: Option<FetchTask>,
     _interval_task: Box<dyn Task>,
     _timeout_task: Option<Box<dyn Task>>,
