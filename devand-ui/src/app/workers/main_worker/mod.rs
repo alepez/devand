@@ -88,6 +88,7 @@ impl Agent for MainWorker {
 
         match msg {
             Request::Lazy(req) => {
+                // Overwrites current timeout task
                 self._timeout_task = Some(lazy_request(self, *req));
             }
             _ => request(self, msg, who),
