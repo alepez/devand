@@ -124,6 +124,8 @@ impl App {
                 // TODO Show error alert
                 false
             }
+
+            _ => false,
         }
     }
 
