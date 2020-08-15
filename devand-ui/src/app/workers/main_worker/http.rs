@@ -8,7 +8,7 @@ fn api_url_get_self_user() -> &'static str {
     "/api/user"
 }
 
-pub fn handle_input(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
+pub fn request(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
     use super::Request;
 
     match msg {
@@ -35,6 +35,9 @@ pub fn handle_input(worker: &mut MainWorker, msg: super::Request, who: HandlerId
         }
         Request::VerifyEmail => {
             log::info!("Verifing email...");
+        }
+        _ => {
+            log::debug!("ignored");
         }
     }
 }

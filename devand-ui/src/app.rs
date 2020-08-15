@@ -86,7 +86,7 @@ impl Component for App {
 
             Msg::UserStore(user) => {
                 self.main_worker
-                    .send(main_worker::Request::SaveSelfUser(user));
+                    .send(main_worker::Request::LazySaveSelfUser(user));
                 false
             }
 

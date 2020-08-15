@@ -9,14 +9,17 @@ use serde_derive::{Deserialize, Serialize};
 use std::time::Duration;
 use yew::services::fetch::FetchTask;
 use yew::services::interval::IntervalService;
+use yew::services::timeout::TimeoutService;
 use yew::services::Task;
 use yew::worker::*;
 
 const INTERVAL_MS: u64 = 2_000;
+const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Request {
     Init,
+    LazySaveSelfUser(User),
     SaveSelfUser(User),
     VerifyEmail,
 }
@@ -30,12 +33,14 @@ pub enum Response {
 
 pub enum Msg {
     Updating,
+    Request(Request),
 }
 
 pub struct MainWorker {
     link: AgentLink<MainWorker>,
     _fetch_task: Option<FetchTask>,
     _interval_task: Box<dyn Task>,
+    _timeout_task: Option<Box<dyn Task>>,
 }
 
 impl Agent for MainWorker {
@@ -52,6 +57,7 @@ impl Agent for MainWorker {
             link,
             _fetch_task: None,
             _interval_task: Box::new(task),
+            _timeout_task: None,
         }
     }
 
@@ -60,18 +66,32 @@ impl Agent for MainWorker {
             Msg::Updating => {
                 log::info!("Tick...");
             }
+            Msg::Request(req) => {
+                self.link.send_input(req);
+            }
         }
     }
 
-    #[cfg(feature = "mock_http")]
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
         log::info!("Request: {:?}", msg);
-        mock::handle_input(self, msg, who)
-    }
 
-    #[cfg(not(feature = "mock_http"))]
-    fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        log::info!("Request: {:?}", msg);
-        http::handle_input(self, msg, who)
+        #[cfg(feature = "mock_http")]
+        use self::mock::request;
+
+        #[cfg(not(feature = "mock_http"))]
+        use self::http::request;
+
+        match msg {
+            Request::LazySaveSelfUser(user) => {
+                let duration = Duration::from_millis(LAZY_REQUEST_DELAY_MS);
+
+                let callback = self
+                    .link
+                    .callback(move |_| Msg::Request(Request::SaveSelfUser(user.clone())));
+
+                self._timeout_task = Some(Box::new(TimeoutService::spawn(duration, callback)));
+            }
+            _ => request(self, msg, who),
+        }
     }
 }
