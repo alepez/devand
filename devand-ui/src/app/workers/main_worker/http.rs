@@ -9,34 +9,26 @@ fn api_url_get_self_user() -> &'static str {
 }
 
 pub fn handle_input(worker: &mut MainWorker, msg: super::Request, who: HandlerId) {
-    log::info!("Request: {:?}", msg);
     use super::Request;
 
     match msg {
         Request::Init => {
-            log::info!("Initializing...");
-
             let url = api_url_get_self_user();
-
             let req = fetch::Request::get(url).body(Nothing).unwrap();
-
-            let callback = worker.link.callback(super::Msg::Response);
+            let link = worker.link.clone();
 
             let handler = move |response: fetch::Response<Json<Result<User, anyhow::Error>>>| {
                 let (meta, Json(data)) = response.into_parts();
 
                 if let Ok(data) = data {
-                    let res = super::Response::SelfUserFetched(data);
-                    callback.emit(Ok(res));
+                    link.respond(who, super::Response::SelfUserFetched(data));
                 } else {
                     let error = anyhow::anyhow!(meta.status);
-                    callback.emit(Err(error));
+                    link.respond(who, super::Response::Error(error.to_string()));
                 }
             };
 
-            let task = fetch::FetchService::fetch(req, handler.into()).ok();
-
-            worker.fetch_task = task;
+            worker._fetch_task = fetch::FetchService::fetch(req, handler.into()).ok();
         }
         Request::SaveSelfUser(user) => {
             log::info!("Saving user...");
