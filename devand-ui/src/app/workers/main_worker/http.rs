@@ -14,6 +14,10 @@ fn api_url_code_now() -> &'static str {
     "/api/code-now"
 }
 
+fn api_url_user(username: &str) -> String {
+    format!("/api/u/{}", username)
+}
+
 pub fn request(worker: &mut MainWorker, msg: Request) {
     match msg {
         Request::Init => {
@@ -40,7 +44,13 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
             worker._fetch_task = make_task(worker, req, Response::CodeNowFetched);
         }
 
-        _ => {
+        Request::LoadPublicUserProfileByUsername(username) => {
+            let url = api_url_user(&username);
+            let req = fetch::Request::get(url).body(Nothing).unwrap();
+            worker._fetch_task = make_task(worker, req, Response::PublicUserProfileFetched);
+        }
+
+        Request::Lazy(_) => {
             log::debug!("ignored");
         }
     }

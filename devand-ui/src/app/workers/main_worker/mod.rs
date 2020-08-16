@@ -28,6 +28,7 @@ pub enum Request {
     SaveSelfUser(devand_core::User),
     VerifyEmail,
     LoadCodeNow,
+    LoadPublicUserProfileByUsername(String),
 }
 
 impl Request {
@@ -40,6 +41,7 @@ impl Request {
 pub enum Response {
     SelfUserFetched(devand_core::User),
     CodeNowFetched(devand_core::CodeNow),
+    PublicUserProfileFetched(devand_core::PublicUserProfile),
     Done(()),
     Error(String),
 }
