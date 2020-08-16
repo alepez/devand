@@ -31,49 +31,53 @@ fn api_url_availability_match() -> &'static str {
 }
 
 pub fn request(worker: &mut MainWorker, msg: Request) {
-    match msg {
+    let task = match msg {
         Request::Init => {
             let req = get(api_url_self_user());
-            worker._fetch_task = task(worker, req, Response::SelfUserFetched);
+            task(worker, req, Response::SelfUserFetched)
         }
 
         Request::SaveSelfUser(user) => {
             let req = put(api_url_self_user(), json(user));
-            worker._fetch_task = task(worker, req, Response::SelfUserFetched);
+            task(worker, req, Response::SelfUserFetched)
         }
 
         Request::VerifyEmail => {
             let req = post(api_url_verify_email(), Nothing);
-            worker._fetch_task = task(worker, req, Response::Done);
+            task(worker, req, Response::Done)
         }
 
         Request::LoadCodeNow => {
             let req = post(api_url_code_now(), Nothing);
-            worker._fetch_task = task(worker, req, Response::CodeNowFetched);
+            task(worker, req, Response::CodeNowFetched)
         }
 
         Request::LoadPublicUserProfile(user_id) => {
             let req = get(&api_url_user(user_id));
-            worker._fetch_task = task(worker, req, Response::PublicUserProfileFetched);
+            task(worker, req, Response::PublicUserProfileFetched)
         }
 
         Request::LoadPublicUserProfileByUsername(username) => {
             let req = get(&api_url_user_by_username(&username));
-            worker._fetch_task = task(worker, req, Response::PublicUserProfileFetched);
+            task(worker, req, Response::PublicUserProfileFetched)
         }
 
         Request::LoadAffinities => {
             let req = get(api_url_affinities());
-            worker._fetch_task = task(worker, req, Response::AffinitiesFetched);
+            task(worker, req, Response::AffinitiesFetched)
         }
 
         Request::LoadAvailabilityMatch => {
             let req = get(api_url_availability_match());
-            worker._fetch_task = task(worker, req, Response::AvailabilityMatchFetched);
+            task(worker, req, Response::AvailabilityMatchFetched)
         }
 
         // Program should never hit this
         Request::Lazy(_) => unimplemented!(),
+    };
+
+    if let Some(task) = task {
+        worker.fetch_tasks.push(task);
     }
 }
 
