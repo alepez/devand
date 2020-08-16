@@ -131,9 +131,10 @@ fn view_vacation_mode_panel() -> Html {
 impl SettingsPage {
     fn view_settings_panel(&self, user: &User) -> Html {
         let settings = &user.settings;
-
+        // Note: do not change div to form, or submission will trigger
+        // a page unload
         html! {
-            <form class="pure-form pure-form-stacked">
+            <div class="pure-form pure-form-stacked">
                 { self.view_profile_panel(user) }
                 {
                     if user.settings.vacation_mode {
@@ -144,7 +145,7 @@ impl SettingsPage {
                 }
                 { self.view_languages_panel(&settings.languages) }
                 { self.view_spoken_languages_panel(&settings.spoken_languages) }
-            </form>
+            </div>
         }
     }
 
