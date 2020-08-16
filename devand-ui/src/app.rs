@@ -1,6 +1,5 @@
 mod components;
 mod elements;
-mod services;
 mod workers;
 
 use self::components::{
