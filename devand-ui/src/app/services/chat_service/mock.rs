@@ -27,69 +27,9 @@ impl ChatService {
         }
     }
 
-    pub fn load_other_user(&mut self, username: &str) {
-        self.callback.emit(ChatServiceContent::OtherUser(
-            devand_core::PublicUserProfile {
-                id: UserId(2),
-                languages: devand_core::Languages::default(),
-                username: username.into(),
-                visible_name: "Foo Bar".into(),
-                bio: "This is the bio".to_string(),
-                spoken_languages: devand_core::SpokenLanguages(btreeset![
-                    devand_core::SpokenLanguage::English
-                ]),
-            },
-        ))
-    }
-
     pub fn load_all_chats(&mut self) {
         self.callback
             .emit(ChatServiceContent::AllChats(fake_chats(&mut self.rng)));
-    }
-
-    pub fn load_history(&mut self, mut chat_members: Vec<UserId>) {
-        chat_members.sort();
-
-        self.chat_members = Some(chat_members.clone());
-
-        for member in &chat_members {
-            self.callback.emit(ChatServiceContent::OtherUserExtended(
-                devand_core::chat::ChatMemberInfo {
-                    user_id: *member,
-                    verified_email: self.rng.gen_bool(0.9),
-                },
-            ))
-        }
-
-        self.callback
-            .emit(ChatServiceContent::NewMessagess(fake_messages(
-                &mut self.rng,
-                10,
-                chat_members[0],
-                chat_members[1],
-            )));
-    }
-
-    pub fn send_message(&mut self, txt: String) {
-        let t: i64 = 1592475298;
-        self.callback
-            .emit(ChatServiceContent::NewMessagess(vec![ChatMessage {
-                id: fake_uuid(&mut self.rng),
-                created_at: chrono::Utc.timestamp(t, 0),
-                author: UserId(1),
-                txt,
-            }]));
-    }
-
-    pub fn poll(&mut self, _last_message: Option<&ChatMessage>) {
-        log::debug!("poll {:?}", &self.chat_members);
-        if let Some(_chat_members) = &self.chat_members {
-            self.callback
-                .emit(ChatServiceContent::NewMessagess(vec![fake_message(
-                    &mut self.rng,
-                    UserId(2),
-                )]))
-        }
     }
 }
 

@@ -34,6 +34,12 @@ pub enum Request {
     LoadAvailabilityMatch,
     CheckOldPassword(String),
     EditPassword(String, String),
+    ChatSendMessage(Vec<devand_core::UserId>, String),
+    ChatPoll(
+        Vec<devand_core::UserId>,
+        Option<chrono::DateTime<chrono::Utc>>,
+    ),
+    ChatLoadHistory(Vec<devand_core::UserId>),
 }
 
 impl Request {
@@ -53,6 +59,8 @@ pub enum Response {
     PasswordEdited(()),
     Done(()),
     Error(String),
+    ChatNewMessagesLoaded(Vec<devand_core::chat::ChatMessage>),
+    ChatHistoryLoaded(devand_core::chat::ChatInfo),
 }
 
 pub enum Msg {
