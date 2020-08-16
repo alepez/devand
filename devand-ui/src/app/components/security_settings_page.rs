@@ -1,14 +1,14 @@
-use crate::app::services::{SecurityService, SecurityServiceContent};
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use yew::prelude::*;
 
 pub struct SecuritySettingsPage {
     state: State,
     link: ComponentLink<Self>,
-    service: SecurityService,
+    main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 pub enum Msg {
-    ServiceResponse(Result<SecurityServiceContent, anyhow::Error>),
+    MainWorkerRes(main_worker::Response),
     SetOldPassword(String),
     SetNewPassword(String),
     SetRepeatNewPassword(String),
@@ -32,12 +32,12 @@ impl Component for SecuritySettingsPage {
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
-        let service_callback = link.callback(Msg::ServiceResponse);
-        let service = SecurityService::new(service_callback);
+        let main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+
         SecuritySettingsPage {
             link,
             state,
-            service,
+            main_worker,
         }
     }
 
@@ -60,28 +60,37 @@ impl Component for SecuritySettingsPage {
             }
             Msg::CheckOldPassword => {
                 if !self.state.old_password.is_empty() {
-                    self.service.check_old_password(&self.state.old_password);
+                    self.main_worker
+                        .send(main_worker::Request::CheckOldPassword(
+                            self.state.old_password.clone(),
+                        ))
                 }
                 false
             }
             Msg::ChangePassword => {
-                self.service
-                    .edit_password(&self.state.old_password, &self.state.new_password);
+                self.main_worker.send(main_worker::Request::EditPassword(
+                    self.state.old_password.clone(),
+                    self.state.new_password.clone(),
+                ));
                 false
             }
-            Msg::ServiceResponse(res) => {
+            Msg::MainWorkerRes(res) => {
+                use main_worker::Response;
                 match res {
-                    Ok(SecurityServiceContent::OldPasswordCheck(ok)) => {
+                    Response::OldPasswordChecked(ok) => {
                         self.state.old_password_ok = Some(ok);
+                        true
                     }
-                    Ok(SecurityServiceContent::PasswordChanged) => {
+                    Response::PasswordEdited(()) => {
                         self.state.password_changed = Some(true);
+                        true
                     }
-                    Err(e) => {
-                        self.state.generic_alert = Some(e.to_string());
+                    Response::Error(e) => {
+                        self.state.generic_alert = Some(e);
+                        true
                     }
-                };
-                true
+                    _ => false,
+                }
             }
         }
     }

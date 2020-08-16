@@ -1,5 +1,6 @@
 use crate::app::elements::busy_indicator;
-use crate::app::services::{ChatService, ChatServiceContent};
+use crate::app::workers::main_worker::Request::LoadAllChats;
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::{UserChat, UserChats};
 use yew::{prelude::*, Properties};
@@ -11,14 +12,13 @@ pub struct State {
 }
 
 pub enum Msg {
-    ChatServiceContentFetched(ChatServiceContent),
+    MainWorkerRes(main_worker::Response),
 }
 
 pub struct ChatsPage {
     props: Props,
     state: State,
-    #[allow(dead_code)]
-    service: ChatService,
+    _main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -31,24 +31,24 @@ impl Component for ChatsPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
 
-        let mut service = ChatService::new(link.callback(Msg::ChatServiceContentFetched));
-
-        service.load_all_chats();
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(LoadAllChats);
 
         Self {
             props,
             state,
-            service,
+            _main_worker: main_worker,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::ChatServiceContentFetched(content) => match content {
-                ChatServiceContent::AllChats(chats) => {
+            Msg::MainWorkerRes(res) => match res {
+                main_worker::Response::AllChatsLoaded(chats) => {
                     self.state.chats = Some(chats);
                     true
                 }
+
                 _ => false,
             },
         }

@@ -1,6 +1,9 @@
 use crate::app::components::ChatInput;
 use crate::app::elements::busy_indicator;
-use crate::app::services::{ChatService, ChatServiceContent};
+use crate::app::workers::main_worker::Request::{
+    ChatLoadHistory, ChatPoll, ChatSendMessage, LoadPublicUserProfileByUsername,
+};
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use devand_core::chat::ChatMessage;
 use devand_core::{PublicUserProfile, UserId};
 use yew::services::interval::{IntervalService, IntervalTask};
@@ -11,9 +14,8 @@ pub struct ChatPage {
     state: State,
     link: ComponentLink<Self>,
     #[allow(dead_code)]
-    service: ChatService,
-    #[allow(dead_code)]
     poll_task: IntervalTask,
+    main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -23,9 +25,9 @@ pub struct Props {
 }
 
 pub enum Msg {
-    ChatServiceContentFetched(ChatServiceContent),
     SendMessage(String),
     Poll,
+    MainWorkerRes(main_worker::Response),
 }
 
 #[derive(Default)]
@@ -41,80 +43,91 @@ impl Component for ChatPage {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let mut service = ChatService::new(link.callback(Msg::ChatServiceContentFetched));
-
-        service.load_other_user(&props.chat_with);
-
         let state = State::default();
 
         let poll_task = IntervalService::spawn(
-            std::time::Duration::from_secs(1),
+            std::time::Duration::from_secs(5),
             link.callback(|_| Msg::Poll),
         );
 
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(LoadPublicUserProfileByUsername(props.chat_with.clone()));
+
         Self {
             props,
-            service,
             state,
             link,
             poll_task,
+            main_worker,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        use main_worker::Response;
+
         match msg {
-            Msg::ChatServiceContentFetched(content) => match content {
-                ChatServiceContent::OtherUser(other_user) => {
-                    let me = self.props.me.id;
-                    let other_user_id = other_user.id;
-                    let members = vec![other_user_id, me];
-                    self.state.other_user = Some(other_user);
-                    self.service.load_history(members);
-                    true
+            Msg::SendMessage(txt) => {
+                // TODO Make it work with multiple members chat
+                if let Some(members) = self.two_members() {
+                    self.main_worker.send(ChatSendMessage(members, txt));
                 }
-                ChatServiceContent::NewMessagess(new_messages) => {
-                    self.state.pending = false;
-                    for msg in new_messages {
-                        self.state.messages.push(msg);
+                false
+            }
+
+            Msg::Poll => {
+                if !self.state.pending {
+                    // TODO Make it work with multiple members chat
+                    if let Some(members) = self.two_members() {
+                        self.state.pending = true;
+                        let from_created_at = self.state.messages.last().map(|x| x.created_at);
+                        self.main_worker.send(ChatPoll(members, from_created_at));
+                    }
+                }
+                false
+            }
+
+            Msg::MainWorkerRes(res) => match res {
+                Response::PublicUserProfileFetched(other_user) => {
+                    self.state.other_user = Some(*other_user);
+                    // TODO Make it work with multiple members chat
+                    if let Some(members) = self.two_members() {
+                        self.main_worker.send(ChatLoadHistory(members));
                     }
                     true
                 }
-                ChatServiceContent::OtherUserExtended(members_info) => {
-                    self.state.verified_email = Some(members_info.verified_email);
+
+                Response::ChatHistoryLoaded(chat) => {
+                    let devand_core::chat::ChatInfo {
+                        mut messages,
+                        members_info,
+                    } = chat;
+
+                    self.state.pending = false;
+                    self.state.messages.append(&mut messages);
+
+                    for member in members_info {
+                        // TODO This works only for single member chats
+                        self.state.verified_email = Some(member.verified_email);
+                    }
+
                     true
                 }
+
+                Response::ChatNewMessagesLoaded(mut messages) => {
+                    self.state.pending = false;
+                    self.state.messages.append(&mut messages);
+                    true
+                }
+
                 _ => false,
             },
-            Msg::SendMessage(txt) => {
-                self.service.send_message(txt);
-                false
-            }
-            Msg::Poll => {
-                if !self.state.pending {
-                    let last_message = self.state.messages.last();
-                    self.state.pending = true;
-                    self.service.poll(last_message);
-                }
-                false
-            }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let changed = if self.props.chat_with != props.chat_with {
-            self.service.load_other_user(&props.chat_with);
-            true
-        } else {
-            false
-        };
-
-        if self.props.me.id != props.me.id {
-            // Changing `me` does not make any sense
-            unimplemented!()
-        }
-
-        self.props = props;
-        changed
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+        // Changing of properties is not supported. This pages should always
+        // be created from scratch by the router.
+        false
     }
 
     fn view(&self) -> Html {
@@ -127,6 +140,17 @@ impl Component for ChatPage {
 }
 
 impl ChatPage {
+    // TODO ChatMembers should be a strong type, not a Vec
+    // TODO Sorting when encoded to string should be enforced
+    fn two_members(&self) -> Option<Vec<devand_core::UserId>> {
+        let other_user = self.state.other_user.as_ref()?;
+        let me = self.props.me.id;
+        let other_user_id = other_user.id;
+        let mut members = vec![other_user_id, me];
+        members.sort();
+        Some(members)
+    }
+
     fn view_messages(&self, other_user: &PublicUserProfile) -> Html {
         let unverified_email = self.state.verified_email == Some(false);
         let msg_bubbles = self

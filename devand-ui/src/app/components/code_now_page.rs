@@ -1,6 +1,6 @@
 use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
-use crate::app::services::CodeNowService;
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::CodeNow;
 use yew::{prelude::*, Properties};
@@ -11,15 +11,13 @@ pub struct State {
 }
 
 pub enum Msg {
-    CodeNowUsersFetchOk(CodeNow),
-    CodeNowUsersFetchErr,
+    MainWorkerRes(main_worker::Response),
 }
 
 pub struct CodeNowPage {
     props: Props,
     state: State,
-    #[allow(dead_code)]
-    service: CodeNowService,
+    _main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -32,35 +30,32 @@ impl Component for CodeNowPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
 
-        let callback = link.callback(|result: Result<CodeNow, anyhow::Error>| {
-            if let Ok(code_now) = result {
-                Msg::CodeNowUsersFetchOk(code_now)
-            } else {
-                Msg::CodeNowUsersFetchErr
-            }
-        });
-
-        let mut service = CodeNowService::new(callback);
-
-        service.restore();
+        log::debug!("MainWorker bridge");
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(main_worker::Request::LoadCodeNow);
 
         Self {
             props,
             state,
-            service,
+            _main_worker: main_worker,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::CodeNowUsersFetchOk(code_now) => {
-                self.state.code_now = Some(code_now);
-            }
-            Msg::CodeNowUsersFetchErr => {
-                log::error!("CodeNow fetch error");
+            Msg::MainWorkerRes(res) => {
+                use main_worker::Response;
+
+                match res {
+                    Response::CodeNowFetched(code_now) => {
+                        self.state.code_now = Some(*code_now);
+                        true
+                    }
+
+                    _ => false,
+                }
             }
         }
-        true
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
@@ -95,13 +90,20 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
         .filter(|u| u.username != code_now.current_user.username);
 
     let user = current_user.into();
+    let total_online_users_count = users.clone().count();
     let mut affinities: Vec<_> = devand_core::calculate_affinities(&user, users).collect();
     affinities.sort_unstable_by_key(|x| x.affinity);
 
     if affinities.is_empty() {
+        let warning = if total_online_users_count > 0 {
+            html! { <> { "Sorry, no matching online users found. You can try to " } <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor> </> }
+        } else {
+            html! { <> { "Sorry, there are no online users now. You can try later or " } <RouterAnchor route=AppRoute::Affinities >{ "contact any of best matching users." }</RouterAnchor> </> }
+        };
+
         html! {
             <div class=("alert", "alert-warning")>
-                {"Sorry, no matching online users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+                { warning }
             </div>
         }
     } else {

@@ -54,7 +54,7 @@ pub struct User {
     /// User's bio (max 160 char)
     pub bio: String,
 }
-// FIXME User contains too many fields. UserChats should be in another type, like FullUser
+// FIXME User contains too many fields. unread_messages should be in another type, like FullUser
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
@@ -173,7 +173,7 @@ impl Default for LanguagePreference {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserAffinity {
     pub user: PublicUserProfile,
@@ -270,7 +270,7 @@ impl From<User> for PublicUserProfile {
 #[serde(rename_all = "snake_case")]
 pub struct CodeNowUsers(pub Vec<PublicUserProfile>);
 
-#[derive(Default, Clone, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub struct CodeNow {
     pub current_user: User,

@@ -1,21 +1,19 @@
 use crate::app::components::user_affinity_bubble;
-use crate::app::services::{ScheduleService, ScheduleServiceContent};
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::AppRoute;
+use crate::app::RouterAnchor;
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserAffinity, UserId};
 use yew::{prelude::*, Properties};
-// use crate::app::components::LanguageTag;
-use crate::app::RouterAnchor;
 use yewtil::NeqAssign;
 
 pub struct SchedulePage {
     props: Props,
-    #[allow(dead_code)]
-    service: ScheduleService,
     state: State,
     #[allow(dead_code)]
     link: ComponentLink<Self>,
+    main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -24,8 +22,8 @@ pub struct Props {
 }
 
 pub enum Msg {
-    Loaded(Result<ScheduleServiceContent, anyhow::Error>),
-    LoadUser(UserId),
+    LoadUser(devand_core::UserId),
+    MainWorkerRes(main_worker::Response),
 }
 
 #[derive(Default)]
@@ -41,38 +39,40 @@ impl Component for SchedulePage {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
-        let schedule_loaded = link.callback(Msg::Loaded);
-        let mut service = ScheduleService::new(schedule_loaded);
-        service.load();
+
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(main_worker::Request::LoadAvailabilityMatch);
 
         Self {
             props,
             state,
             link,
-            service,
+            main_worker,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Loaded(result) => {
-                match result {
-                    Ok(content) => match content {
-                        ScheduleServiceContent::AvailabilityMatch(schedule) => {
-                            self.state.schedule = Some(schedule);
-                        }
-                        ScheduleServiceContent::PublicUserProfile(user) => {
-                            self.state.users.insert(user.id, user);
-                        }
-                    },
-                    Err(err) => log::error!("Error: {:?}", err),
-                };
-                true
+            Msg::MainWorkerRes(res) => {
+                use main_worker::Response;
+
+                match res {
+                    Response::PublicUserProfileFetched(user) => {
+                        self.state.users.insert(user.id, *user);
+                        true
+                    }
+                    Response::AvailabilityMatchFetched(schedule) => {
+                        self.state.schedule = Some(*schedule);
+                        true
+                    }
+                    _ => false,
+                }
             }
             Msg::LoadUser(user_id) => {
                 if !self.state.user_requests.contains(&user_id) {
                     self.state.user_requests.insert(user_id);
-                    self.service.load_public_profile(user_id);
+                    self.main_worker
+                        .send(main_worker::Request::LoadPublicUserProfile(user_id));
                 }
                 false
             }

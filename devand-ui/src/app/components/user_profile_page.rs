@@ -1,6 +1,6 @@
 use crate::app::components::LanguageTag;
 use crate::app::elements::busy_indicator;
-use crate::app::services::UserProfileService;
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterButton};
 use devand_core::PublicUserProfile;
 use devand_core::SpokenLanguages;
@@ -9,8 +9,7 @@ use yew::{prelude::*, Properties};
 pub struct UserProfilePage {
     props: Props,
     state: State,
-    #[allow(dead_code)]
-    service: UserProfileService,
+    main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -19,7 +18,7 @@ pub struct Props {
 }
 
 pub enum Msg {
-    OtherUserLoaded(Option<PublicUserProfile>),
+    MainWorkerRes(main_worker::Response),
 }
 
 #[derive(Default)]
@@ -32,34 +31,44 @@ impl Component for UserProfilePage {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let other_user_loaded_callback = link.callback(Msg::OtherUserLoaded);
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
 
-        let mut service = UserProfileService::new(other_user_loaded_callback);
-
-        service.load_other_user(&props.username);
+        main_worker.send(main_worker::Request::LoadPublicUserProfileByUsername(
+            props.username.clone(),
+        ));
 
         let state = State::default();
 
         Self {
             props,
-            service,
             state,
+            main_worker,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::OtherUserLoaded(user) => {
-                log::info!("user loaded {:?}", &user);
-                self.state.other_user = user;
-                true
+            Msg::MainWorkerRes(res) => {
+                use main_worker::Response;
+
+                match res {
+                    Response::PublicUserProfileFetched(other_user) => {
+                        self.state.other_user = Some(*other_user);
+                        true
+                    }
+
+                    _ => false,
+                }
             }
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         let changed = if self.props.username != props.username {
-            self.service.load_other_user(&props.username);
+            self.main_worker
+                .send(main_worker::Request::LoadPublicUserProfileByUsername(
+                    props.username.clone(),
+                ));
             true
         } else {
             false

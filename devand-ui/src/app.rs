@@ -1,13 +1,14 @@
 mod components;
 mod elements;
 mod services;
+mod workers;
 
 use self::components::{
     AffinitiesPage, ChatPage, ChatsPage, CodeNowPage, NotFoundPage, SchedulePage,
     SecuritySettingsPage, SettingsPage, UserProfilePage,
 };
 use self::elements::busy_indicator;
-use self::services::UserService;
+use self::workers::{main_worker, main_worker::MainWorker};
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
@@ -41,7 +42,7 @@ pub enum AppRoute {
 }
 
 pub struct App {
-    user_service: UserService,
+    main_worker: Box<dyn Bridge<MainWorker>>,
     state: State,
     link: ComponentLink<Self>,
 }
@@ -51,13 +52,14 @@ pub struct State {
     user: Option<User>,
     pending_save: bool,
     verifying_email: bool,
+    online_users: usize,
 }
 
 pub enum Msg {
     UserStore(User),
-    UserFetchOk(User),
-    UserFetchErr,
     VerifyEmail,
+
+    MainWorkerRes(main_worker::Response),
 }
 
 impl Component for App {
@@ -65,19 +67,11 @@ impl Component for App {
     type Properties = ();
 
     fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let fetch_callback = link.callback(|result: Result<User, anyhow::Error>| match result {
-            Ok(user) => Msg::UserFetchOk(user),
-            Err(err) => {
-                log::error!("{:?}", err);
-                Msg::UserFetchErr
-            }
-        });
-
-        let mut user_service = UserService::new(fetch_callback);
-        user_service.restore();
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(main_worker::Request::Init);
 
         App {
-            user_service,
+            main_worker,
             state: State::default(),
             link,
         }
@@ -89,24 +83,17 @@ impl Component for App {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::MainWorkerRes(res) => self.handle_main_worker_res(res),
+
             Msg::UserStore(user) => {
-                self.user_service.store(&user);
+                self.main_worker
+                    .send(main_worker::Request::SaveSelfUser(Box::new(user)).lazy());
                 false
             }
-            Msg::UserFetchOk(user) => {
-                log::debug!("User fetch ok");
-                // TODO Extract chats
-                self.state.user = Some(user);
-                self.state.pending_save = false;
-                true
-            }
-            Msg::UserFetchErr => {
-                log::error!("User fetch error");
-                false
-            }
+
             Msg::VerifyEmail => {
                 log::debug!("Verify address");
-                self.user_service.verify_email();
+                self.main_worker.send(main_worker::Request::VerifyEmail);
                 self.state.verifying_email = true;
                 true
             }
@@ -123,10 +110,38 @@ impl Component for App {
 }
 
 impl App {
+    fn handle_main_worker_res(&mut self, res: main_worker::Response) -> bool {
+        use main_worker::Response;
+
+        match res {
+            Response::SelfUserFetched(user) => {
+                self.state.user = Some(*user);
+                self.state.pending_save = false;
+                true
+            }
+
+            Response::CodeNowFetched(code_now) => {
+                let my_id = code_now.current_user.id;
+                let online_users_now = code_now.all_users.iter().filter(|u| u.id != my_id).count();
+                let changed = self.state.online_users != online_users_now;
+                self.state.online_users = online_users_now;
+                changed
+            }
+
+            Response::Error(err) => {
+                log::error!("Error: {}", err);
+                // TODO Show error alert
+                false
+            }
+
+            _ => false,
+        }
+    }
+
     fn view_ok(&self, user: &User) -> VNode {
         html! {
             <>
-            { view_menu(user) }
+            { view_menu(user, self.state.online_users) }
             { self.view_routes(&user) }
             </>
         }
@@ -160,12 +175,12 @@ impl App {
     }
 }
 
-fn view_menu(user: &User) -> VNode {
+fn view_menu(user: &User, online_users: usize) -> VNode {
     html! {
     <ul class=("devand-menu")>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(online_users) }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(user.unread_messages) }</RouterAnchor></li>
@@ -173,17 +188,28 @@ fn view_menu(user: &User) -> VNode {
     }
 }
 
+fn view_code_now(online_users: usize) -> VNode {
+    html! {
+    <span>
+        <span>{ "Code Now"}</span>
+        { view_count_tag("devand-online-users-count", online_users) }
+    </span>
+    }
+}
+
 fn view_messages(unread_messages: usize) -> VNode {
     html! {
     <span>
         <span>{ "Messages"}</span>
-        {
-            if unread_messages > 0 {
-                html! { <span class="devand-messages-count">{ format!("{}", unread_messages) }</span> }
-            } else {
-                html! { }
-            }
-        }
+        { view_count_tag("devand-messages-count", unread_messages) }
     </span>
+    }
+}
+
+fn view_count_tag(class: &str, count: usize) -> VNode {
+    if count > 0 {
+        html! { <span class=class>{ format!("{}", count) }</span> }
+    } else {
+        html! {}
     }
 }
