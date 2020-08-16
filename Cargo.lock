@@ -4080,6 +4080,17 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "yew",
+ "yewtil-macro",
+]
+
+[[package]]
+name = "yewtil-macro"
+version = "0.1.0"
+source = "git+https://github.com/yewstack/yew.git?tag=0.17.2#6327fe6680ed9c13ad2c8340820a9968deac69f6"
+dependencies = [
+ "proc-macro2 1.0.19",
+ "quote 1.0.7",
+ "syn 1.0.38",
 ]
 
 [[package]]
