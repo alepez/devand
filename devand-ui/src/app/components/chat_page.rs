@@ -124,21 +124,10 @@ impl Component for ChatPage {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let changed = if self.props.chat_with != props.chat_with {
-            // FIXME self.service.load_other_user(&props.chat_with);
-            true
-        } else {
-            false
-        };
-
-        if self.props.me.id != props.me.id {
-            // Changing `me` does not make any sense
-            unimplemented!()
-        }
-
-        self.props = props;
-        changed
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+        // Changing of properties is not supported. This pages should always
+        // be created from scratch by the router.
+        false
     }
 
     fn view(&self) -> Html {

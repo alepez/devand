@@ -18,7 +18,7 @@ pub enum Msg {
 pub struct ChatsPage {
     props: Props,
     state: State,
-    main_worker: Box<dyn Bridge<MainWorker>>,
+    _main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -37,7 +37,7 @@ impl Component for ChatsPage {
         Self {
             props,
             state,
-            main_worker,
+            _main_worker: main_worker,
         }
     }
 
