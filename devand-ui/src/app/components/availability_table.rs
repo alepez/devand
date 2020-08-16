@@ -111,7 +111,7 @@ impl AvailabilityTable {
 
     fn view_schedule_never(&self) -> Html {
         html! {
-            <fieldset>
+            <fieldset class="pure-u-1">
                 <legend>{ "You haven't scheduled anything yet" }</legend>
                 <div>
                     <button
