@@ -37,6 +37,35 @@ fn api_url_password_edit() -> &'static str {
     "/api/password-edit"
 }
 
+fn api_url_chat(chat_members: &[devand_core::UserId]) -> String {
+    format!("/api/chat/{}", encode_chat_members(chat_members))
+}
+
+fn api_url_chat_messages(members: &[devand_core::UserId]) -> String {
+    let members = encode_chat_members(members);
+    format!("/api/chat/{}/messages", members)
+}
+
+fn api_url_chat_messages_poll(
+    members: &[devand_core::UserId],
+    from_created_at: Option<chrono::DateTime<chrono::Utc>>,
+) -> String {
+    let members = encode_chat_members(members);
+    format!(
+        "/api/chat/{}/messages/poll/{}",
+        members,
+        from_created_at.map(|x| x.timestamp()).unwrap_or(0)
+    )
+}
+
+fn encode_chat_members(chat_members: &[devand_core::UserId]) -> String {
+    chat_members
+        .iter()
+        .map(|x| x.0.to_string())
+        .collect::<Vec<_>>()
+        .join("-")
+}
+
 pub fn request(worker: &mut MainWorker, msg: Request) {
     let task = match msg {
         Request::Init => {
@@ -97,6 +126,21 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
 
             let req = post(api_url_password_edit(), json(body));
             task(worker, req, Response::PasswordEdited)
+        }
+
+        Request::ChatSendMessage(members, txt) => {
+            let req = post(&api_url_chat_messages(&members), json(txt));
+            task(worker, req, Response::ChatNewMessagesLoaded)
+        }
+
+        Request::ChatPoll(members, from_created_at) => {
+            let req = get(&api_url_chat_messages_poll(&members, from_created_at));
+            task(worker, req, Response::ChatNewMessagesLoaded)
+        }
+
+        Request::ChatLoadHistory(members) => {
+            let req = get(&api_url_chat(&members));
+            task(worker, req, Response::ChatHistoryLoaded)
         }
 
         // Program should never hit this
