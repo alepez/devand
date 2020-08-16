@@ -1,5 +1,5 @@
 use crate::app::components::affinities_table::view_affinities_table;
-use crate::app::elements::busy_indicator;
+use crate::app::components::common::BusyIndicator;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::CodeNow;
@@ -71,7 +71,7 @@ impl Component for CodeNowPage {
             if let Some(code_now) = &self.state.code_now {
                 view_code_now_users(code_now)
             } else {
-                busy_indicator()
+            html! { <BusyIndicator /> }
             }
         }
         </>

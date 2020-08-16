@@ -1,5 +1,5 @@
+use crate::app::components::common::BusyIndicator;
 use crate::app::components::LanguageTag;
-use crate::app::elements::busy_indicator;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterButton};
 use devand_core::PublicUserProfile;
@@ -107,7 +107,7 @@ impl Component for UserProfilePage {
             </>
             }
         } else {
-            busy_indicator()
+            html! { <BusyIndicator /> }
         }
     }
 }

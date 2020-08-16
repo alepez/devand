@@ -1,5 +1,5 @@
+use crate::app::components::common::BusyIndicator;
 use crate::app::components::ChatInput;
-use crate::app::elements::busy_indicator;
 use crate::app::workers::main_worker::Request::{
     ChatLoadHistory, ChatPoll, ChatSendMessage, LoadPublicUserProfileByUsername,
 };
@@ -134,7 +134,7 @@ impl Component for ChatPage {
         if let Some(other_user) = &self.state.other_user {
             self.view_messages(other_user)
         } else {
-            busy_indicator()
+            html! { <BusyIndicator /> }
         }
     }
 }

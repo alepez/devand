@@ -1,6 +1,6 @@
+use crate::app::components::common::BusyIndicator;
 use crate::app::components::AddLanguageComponent;
 use crate::app::components::EditableLanguageTag;
-use crate::app::elements::busy_indicator;
 use devand_core::{
     Availability, Language, LanguagePreference, Languages, SpokenLanguage, SpokenLanguages, User,
 };
@@ -112,7 +112,7 @@ impl Component for SettingsPage {
                 if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)
                 } else {
-                    busy_indicator()
+            html! { <BusyIndicator /> }
                 }
                 }
             </div>

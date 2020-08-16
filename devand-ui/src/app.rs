@@ -1,9 +1,7 @@
 mod components;
-mod elements;
 mod workers;
 
 use self::components::*;
-use self::elements::busy_indicator;
 use self::workers::{main_worker, main_worker::MainWorker};
 use devand_core::{PublicUserProfile, User};
 use yew::prelude::*;
@@ -98,7 +96,7 @@ impl Component for App {
         if let Some(user) = &self.state.user {
             self.view_ok(user)
         } else {
-            busy_indicator()
+            html! { <BusyIndicator /> }
         }
     }
 }
