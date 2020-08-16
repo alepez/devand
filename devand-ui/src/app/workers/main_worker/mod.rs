@@ -67,8 +67,9 @@ pub struct MainWorker {
     link: AgentLink<MainWorker>,
     subscribers: HashSet<HandlerId>,
 
-    // TODO Prevent overwriting (canceling) of fetch task
-    _fetch_task: Option<FetchTask>,
+    // TODO Prevent memory leak
+    // TODO Add cache for resources like public profile
+    fetch_tasks: Vec<FetchTask>,
     _code_now_task: Box<dyn Task>,
     _timeout_task: Option<Box<dyn Task>>,
 
@@ -93,7 +94,7 @@ impl Agent for MainWorker {
         MainWorker {
             link,
             subscribers: HashSet::default(),
-            _fetch_task: None,
+            fetch_tasks: Vec::default(),
             _code_now_task: code_now_task,
             _timeout_task: None,
             _on_unload: make_on_unload_callback(pending.clone()),
