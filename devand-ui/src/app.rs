@@ -2,18 +2,13 @@ mod components;
 mod elements;
 mod workers;
 
-use self::components::{
-    AffinitiesPage, ChatPage, ChatsPage, CodeNowPage, NotFoundPage, SchedulePage,
-    SecuritySettingsPage, SettingsPage, UserProfilePage,
-};
+use self::components::*;
 use self::elements::busy_indicator;
 use self::workers::{main_worker, main_worker::MainWorker};
+use devand_core::{PublicUserProfile, User};
 use yew::prelude::*;
-use yew::virtual_dom::VNode;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
-
-use devand_core::{PublicUserProfile, User};
 
 type RouterAnchor = yew_router::components::RouterAnchor<AppRoute>;
 type RouterButton = yew_router::components::RouterButton<AppRoute>;
@@ -99,7 +94,7 @@ impl Component for App {
         }
     }
 
-    fn view(&self) -> VNode {
+    fn view(&self) -> Html {
         if let Some(user) = &self.state.user {
             self.view_ok(user)
         } else {
@@ -137,7 +132,7 @@ impl App {
         }
     }
 
-    fn view_ok(&self, user: &User) -> VNode {
+    fn view_ok(&self, user: &User) -> Html {
         html! {
             <>
             { view_menu(user, self.state.online_users) }
@@ -146,7 +141,7 @@ impl App {
         }
     }
 
-    fn view_routes(&self, user: &User) -> VNode {
+    fn view_routes(&self, user: &User) -> Html {
         let on_settings_change = self.link.callback(Msg::UserStore);
         let on_verify_email = self.link.callback(|_| Msg::VerifyEmail);
         let pub_user_profile: PublicUserProfile = user.clone().into();
@@ -174,7 +169,7 @@ impl App {
     }
 }
 
-fn view_menu(user: &User, online_users: usize) -> VNode {
+fn view_menu(user: &User, online_users: usize) -> Html {
     html! {
     <ul class=("devand-menu")>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
@@ -187,7 +182,7 @@ fn view_menu(user: &User, online_users: usize) -> VNode {
     }
 }
 
-fn view_code_now(online_users: usize) -> VNode {
+fn view_code_now(online_users: usize) -> Html {
     html! {
     <span>
         <span>{ "Code Now"}</span>
@@ -196,7 +191,7 @@ fn view_code_now(online_users: usize) -> VNode {
     }
 }
 
-fn view_messages(unread_messages: usize) -> VNode {
+fn view_messages(unread_messages: usize) -> Html {
     html! {
     <span>
         <span>{ "Messages"}</span>
@@ -205,7 +200,7 @@ fn view_messages(unread_messages: usize) -> VNode {
     }
 }
 
-fn view_count_tag(class: &str, count: usize) -> VNode {
+fn view_count_tag(class: &str, count: usize) -> Html {
     if count > 0 {
         html! { <span class=class>{ format!("{}", count) }</span> }
     } else {
