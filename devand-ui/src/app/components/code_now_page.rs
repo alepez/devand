@@ -90,13 +90,20 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
         .filter(|u| u.username != code_now.current_user.username);
 
     let user = current_user.into();
+    let total_online_users_count = users.clone().count();
     let mut affinities: Vec<_> = devand_core::calculate_affinities(&user, users).collect();
     affinities.sort_unstable_by_key(|x| x.affinity);
 
     if affinities.is_empty() {
+        let warning = if total_online_users_count > 0 {
+            html! { <> { "Sorry, no matching online users found. You can try to " } <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor> </> }
+        } else {
+            html! { <> { "Sorry, there are no online users now. You can try later or " } <RouterAnchor route=AppRoute::Affinities >{ "contact any of best matching users." }</RouterAnchor> </> }
+        };
+
         html! {
             <div class=("alert", "alert-warning")>
-                {"Sorry, no matching online users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+                { warning }
             </div>
         }
     } else {
