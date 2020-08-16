@@ -2,7 +2,6 @@ use yew::virtual_dom::VNode;
 use yew::{html, Properties};
 use yewtil::{Pure, PureComponent};
 
-/// Alias to make usability better.
 pub type CountTag = Pure<PureCountTag>;
 
 #[derive(PartialEq, Properties, Clone)]

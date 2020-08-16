@@ -1,3 +1,4 @@
+use crate::app::components::common::BusyIndicator;
 use crate::app::components::user_affinity_bubble;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::AppRoute;
@@ -93,7 +94,7 @@ impl Component for SchedulePage {
         if let Some(schedule) = &self.state.schedule {
             self.view_schedule(schedule)
         } else {
-            crate::app::elements::busy_indicator()
+            html! { <BusyIndicator /> }
         }
         }
         </>

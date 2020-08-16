@@ -1,5 +1,5 @@
 use crate::app::components::affinities_table::view_affinities_table;
-use crate::app::elements::busy_indicator;
+use crate::app::components::common::BusyIndicator;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::UserAffinity;
@@ -71,7 +71,7 @@ impl Component for AffinitiesPage {
             if let Some(affinities) = &self.state.affinities {
                 view_affinities(affinities)
             } else {
-                busy_indicator()
+            html! { <BusyIndicator /> }
             }
         }
         </>
