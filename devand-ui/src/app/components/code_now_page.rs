@@ -48,7 +48,7 @@ impl Component for CodeNowPage {
 
                 match res {
                     Response::CodeNowFetched(code_now) => {
-                        self.state.code_now = Some(code_now);
+                        self.state.code_now = Some(*code_now);
                         true
                     }
 
