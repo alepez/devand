@@ -44,20 +44,12 @@ impl Component for CodeNowPage {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::MainWorkerRes(res) => {
-                log::debug!("{:?}", res);
                 use main_worker::Response;
 
                 match res {
                     Response::CodeNowFetched(code_now) => {
-                        log::debug!("{:?}", code_now);
                         self.state.code_now = Some(code_now);
                         true
-                    }
-
-                    Response::Error(err) => {
-                        log::error!("Error: {}", err);
-                        // TODO Show error alert
-                        false
                     }
 
                     _ => false,
