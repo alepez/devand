@@ -38,6 +38,9 @@ tag = "0.17.2"
 [dependencies.yewtil]
 git = "https://github.com/yewstack/yew.git"
 tag = "0.17.2"
+features = [
+  "pure"
+]
 
 [dependencies.web-sys]
 version = "0.3"

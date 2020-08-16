@@ -1,4 +1,5 @@
 use crate::app::elements::busy_indicator;
+use crate::app::components::common::CountTag;
 use crate::app::workers::main_worker::Request::LoadAllChats;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
@@ -110,13 +111,7 @@ fn view_direct_chat(chat: &UserChat) -> Html {
     html! {
     <li class=("user-chat")>
         <span class="visible_name"><RouterAnchor route=AppRoute::Chat(username) >{ visible_name }</RouterAnchor></span>
-        {
-            if unread_messages > 0 {
-                html! { <span class="devand-messages-count">{ format!("{}", unread_messages) }</span> }
-            } else {
-                html! { }
-            }
-        }
+        <CountTag count=unread_messages />
     </li>
     }
 }

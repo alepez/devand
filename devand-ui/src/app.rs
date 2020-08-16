@@ -183,27 +183,9 @@ fn view_menu(user: &User, online_users: usize) -> Html {
 }
 
 fn view_code_now(online_users: usize) -> Html {
-    html! {
-    <span>
-        <span>{ "Code Now"}</span>
-        { view_count_tag("devand-online-users-count", online_users) }
-    </span>
-    }
+    html! { <span>{ "Code Now"} <CountTag count=online_users /></span> }
 }
 
 fn view_messages(unread_messages: usize) -> Html {
-    html! {
-    <span>
-        <span>{ "Messages"}</span>
-        { view_count_tag("devand-messages-count", unread_messages) }
-    </span>
-    }
-}
-
-fn view_count_tag(class: &str, count: usize) -> Html {
-    if count > 0 {
-        html! { <span class=class>{ format!("{}", count) }</span> }
-    } else {
-        html! {}
-    }
+    html! { <span>{ "Messages"} <CountTag count=unread_messages /></span> }
 }

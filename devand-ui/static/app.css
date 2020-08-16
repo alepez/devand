@@ -176,8 +176,7 @@ button {
   white-space: nowrap;
 }
 
-.devand-messages-count,
-.devand-online-users-count {
+.devand-count-tag {
   position: relative;
   padding: .2em;
   border: 1px solid transparent;
