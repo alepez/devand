@@ -30,6 +30,13 @@ fn api_url_availability_match() -> &'static str {
     "/api/availability-match"
 }
 
+fn api_url_password_check() -> &'static str {
+    "/api/password-check"
+}
+fn api_url_password_edit() -> &'static str {
+    "/api/password-edit"
+}
+
 pub fn request(worker: &mut MainWorker, msg: Request) {
     let task = match msg {
         Request::Init => {
@@ -70,6 +77,26 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
         Request::LoadAvailabilityMatch => {
             let req = get(api_url_availability_match());
             task(worker, req, Response::AvailabilityMatchFetched)
+        }
+
+        Request::CheckOldPassword(old_password) => {
+            let body = devand_core::PasswordEdit {
+                old_password,
+                new_password: String::default(),
+            };
+
+            let req = post(api_url_password_check(), json(body));
+            task(worker, req, Response::OldPasswordChecked)
+        }
+
+        Request::EditPassword(old_password, new_password) => {
+            let body = devand_core::PasswordEdit {
+                old_password,
+                new_password,
+            };
+
+            let req = post(api_url_password_edit(), json(body));
+            task(worker, req, Response::PasswordEdited)
         }
 
         // Program should never hit this

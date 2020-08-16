@@ -32,6 +32,8 @@ pub enum Request {
     LoadPublicUserProfile(devand_core::UserId),
     LoadAffinities,
     LoadAvailabilityMatch,
+    CheckOldPassword(String),
+    EditPassword(String, String),
 }
 
 impl Request {
@@ -47,6 +49,8 @@ pub enum Response {
     PublicUserProfileFetched(Box<devand_core::PublicUserProfile>),
     AffinitiesFetched(Vec<devand_core::UserAffinity>),
     AvailabilityMatchFetched(Box<devand_core::schedule_matcher::AvailabilityMatch>),
+    OldPasswordChecked(bool),
+    PasswordEdited(()),
     Done(()),
     Error(String),
 }
@@ -140,6 +144,7 @@ impl Agent for MainWorker {
                 // Overwrites current timeout task
                 self._timeout_task = Some(lazy_request(self, *req));
             }
+
             _ => request(self, msg),
         }
     }
