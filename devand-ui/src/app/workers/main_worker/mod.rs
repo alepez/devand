@@ -5,6 +5,7 @@ mod http;
 mod mock;
 
 use serde_derive::{Deserialize, Serialize};
+use std::collections::HashSet;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
@@ -35,7 +36,7 @@ impl Request {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Response {
     SelfUserFetched(devand_core::User),
     CodeNowFetched(devand_core::CodeNow),
@@ -46,10 +47,18 @@ pub enum Response {
 pub enum Msg {
     CodeNowUpdate,
     Request(Request),
+    Response(Response),
+}
+
+impl From<Response> for Msg {
+    fn from(res: Response) -> Self {
+        Msg::Response(res)
+    }
 }
 
 pub struct MainWorker {
     link: AgentLink<MainWorker>,
+    subscribers: HashSet<HandlerId>,
 
     // TODO Prevent overwriting (canceling) of fetch task
     _fetch_task: Option<FetchTask>,
@@ -68,18 +77,29 @@ impl Agent for MainWorker {
     type Output = Response;
 
     fn create(link: AgentLink<Self>) -> Self {
+        log::info!("MainWorker created");
+
         let pending = Arc::new(AtomicBool::new(false));
 
         let code_now_task = make_code_now_task(link.clone());
 
         MainWorker {
             link,
+            subscribers: HashSet::default(),
             _fetch_task: None,
             _code_now_task: code_now_task,
             _timeout_task: None,
             _on_unload: make_on_unload_callback(pending.clone()),
             pending,
         }
+    }
+
+    fn connected(&mut self, id: HandlerId) {
+        self.subscribers.insert(id);
+    }
+
+    fn disconnected(&mut self, id: HandlerId) {
+        self.subscribers.remove(&id);
     }
 
     fn update(&mut self, msg: Self::Message) {
@@ -89,13 +109,18 @@ impl Agent for MainWorker {
                 let req = Request::LoadCodeNow;
                 self.link.send_input(req);
             }
+
             Msg::Request(req) => {
                 self.link.send_input(req);
+            }
+
+            Msg::Response(res) => {
+                self.publish(res);
             }
         }
     }
 
-    fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
+    fn handle_input(&mut self, msg: Self::Input, _who: HandlerId) {
         #[cfg(feature = "mock_http")]
         use self::mock::request;
 
@@ -107,7 +132,15 @@ impl Agent for MainWorker {
                 // Overwrites current timeout task
                 self._timeout_task = Some(lazy_request(self, *req));
             }
-            _ => request(self, msg, who),
+            _ => request(self, msg),
+        }
+    }
+}
+
+impl MainWorker {
+    fn publish(&self, res: Response) {
+        for sub in self.subscribers.iter() {
+            self.link.respond(*sub, res.clone());
         }
     }
 }

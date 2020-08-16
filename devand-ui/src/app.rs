@@ -119,8 +119,9 @@ impl App {
                 true
             }
 
-            Response::CodeNowFetched(code_now) => {
-                log::debug!("{:?}", code_now);
+            Response::CodeNowFetched(_code_now) => {
+                // TODO Highlight code now button when someone is online
+                // log::debug!("{:?}", code_now);
                 false
             }
 
