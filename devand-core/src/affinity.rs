@@ -109,7 +109,7 @@ fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
 }
 
 // TODO Normalize to [0..1] when serializing
-#[derive(Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone)]
+#[derive(Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone, Debug)]
 pub struct Affinity(i32);
 
 impl Affinity {

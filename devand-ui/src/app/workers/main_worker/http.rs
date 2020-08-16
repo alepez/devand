@@ -18,6 +18,10 @@ fn api_url_user(username: &str) -> String {
     format!("/api/u/{}", username)
 }
 
+fn api_url_affinities() -> &'static str {
+    "/api/affinities"
+}
+
 pub fn request(worker: &mut MainWorker, msg: Request) {
     match msg {
         Request::Init => {
@@ -50,9 +54,14 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
             worker._fetch_task = make_task(worker, req, Response::PublicUserProfileFetched);
         }
 
-        Request::Lazy(_) => {
-            log::debug!("ignored");
+        Request::LoadAffinities => {
+            let url = api_url_affinities();
+            let req = fetch::Request::get(url).body(Nothing).unwrap();
+            worker._fetch_task = make_task(worker, req, Response::AffinitiesFetched);
         }
+
+        // Program should never hit this
+        Request::Lazy(_) => unimplemented!(),
     }
 }
 

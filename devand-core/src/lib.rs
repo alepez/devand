@@ -173,7 +173,7 @@ impl Default for LanguagePreference {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct UserAffinity {
     pub user: PublicUserProfile,
