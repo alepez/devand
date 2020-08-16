@@ -87,7 +87,7 @@ impl Component for App {
 
             Msg::UserStore(user) => {
                 self.main_worker
-                    .send(main_worker::Request::SaveSelfUser(user).lazy());
+                    .send(main_worker::Request::SaveSelfUser(Box::new(user)).lazy());
                 false
             }
 
@@ -115,7 +115,7 @@ impl App {
 
         match res {
             Response::SelfUserFetched(user) => {
-                self.state.user = Some(user);
+                self.state.user = Some(*user);
                 self.state.pending_save = false;
                 true
             }

@@ -25,7 +25,7 @@ const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 pub enum Request {
     Init,
     Lazy(Box<Request>),
-    SaveSelfUser(devand_core::User),
+    SaveSelfUser(Box<devand_core::User>),
     VerifyEmail,
     LoadCodeNow,
     LoadPublicUserProfileByUsername(String),
@@ -42,7 +42,7 @@ impl Request {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Response {
-    SelfUserFetched(devand_core::User),
+    SelfUserFetched(Box<devand_core::User>),
     CodeNowFetched(devand_core::CodeNow),
     PublicUserProfileFetched(devand_core::PublicUserProfile),
     AffinitiesFetched(Vec<devand_core::UserAffinity>),

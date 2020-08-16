@@ -10,7 +10,7 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
     match msg {
         Request::Init => {
             log::info!("Initializing...");
-            link.send_message(Response::SelfUserFetched(fake_user()));
+            link.send_message(Response::SelfUserFetched(Box::new(fake_user())));
         }
         Request::SaveSelfUser(user) => {
             log::info!("Saving user...");
