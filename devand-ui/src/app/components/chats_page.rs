@@ -1,4 +1,4 @@
-use crate::app::components::common::{CountTag, BusyIndicator};
+use crate::app::components::common::{BusyIndicator, CountTag};
 use crate::app::workers::main_worker::Request::LoadAllChats;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
