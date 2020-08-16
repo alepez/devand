@@ -18,7 +18,7 @@ use yew::services::timeout::TimeoutService;
 use yew::services::Task;
 use yew::worker::*;
 
-const INTERVAL_MS: u64 = 5_000;
+const CODE_NOW_INTERVAL_MS: u64 = 5_000;
 const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -146,7 +146,7 @@ impl MainWorker {
 }
 
 fn make_code_now_task(link: AgentLink<MainWorker>) -> Box<dyn Task> {
-    let duration = Duration::from_millis(INTERVAL_MS);
+    let duration = Duration::from_millis(CODE_NOW_INTERVAL_MS);
     let callback = link.callback(|_| Msg::CodeNowUpdate);
     let task = IntervalService::spawn(duration, callback);
     Box::new(task)
