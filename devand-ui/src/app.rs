@@ -52,6 +52,7 @@ pub struct State {
     user: Option<User>,
     pending_save: bool,
     verifying_email: bool,
+    online_users: usize,
 }
 
 pub enum Msg {
@@ -119,10 +120,12 @@ impl App {
                 true
             }
 
-            Response::CodeNowFetched(_code_now) => {
-                // TODO Highlight code now button when someone is online
-                // log::debug!("{:?}", code_now);
-                false
+            Response::CodeNowFetched(code_now) => {
+                let my_id = code_now.current_user.id;
+                let online_users_now = code_now.all_users.iter().filter(|u| u.id != my_id).count();
+                let changed = self.state.online_users != online_users_now;
+                self.state.online_users = online_users_now;
+                changed
             }
 
             Response::Error(err) => {
@@ -138,7 +141,7 @@ impl App {
     fn view_ok(&self, user: &User) -> VNode {
         html! {
             <>
-            { view_menu(user) }
+            { view_menu(user, self.state.online_users) }
             { self.view_routes(&user) }
             </>
         }
@@ -172,12 +175,12 @@ impl App {
     }
 }
 
-fn view_menu(user: &User) -> VNode {
+fn view_menu(user: &User, online_users: usize) -> VNode {
     html! {
     <ul class=("devand-menu")>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ "Code Now" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(online_users) }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(user.unread_messages) }</RouterAnchor></li>
@@ -185,17 +188,28 @@ fn view_menu(user: &User) -> VNode {
     }
 }
 
+fn view_code_now(online_users: usize) -> VNode {
+    html! {
+    <span>
+        <span>{ "Code Now"}</span>
+        { view_count_tag("devand-online-users-count", online_users) }
+    </span>
+    }
+}
+
 fn view_messages(unread_messages: usize) -> VNode {
     html! {
     <span>
         <span>{ "Messages"}</span>
-        {
-            if unread_messages > 0 {
-                html! { <span class="devand-messages-count">{ format!("{}", unread_messages) }</span> }
-            } else {
-                html! { }
-            }
-        }
+        { view_count_tag("devand-messages-count", unread_messages) }
     </span>
+    }
+}
+
+fn view_count_tag(class: &str, count: usize) -> VNode {
+    if count > 0 {
+        html! { <span class=class>{ format!("{}", count) }</span> }
+    } else {
+        html! {}
     }
 }
