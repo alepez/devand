@@ -53,7 +53,7 @@ impl Component for UserProfilePage {
 
                 match res {
                     Response::PublicUserProfileFetched(other_user) => {
-                        self.state.other_user = Some(other_user);
+                        self.state.other_user = Some(*other_user);
                         true
                     }
 

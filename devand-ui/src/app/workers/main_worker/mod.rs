@@ -43,10 +43,10 @@ impl Request {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Response {
     SelfUserFetched(Box<devand_core::User>),
-    CodeNowFetched(devand_core::CodeNow),
-    PublicUserProfileFetched(devand_core::PublicUserProfile),
+    CodeNowFetched(Box<devand_core::CodeNow>),
+    PublicUserProfileFetched(Box<devand_core::PublicUserProfile>),
     AffinitiesFetched(Vec<devand_core::UserAffinity>),
-    AvailabilityMatchFetched(devand_core::schedule_matcher::AvailabilityMatch),
+    AvailabilityMatchFetched(Box<devand_core::schedule_matcher::AvailabilityMatch>),
     Done(()),
     Error(String),
 }

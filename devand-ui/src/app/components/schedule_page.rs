@@ -58,11 +58,11 @@ impl Component for SchedulePage {
 
                 match res {
                     Response::PublicUserProfileFetched(user) => {
-                        self.state.users.insert(user.id, user);
+                        self.state.users.insert(user.id, *user);
                         true
                     }
                     Response::AvailabilityMatchFetched(schedule) => {
-                        self.state.schedule = Some(schedule);
+                        self.state.schedule = Some(*schedule);
                         true
                     }
                     _ => false,
