@@ -3,24 +3,23 @@ use super::{MainWorker, Request, Response};
 use maplit::{btreemap, btreeset};
 use yew::worker::*;
 
-pub fn request(worker: &mut MainWorker, msg: Request, who: HandlerId) {
+pub fn request(worker: &mut MainWorker, msg: Request) {
     log::info!("Request: {:?}", msg);
+
+    let link = worker.link.clone();
+
     match msg {
         Request::Init => {
             log::info!("Initializing...");
-            // TODO get actual data
-            worker
-                .link
-                .respond(who, Response::SelfUserFetched(fake_user()));
+            link.send_message(Response::SelfUserFetched(fake_user()));
         }
         Request::SaveSelfUser(user) => {
             log::info!("Saving user...");
-            // TODO put/get actual data
-            worker.link.respond(who, Response::SelfUserFetched(user));
+            link.send_message(Response::SelfUserFetched(user));
         }
         Request::VerifyEmail => {
             log::info!("Verifing email...");
-            // TODO post actual data
+            link.send_message(Response::Done);
         }
         _ => {
             log::debug!("ignored");
