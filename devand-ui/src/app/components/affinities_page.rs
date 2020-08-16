@@ -1,6 +1,6 @@
 use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::elements::busy_indicator;
-use crate::app::services::AffinitiesService;
+use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::UserAffinity;
 use yew::{prelude::*, Properties};
@@ -12,15 +12,13 @@ pub struct State {
 }
 
 pub enum Msg {
-    AffinitiesFetchOk(Vec<UserAffinity>),
-    AffinitiesFetchErr,
+    MainWorkerRes(main_worker::Response),
 }
 
 pub struct AffinitiesPage {
     props: Props,
     state: State,
-    #[allow(dead_code)]
-    affinities_service: AffinitiesService,
+    _main_worker: Box<dyn Bridge<MainWorker>>,
 }
 
 #[derive(Clone, PartialEq, Properties)]
@@ -33,35 +31,30 @@ impl Component for AffinitiesPage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let state = State::default();
 
-        let callback = link.callback(|result: Result<Vec<UserAffinity>, anyhow::Error>| {
-            if let Ok(affinities) = result {
-                Msg::AffinitiesFetchOk(affinities)
-            } else {
-                Msg::AffinitiesFetchErr
-            }
-        });
-
-        let mut affinities_service = AffinitiesService::new(callback);
-
-        affinities_service.restore();
+        let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
+        main_worker.send(main_worker::Request::LoadAffinities);
 
         Self {
             props,
             state,
-            affinities_service,
+            _main_worker: main_worker,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::AffinitiesFetchOk(mut affinities) => {
-                affinities.sort_unstable_by_key(|x| x.affinity);
-                self.state.affinities = Some(affinities);
-                true
-            }
-            Msg::AffinitiesFetchErr => {
-                log::error!("Affinities fetch error");
-                false
+            Msg::MainWorkerRes(res) => {
+                use main_worker::Response;
+
+                match res {
+                    Response::AffinitiesFetched(mut affinities) => {
+                        affinities.sort_unstable_by_key(|x| x.affinity);
+                        self.state.affinities = Some(affinities);
+                        true
+                    }
+
+                    _ => false,
+                }
             }
         }
     }
