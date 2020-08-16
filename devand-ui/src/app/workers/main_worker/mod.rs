@@ -73,7 +73,7 @@ pub struct MainWorker {
     _code_now_task: Box<dyn Task>,
     _timeout_task: Option<Box<dyn Task>>,
 
-    _on_unload: Closure<dyn FnMut(BeforeUnloadEvent) -> ()>,
+    _on_unload: Closure<dyn FnMut(BeforeUnloadEvent)>,
 
     pending: Arc<AtomicBool>,
 }
@@ -185,9 +185,7 @@ fn lazy_request(main_worker: &MainWorker, req: Request) -> Box<dyn Task> {
 /// request has finished. on_unload is triggered when the user leave
 /// the page and triggers an alert about unsaved changes. This is how GMail
 /// handles this case.
-fn make_on_unload_callback(
-    pending: Arc<AtomicBool>,
-) -> Closure<dyn FnMut(BeforeUnloadEvent) -> ()> {
+fn make_on_unload_callback(pending: Arc<AtomicBool>) -> Closure<dyn FnMut(BeforeUnloadEvent)> {
     use wasm_bindgen::JsCast;
 
     let window = yew::utils::window();
