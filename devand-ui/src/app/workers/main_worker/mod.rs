@@ -40,6 +40,7 @@ pub enum Request {
         Option<chrono::DateTime<chrono::Utc>>,
     ),
     ChatLoadHistory(Vec<devand_core::UserId>),
+    LoadAllChats,
 }
 
 impl Request {
@@ -61,6 +62,7 @@ pub enum Response {
     Error(String),
     ChatNewMessagesLoaded(Vec<devand_core::chat::ChatMessage>),
     ChatHistoryLoaded(devand_core::chat::ChatInfo),
+    AllChatsLoaded(devand_core::UserChats),
 }
 
 pub enum Msg {

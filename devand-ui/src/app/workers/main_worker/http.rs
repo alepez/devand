@@ -58,6 +58,10 @@ fn api_url_chat_messages_poll(
     )
 }
 
+fn api_url_chats() -> &'static str {
+    "/api/chats"
+}
+
 fn encode_chat_members(chat_members: &[devand_core::UserId]) -> String {
     chat_members
         .iter()
@@ -141,6 +145,11 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
         Request::ChatLoadHistory(members) => {
             let req = get(&api_url_chat(&members));
             task(worker, req, Response::ChatHistoryLoaded)
+        }
+
+        Request::LoadAllChats => {
+            let req = get(&api_url_chats());
+            task(worker, req, Response::AllChatsLoaded)
         }
 
         // Program should never hit this
