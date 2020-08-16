@@ -1,7 +1,6 @@
 use super::{MainWorker, Request, Response};
 
 use maplit::{btreemap, btreeset};
-use yew::worker::*;
 
 pub fn request(worker: &mut MainWorker, msg: Request) {
     log::info!("Request: {:?}", msg);
@@ -19,7 +18,7 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
         }
         Request::VerifyEmail => {
             log::info!("Verifing email...");
-            link.send_message(Response::Done);
+            link.send_message(Response::Done(()));
         }
         _ => {
             log::debug!("ignored");
