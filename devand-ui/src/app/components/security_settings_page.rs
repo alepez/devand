@@ -86,7 +86,7 @@ impl Component for SecuritySettingsPage {
                         true
                     }
                     Response::Error(e) => {
-                        self.state.generic_alert = Some(e.to_string());
+                        self.state.generic_alert = Some(e);
                         true
                     }
                     _ => false,
