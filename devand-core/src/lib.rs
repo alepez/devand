@@ -54,7 +54,7 @@ pub struct User {
     /// User's bio (max 160 char)
     pub bio: String,
 }
-// FIXME User contains too many fields. UserChats should be in another type, like FullUser
+// FIXME User contains too many fields. unread_messages should be in another type, like FullUser
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
