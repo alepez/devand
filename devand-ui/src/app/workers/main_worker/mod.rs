@@ -29,7 +29,9 @@ pub enum Request {
     VerifyEmail,
     LoadCodeNow,
     LoadPublicUserProfileByUsername(String),
+    LoadPublicUserProfile(devand_core::UserId),
     LoadAffinities,
+    LoadAvailabilityMatch,
 }
 
 impl Request {
@@ -44,6 +46,7 @@ pub enum Response {
     CodeNowFetched(devand_core::CodeNow),
     PublicUserProfileFetched(devand_core::PublicUserProfile),
     AffinitiesFetched(Vec<devand_core::UserAffinity>),
+    AvailabilityMatchFetched(devand_core::schedule_matcher::AvailabilityMatch),
     Done(()),
     Error(String),
 }

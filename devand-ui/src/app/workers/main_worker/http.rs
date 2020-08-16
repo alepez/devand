@@ -14,12 +14,20 @@ fn api_url_code_now() -> &'static str {
     "/api/code-now"
 }
 
-fn api_url_user(username: &str) -> String {
+fn api_url_user_by_username(username: &str) -> String {
     format!("/api/u/{}", username)
+}
+
+fn api_url_user(user_id: devand_core::UserId) -> String {
+    format!("/api/u/{}", user_id.0)
 }
 
 fn api_url_affinities() -> &'static str {
     "/api/affinities"
+}
+
+fn api_url_availability_match() -> &'static str {
+    "/api/availability-match"
 }
 
 pub fn request(worker: &mut MainWorker, msg: Request) {
@@ -44,14 +52,24 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
             worker._fetch_task = task(worker, req, Response::CodeNowFetched);
         }
 
+        Request::LoadPublicUserProfile(user_id) => {
+            let req = get(&api_url_user(user_id));
+            worker._fetch_task = task(worker, req, Response::PublicUserProfileFetched);
+        }
+
         Request::LoadPublicUserProfileByUsername(username) => {
-            let req = get(&api_url_user(&username));
+            let req = get(&api_url_user_by_username(&username));
             worker._fetch_task = task(worker, req, Response::PublicUserProfileFetched);
         }
 
         Request::LoadAffinities => {
             let req = get(api_url_affinities());
             worker._fetch_task = task(worker, req, Response::AffinitiesFetched);
+        }
+
+        Request::LoadAvailabilityMatch => {
+            let req = get(api_url_availability_match());
+            worker._fetch_task = task(worker, req, Response::AvailabilityMatchFetched);
         }
 
         // Program should never hit this
