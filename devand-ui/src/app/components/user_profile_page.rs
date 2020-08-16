@@ -33,10 +33,9 @@ impl Component for UserProfilePage {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let mut main_worker = MainWorker::bridge(link.callback(Msg::MainWorkerRes));
 
-        main_worker
-            .send(main_worker::Request::LoadPublicUserProfileByUsername(
-                props.username.clone(),
-            ));
+        main_worker.send(main_worker::Request::LoadPublicUserProfileByUsername(
+            props.username.clone(),
+        ));
 
         let state = State::default();
 
