@@ -35,6 +35,19 @@ pub enum Text<'a> {
     OldPassword,
     OldPasswordWrong,
     OldPasswordOk,
+    VacationModeEnabled,
+    AddressUnverified,
+    CheckEmailForLink,
+    Verify,
+    UsernameCannotBeChanged,
+    MaxNCharacters(usize),
+    VacationMode,
+    Languages,
+    SpokenLanguages,
+    SelectOneLanguage,
+    SelectOneSpokenLanguage,
+    VisibleName,
+    Bio,
 }
 
 impl<'a> ToString for Text<'a> {
@@ -76,6 +89,19 @@ impl<'a> ToString for Text<'a> {
             Text::OldPassword => "Old password".into(),
             Text::OldPasswordWrong => "Old password is wrong".into(),
             Text::OldPasswordOk => "Old password ok".into(),
+            Text::VacationModeEnabled => "You are currently in vacation mode".into(),
+            Text::AddressUnverified => "This address is not verified.".into(),
+            Text::CheckEmailForLink => "Check your email for a link to verify your email address. If it doesn’t appear within a few minutes, check your spam folder.".into(),
+            Text::Verify => "Verify".into(),
+            Text::UsernameCannotBeChanged => "Username cannot be changed".into(),
+            Text::MaxNCharacters(n) => format!("(max {} characters)", n),
+            Text::VacationMode => " Vacation mode".into(),
+            Text::Languages => "Languages".into(),
+            Text::SpokenLanguages => "Spoken Languages".into(),
+            Text::SelectOneLanguage => "Please, select at least one language with Low or High priority".into(),
+            Text::SelectOneSpokenLanguage => "Please, select at least one spoken language".into(),
+            Text::VisibleName => "Visible name".into(),
+            Text::Bio => "Bio".into(),
         }
     }
 }
