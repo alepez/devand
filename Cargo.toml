@@ -5,6 +5,7 @@ members = [
   "devand-crypto",
   "devand-db",
   "devand-mailer",
+  "devand-text",
   "devand-ui",
   "devand-web",
 ]

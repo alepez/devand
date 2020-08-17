@@ -4,6 +4,7 @@ mod workers;
 use self::components::*;
 use self::workers::{main_worker, main_worker::MainWorker};
 use devand_core::{PublicUserProfile, User};
+use devand_text::Text;
 use yew::prelude::*;
 use yew_router::switch::Permissive;
 use yew_router::{prelude::*, Switch};
@@ -170,20 +171,20 @@ impl App {
 fn view_menu(user: &User, online_users: usize) -> Html {
     html! {
     <ul class=("devand-menu")>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ "Settings" }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ "Affinities" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ Text::Settings }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ Text::Affinities }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(online_users) }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ "Schedule" }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ "Security" }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ Text::Schedule }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ Text::Security }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(user.unread_messages) }</RouterAnchor></li>
     </ul>
     }
 }
 
 fn view_code_now(online_users: usize) -> Html {
-    html! { <span>{ "Code Now"} <CountTag count=online_users /></span> }
+    html! { <span>{ Text::CodeNow } <CountTag count=online_users /></span> }
 }
 
 fn view_messages(unread_messages: usize) -> Html {
-    html! { <span>{ "Messages"} <CountTag count=unread_messages /></span> }
+    html! { <span>{ Text::Messages } <CountTag count=unread_messages /></span> }
 }
