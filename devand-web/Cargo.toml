@@ -12,6 +12,7 @@ devand-core = { path = "../devand-core" }
 devand-crypto = { path = "../devand-crypto" }
 devand-db = { path = "../devand-db" }
 devand-mailer = { path = "../devand-mailer", features = ["client"] }
+devand-text = { path = "../devand-text" }
 dotenv = "0.15"
 env_logger = "0.7"
 log = "0.4"

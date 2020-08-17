@@ -55,6 +55,21 @@ pub enum Text<'a> {
     Loading,
     EmailVerifySubject,
     EmailVerifyBodyMarkdown(&'a str),
+    LoginError,
+    LogoutDone,
+    ResetYourPassowrd,
+    EmailNotAssociatedToAccount,
+    CheckYourEmail,
+    PasswordChangedReset,
+    InvalidPassword,
+    InvalidToken,
+    CreateAccount,
+    YourDashboard,
+    Motto,
+    PrivacyPolicy,
+    CodeOfConduct,
+    NeedHelp,
+    EmailAddressVerification,
 }
 
 impl<'a> ToString for Text<'a> {
@@ -119,9 +134,30 @@ impl<'a> ToString for Text<'a> {
                                                            Before we get started, we just need to confirm that this is you.\n\n\
                                                            Click below to verify your email address:\n\n\
                                                            {}", url),
+            Text::LoginError => "Incorrect username or password".into(),
+            Text::LogoutDone => "Successfully logged out.".into(),
+            Text::ResetYourPassowrd => "Reset your password".into(),
+            Text::EmailNotAssociatedToAccount => "That address is not associated with a personal user account.".into(),
+            Text::CheckYourEmail => "Check your email".into(),
+            Text::PasswordChangedReset => "Your password has been changed! You can now sign in with your new password.".into(),
+            Text::InvalidPassword => "Invalid password".into(),
+            Text::InvalidToken => "Invalid token".into(),
+            Text::CreateAccount => "Create your DevAndDev account".into(),
+            Text::YourDashboard => "Your dashboard".into(),
+            Text::Motto => "Find your pair-programming pal".into(),
+            Text::PrivacyPolicy => "Privacy Policy".into(),
+            Text::CodeOfConduct => "DevAndDev Code of Conduct".into(),
+            Text::NeedHelp => "Need help?".into(),
+            Text::EmailAddressVerification => "Email address verification".into(),
         }
     }
 }
+
+// impl<'a> AsRef<str> for Text<'a> {
+//     fn as_ref(&self) -> &str {
+//         self.to_string().as_ref()
+//     }
+// }
 
 impl Default for Text<'_> {
     fn default() -> Self {
