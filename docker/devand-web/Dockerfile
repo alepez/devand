@@ -6,6 +6,7 @@ ADD --chown=builder ./devand-crypto ./devand-crypto
 ADD --chown=builder ./devand-db ./devand-db
 ADD --chown=builder ./devand-mailer ./devand-mailer
 ADD --chown=builder ./devand-ui ./devand-ui
+ADD --chown=builder ./devand-text ./devand-text
 ADD --chown=builder ./devand-web ./devand-web
 
 USER builder
