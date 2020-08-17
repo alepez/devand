@@ -479,7 +479,7 @@ fn verify_email_token_post(
         verified: bool,
     }
 
-    let title= Text::EmailAddressVerification.to_string();
+    let title = Text::EmailAddressVerification.to_string();
     let context = Context {
         title,
         authenticated: auth_data.is_some(),
