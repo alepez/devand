@@ -12,7 +12,7 @@ use std::cmp::Ord;
 use std::collections::BTreeMap;
 use strum_macros::{Display, EnumIter, EnumString};
 
-pub use affinity::{Affinity, AffinityParams};
+pub use affinity::{Affinity, AffinityParams, AffinityLevel};
 pub use languages::Language;
 pub use schedule::{Availability, DaySchedule, WeekSchedule};
 pub use spoken_languages::*;

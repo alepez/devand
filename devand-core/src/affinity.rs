@@ -112,6 +112,13 @@ fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
 #[derive(Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone, Debug)]
 pub struct Affinity(i32);
 
+#[derive(Copy, Clone)]
+pub enum AffinityLevel {
+    Low,
+    Medium,
+    High,
+}
+
 impl Affinity {
     pub const NONE: Self = Affinity(Self::MIN);
     pub const FULL: Self = Affinity(Self::MAX);
@@ -143,6 +150,17 @@ impl Affinity {
 
     pub fn is_zero(&self) -> bool {
         self.0 <= Self::MIN
+    }
+}
+
+impl From<Affinity> for AffinityLevel {
+    fn from(affinity: Affinity) -> Self {
+        let x = affinity.normalize();
+        match x {
+            x if x >= 0.6 => AffinityLevel::High,
+            x if x >= 0.3 => AffinityLevel::Medium,
+            _ => AffinityLevel::Low,
+        }
     }
 }
 
