@@ -48,6 +48,9 @@ pub enum Text<'a> {
     SelectOneSpokenLanguage,
     VisibleName,
     Bio,
+    LowAffinity,
+    MediumAffinity,
+    HighAffinity,
 }
 
 impl<'a> ToString for Text<'a> {
@@ -102,6 +105,9 @@ impl<'a> ToString for Text<'a> {
             Text::SelectOneSpokenLanguage => "Please, select at least one spoken language".into(),
             Text::VisibleName => "Visible name".into(),
             Text::Bio => "Bio".into(),
+            Text::LowAffinity => "Low affinity".into(),
+            Text::MediumAffinity => "Medium affinity".into(),
+            Text::HighAffinity => "High affinity".into(),
         }
     }
 }
