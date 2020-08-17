@@ -153,12 +153,6 @@ impl<'a> ToString for Text<'a> {
     }
 }
 
-// impl<'a> AsRef<str> for Text<'a> {
-//     fn as_ref(&self) -> &str {
-//         self.to_string().as_ref()
-//     }
-// }
-
 impl Default for Text<'_> {
     fn default() -> Self {
         Text::EmptyString
