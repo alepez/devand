@@ -1,5 +1,4 @@
-use yew::virtual_dom::VNode;
-use yew::{html, Properties};
+use yew::prelude::*;
 use yewtil::{Pure, PureComponent};
 
 pub type BusyIndicator = Pure<PureBusyIndicator>;
@@ -11,7 +10,7 @@ pub struct PureBusyIndicator {
 }
 
 impl PureComponent for PureBusyIndicator {
-    fn render(&self) -> VNode {
+    fn render(&self) -> Html {
         let mut class = vec!["devand-busy-indicator"];
 
         if self.running {

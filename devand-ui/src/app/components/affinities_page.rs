@@ -1,5 +1,5 @@
 use crate::app::components::affinities_table::view_affinities_table;
-use crate::app::components::common::BusyIndicator;
+use crate::app::components::{Alert, BusyIndicator};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::UserAffinity;
@@ -94,8 +94,8 @@ fn view_affinities(affinities: &[UserAffinity]) -> Html {
 
 fn view_no_affinities() -> Html {
     html! {
-        <div class=("alert", "alert-warning")>
-            {"Sorry, no matching users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
-        </div>
+    <Alert>
+        {"Sorry, no matching users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+    </Alert>
     }
 }

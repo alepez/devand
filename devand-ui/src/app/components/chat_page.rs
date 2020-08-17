@@ -1,5 +1,4 @@
-use crate::app::components::common::BusyIndicator;
-use crate::app::components::ChatInput;
+use crate::app::components::{Alert, BusyIndicator, ChatInput};
 use crate::app::workers::main_worker::Request::{
     ChatLoadHistory, ChatPoll, ChatSendMessage, LoadPublicUserProfileByUsername,
 };
@@ -183,11 +182,7 @@ impl ChatPage {
 }
 
 fn view_unverified_email() -> Html {
-    html! {
-    <div class=("alert", "alert-warning")>
-        { "This user may not receive email notification of this message (email not verified yet)" }
-    </div>
-    }
+    html! { <Alert>{ "This user may not receive email notification of this message (email not verified yet)" }</Alert> }
 }
 
 fn view_bubble(me: UserId, msg: &ChatMessage) -> Html {

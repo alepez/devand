@@ -1,5 +1,5 @@
-use crate::app::components::common::BusyIndicator;
 use crate::app::components::user_affinity_bubble;
+use crate::app::components::{Alert, BusyIndicator};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::AppRoute;
 use crate::app::RouterAnchor;
@@ -113,17 +113,17 @@ impl SchedulePage {
 
     fn view_no_slots(&self) -> Html {
         html! {
-            <div class=("alert", "alert-warning")>
-                {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your availability." }</RouterAnchor>
-            </div>
+        <Alert>
+            {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your availability." }</RouterAnchor>
+        </Alert>
         }
     }
 
     fn view_all_slots_empty(&self) -> Html {
         html! {
-            <div class=("alert", "alert-warning")>
-                {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
-            </div>
+        <Alert>
+            {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+        </Alert>
         }
     }
 
