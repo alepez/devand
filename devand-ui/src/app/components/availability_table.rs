@@ -1,5 +1,6 @@
 use chrono::Weekday;
 use devand_core::{Availability, DaySchedule, WeekSchedule};
+use devand_text::Text;
 use yew::{prelude::*, Properties};
 use yewtil::NeqAssign;
 
@@ -64,7 +65,7 @@ impl AvailabilityTable {
     fn view_week(&self, schedule: &WeekSchedule) -> Html {
         html! {
             <fieldset class="pure-u-1">
-                <legend>{ "Your current weekly schedule. Check your available hours. All hours are in UTC" }</legend>
+                <legend>{ Text::YourCurrentWeeklySchedule }</legend>
                 { self.view_days(schedule) }
             </fieldset>
         }
@@ -112,12 +113,12 @@ impl AvailabilityTable {
     fn view_schedule_never(&self) -> Html {
         html! {
             <fieldset class="pure-u-1">
-                <legend>{ "You haven't scheduled anything yet" }</legend>
+                <legend>{ Text::YouHaventScheduled }</legend>
                 <div>
                     <button
                         class="pure-button"
                         onclick=self.link.callback(move |_| Msg::ResetSchedule)>
-                        { "Set your availability" }
+                        { Text::SetYourAvailability }
                     </button>
                 </div>
             </fieldset>

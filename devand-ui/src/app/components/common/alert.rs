@@ -41,4 +41,3 @@ impl PureComponent for PureAlert {
         }
     }
 }
-
