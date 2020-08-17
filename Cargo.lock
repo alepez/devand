@@ -621,6 +621,7 @@ dependencies = [
  "comrak",
  "devand-crypto",
  "devand-db",
+ "devand-text",
  "dotenv",
  "env_logger",
  "jsonrpc-core",
@@ -634,12 +635,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "devand-text"
+version = "0.1.0"
+
+[[package]]
 name = "devand-ui"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
  "devand-core",
+ "devand-text",
  "fake",
  "gloo",
  "http 0.2.1",
@@ -672,6 +678,7 @@ dependencies = [
  "devand-crypto",
  "devand-db",
  "devand-mailer",
+ "devand-text",
  "dotenv",
  "env_logger",
  "log 0.4.11",

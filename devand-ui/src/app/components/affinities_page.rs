@@ -3,7 +3,8 @@ use crate::app::components::{Alert, BusyIndicator};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::UserAffinity;
-use yew::{prelude::*, Properties};
+use devand_text::Text;
+use yew::prelude::*;
 use yewtil::NeqAssign;
 
 #[derive(Default)]
@@ -66,7 +67,7 @@ impl Component for AffinitiesPage {
     fn view(&self) -> Html {
         html! {
         <>
-        <h1>{ "Affinities" }</h1>
+        <h1>{ Text::Affinities }</h1>
         {
             if let Some(affinities) = &self.state.affinities {
                 view_affinities(affinities)
@@ -85,7 +86,7 @@ fn view_affinities(affinities: &[UserAffinity]) -> Html {
     } else {
         html! {
         <>
-            <p>{ "In the table below, you can see a list of developers who love the same languages as you. Just click the chat icon to start chatting and organize your next pair-programming session." }</p>
+            <p>{ Text::AffinitiesTableDescription }</p>
             { view_affinities_table(affinities) }
         </>
         }
@@ -95,7 +96,7 @@ fn view_affinities(affinities: &[UserAffinity]) -> Html {
 fn view_no_affinities() -> Html {
     html! {
     <Alert>
-        {"Sorry, no matching users found. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+        { Text::NoMatchingUsersFound } <RouterAnchor route=AppRoute::Settings >{ Text::ExtendYourLanguageSelection }</RouterAnchor>
     </Alert>
     }
 }

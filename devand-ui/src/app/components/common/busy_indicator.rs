@@ -1,3 +1,4 @@
+use devand_text::Text;
 use yew::prelude::*;
 use yewtil::{Pure, PureComponent};
 
@@ -17,6 +18,6 @@ impl PureComponent for PureBusyIndicator {
             class.push("devand-running");
         };
 
-        html! { <div class=class>{ "Loading..." }</div>}
+        html! { <div class=class>{ Text::Loading }</div>}
     }
 }

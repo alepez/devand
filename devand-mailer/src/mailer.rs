@@ -1,4 +1,5 @@
 use devand_crypto::{EmailVerification, Signable};
+use devand_text::Text;
 use lettre::smtp::authentication::Credentials;
 use lettre::smtp::ConnectionReuseParameters;
 use lettre::{SmtpClient, Transport};
@@ -99,20 +100,12 @@ impl Mailer {
         // FIXME Base url
         let url = format!("https://devand.dev/verify_email/{}", token);
 
-        let subject = "Verify Email Address for DevAndDev";
-        let text = format!(
-            "
-Thanks for registering for an account on *DevAndDev*!\n\n
-Before we get started, we just need to confirm that this is you.\n\n
-Click below to verify your email address:\n\n
-{}
-",
-            url
-        );
+        let subject = Text::EmailVerifySubject.to_string();
+        let text = Text::EmailVerifyBodyMarkdown(&url).to_string();
 
         let email = Email {
             recipient,
-            subject: subject.to_string(),
+            subject,
             text,
             address_must_be_verified: false,
         };
@@ -145,5 +138,19 @@ fn create_email(
             None
         }
         Ok(email) => Some(email),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mail_body() {
+        let url = "https://devand.dev/verify_email/foobar";
+        let body = Text::EmailVerifyBodyMarkdown(url).to_string();
+        // We check lenght for regressions, especially to be sure that unwanted
+        // blank spaces are added.
+        assert_eq!(body.len(), 202);
     }
 }

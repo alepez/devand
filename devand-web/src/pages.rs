@@ -2,6 +2,7 @@ use crate::auth::{self, AuthData, ExpectedCaptcha};
 use crate::StaticDir;
 use crate::{Mailer, PgDevandConn};
 use devand_crypto::{EmailVerification, PasswordReset, Signable, SignedToken};
+use devand_text::Text;
 use rocket::http::uri::Uri;
 use rocket::http::{ContentType, Cookies};
 use rocket::request::{FlashMessage, Form};
@@ -28,7 +29,7 @@ fn login(
             log_fail(real_ip.0);
             Flash::error(
                 Redirect::to(uri!(login_page: return_to)),
-                "Incorrect username or password",
+                Text::LoginError.to_string(),
             )
         })
 }
@@ -76,7 +77,7 @@ fn logout(mut cookies: Cookies) -> Flash<Redirect> {
     auth::logout(&mut cookies);
     Flash::success(
         Redirect::to(uri!(login_page: String::new())),
-        "Successfully logged out.",
+        Text::LogoutDone.to_string(),
     )
 }
 
@@ -84,14 +85,15 @@ fn logout(mut cookies: Cookies) -> Flash<Redirect> {
 fn password_reset_page(flash: Option<FlashMessage>) -> Template {
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         flash_msg: Option<String>,
         flash_name: Option<String>,
         authenticated: bool,
     }
 
+    let title = Text::ResetYourPassowrd.to_string();
     let context = Context {
-        title: "Reset your password",
+        title,
         flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
         flash_name: flash.as_ref().map(|x| x.name().to_string()),
         authenticated: false,
@@ -113,7 +115,7 @@ fn password_reset(
     crypto_encoder: State<devand_crypto::Encoder>,
     conn: PgDevandConn,
 ) -> Result<Redirect, Flash<Redirect>> {
-    let err_msg = "That address is not associated with a personal user account.";
+    let err_msg = Text::EmailNotAssociatedToAccount.to_string();
     let PasswordReset1 { email } = password_reset.0;
 
     if let Some(user) = devand_db::load_user_by_email(email.as_str(), &conn) {
@@ -145,7 +147,7 @@ fn password_reset_token_page(
 ) -> Template {
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         token: String,
         flash_msg: Option<String>,
         flash_name: Option<String>,
@@ -158,8 +160,9 @@ fn password_reset_token_page(
     let valid_token =
         PasswordReset::try_from_token(&token.clone().into(), &crypto_decoder).is_some();
 
+    let title = Text::ResetYourPassowrd.to_string();
     let context = Context {
-        title: "Reset your password",
+        title,
         token,
         flash_msg: flash.as_ref().map(|x| x.msg().to_string()),
         flash_name: flash.as_ref().map(|x| x.name().to_string()),
@@ -174,12 +177,13 @@ fn password_reset_token_page(
 fn password_reset_wait_page() -> Template {
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         authenticated: bool,
     }
 
+    let title = Text::CheckYourEmail.to_string();
     let context = Context {
-        title: "Check your email",
+        title,
         authenticated: false,
     };
 
@@ -199,14 +203,14 @@ fn password_reset_token(
     crypto_decoder: State<devand_crypto::Decoder>,
     conn: PgDevandConn,
 ) -> Result<Flash<Redirect>, Flash<Redirect>> {
-    let ok_msg = "Your password has been changed! You can now sign in with your new password.";
+    let ok_msg = Text::PasswordChangedReset.to_string();
     let redirect_ok = Redirect::to(uri!(login_page: String::new()));
     let redirect_err = Redirect::to(uri!(password_reset_token_page: token.clone()));
 
     let PasswordReset2 { password } = password_reset.0;
 
     if !devand_core::auth::is_valid_password(&password) {
-        let err_msg = "Invalid password";
+        let err_msg = Text::InvalidPassword.to_string();
         return Err(Flash::error(redirect_err, err_msg));
     }
 
@@ -222,7 +226,7 @@ fn password_reset_token(
         }
         None => {
             log_fail(real_ip.0);
-            let err_msg = "Invalid token";
+            let err_msg = Text::InvalidToken.to_string();
             Err(Flash::error(redirect_err, err_msg))
         }
     }
@@ -263,7 +267,7 @@ fn join_page(
         // When user is not authenticated, /join displays a form
         #[derive(Serialize)]
         struct Context {
-            title: &'static str,
+            title: String,
             flash: Option<String>,
             username: Option<String>,
             email: Option<String>,
@@ -271,8 +275,9 @@ fn join_page(
             authenticated: bool,
         }
 
+        let title = Text::CreateAccount.to_string();
         let context = Context {
-            title: "Create your DevAndDev account",
+            title,
             flash: flash.map(|x| x.msg().to_string()),
             username: join_data.as_ref().map(|x| x.username.to_string()),
             email: join_data.as_ref().map(|x| x.email.to_string()),
@@ -336,12 +341,13 @@ fn dashboard_user_profile(auth_data: AuthData, _username: String) -> Template {
 fn dashboard(_auth_data: AuthData) -> Template {
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         authenticated: bool,
     }
 
+    let title = Text::YourDashboard.to_string();
     let context = Context {
-        title: "Your dashboard",
+        title,
         authenticated: true,
     };
 
@@ -384,12 +390,13 @@ fn privacy(auth_data: Option<AuthData>) -> Template {
 fn code_of_conduct(auth_data: Option<AuthData>) -> Template {
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         authenticated: bool,
     }
 
+    let title = Text::CodeOfConduct.to_string();
     let context = Context {
-        title: "DevAndDev Code of Conduct",
+        title,
         authenticated: auth_data.is_some(),
     };
 
@@ -400,12 +407,13 @@ fn code_of_conduct(auth_data: Option<AuthData>) -> Template {
 fn help(auth_data: Option<AuthData>) -> Template {
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         authenticated: bool,
     }
 
+    let title = Text::NeedHelp.to_string();
     let context = Context {
-        title: "Need help?",
+        title,
         authenticated: auth_data.is_some(),
     };
 
@@ -430,14 +438,15 @@ fn verify_email_token(
 
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         authenticated: bool,
         valid_token: bool,
         token: String,
     }
 
+    let title = Text::EmailAddressVerification.to_string();
     let context = Context {
-        title: "Email address verification",
+        title,
         authenticated: auth_data.is_some(),
         valid_token,
         token,
@@ -465,13 +474,14 @@ fn verify_email_token_post(
 
     #[derive(Serialize)]
     struct Context {
-        title: &'static str,
+        title: String,
         authenticated: bool,
         verified: bool,
     }
 
+    let title = Text::EmailAddressVerification.to_string();
     let context = Context {
-        title: "Email address verification",
+        title,
         authenticated: auth_data.is_some(),
         verified,
     };

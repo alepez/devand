@@ -3,6 +3,7 @@ use crate::app::workers::main_worker::Request::LoadAllChats;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::{UserChat, UserChats};
+use devand_text::Text;
 use yew::{prelude::*, Properties};
 use yewtil::NeqAssign;
 
@@ -121,6 +122,6 @@ fn view_group_chat(_chat: &UserChat) -> Html {
 
 fn view_no_chats() -> Html {
     html! {
-        <p>{ "You don't have any chat yet" }</p>
+        <p>{ Text::NoChatsYet }</p>
     }
 }
