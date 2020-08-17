@@ -1,4 +1,5 @@
 pub enum Text<'a> {
+    EmptyString,
     Settings,
     Affinities,
     CodeNow,
@@ -23,11 +24,23 @@ pub enum Text<'a> {
     UnknownPageNotFound,
     ExtendYourAvailability,
     NoAvailableUsers,
+    PasswordChanged,
+    PasswordChangeError,
+    Password,
+    PasswordUnsecure,
+    PasswordMismatch,
+    NewPassword,
+    NewPasswordOk,
+    RepeatNewPassword,
+    OldPassword,
+    OldPasswordWrong,
+    OldPasswordOk,
 }
 
 impl<'a> ToString for Text<'a> {
     fn to_string(&self) -> String {
         match self {
+            Text::EmptyString => "".into(),
             Text::Settings => "Settings".into(),
             Text::Affinities => "Affinities".into(),
             Text::CodeNow => "Code Now".into(),
@@ -46,12 +59,29 @@ impl<'a> ToString for Text<'a> {
             Text::CodeNowTableDescription => "In the table below, you can see a list of online developers, sorted by analogy. Just click the chat icon to start chatting and organize your next pair-programming session.".into(),
             Text::ContactBestMatchingUsers => "contact any of best matching users.".into(),
             Text::NoOnlineUsers => "Sorry, no matching online users found. You can try to ".into(),
-            Text::NoMatchingOnlineUsers => "Sorry, there are no online users now. You can try later or ".into(), 
+            Text::NoMatchingOnlineUsers => "Sorry, there are no online users now. You can try later or ".into(),
             Text::Add => "Add".into(),
             Text::PageNotFound(page) => format!("Page {} not found", page),
             Text::UnknownPageNotFound => "Page not found".into(),
             Text::ExtendYourAvailability => "extend your availability.".into(),
             Text::NoAvailableUsers => "Sorry, there are no available users. You can try to ".into(),
+            Text::PasswordChanged => "Password changed successfully.".into(),
+            Text::PasswordChangeError => "An error occurred while changing password. Please, retry.".into(),
+            Text::Password => "Password".into(),
+            Text::PasswordUnsecure => "Password is too unsecure".into(),
+            Text::PasswordMismatch => "Password mismatch".into(),
+            Text::NewPassword => "New password".into(),
+            Text::NewPasswordOk => "New password ok".into(),
+            Text::RepeatNewPassword => "Repeat new password".into(),
+            Text::OldPassword => "Old password".into(),
+            Text::OldPasswordWrong => "Old password is wrong".into(),
+            Text::OldPasswordOk => "Old password ok".into(),
         }
+    }
+}
+
+impl Default for Text<'_> {
+    fn default() -> Self {
+        Text::EmptyString
     }
 }
