@@ -6,6 +6,7 @@ use crate::app::RouterAnchor;
 use chrono::{DateTime, Utc};
 use devand_core::schedule_matcher::AvailabilityMatch;
 use devand_core::{Affinity, AffinityParams, PublicUserProfile, UserAffinity, UserId};
+use devand_text::Text;
 use yew::{prelude::*, Properties};
 use yewtil::NeqAssign;
 
@@ -87,7 +88,7 @@ impl Component for SchedulePage {
     fn view(&self) -> Html {
         html! {
         <>
-        <h1>{ "Schedule" }</h1>
+        <h1>{ Text::Schedule }</h1>
         <p>{ "Here you find a list of users available at the same time as you." }</p>
         <p>{ "Just choose someone to pair-program with and start chatting" }</p>
         {
@@ -114,7 +115,7 @@ impl SchedulePage {
     fn view_no_slots(&self) -> Html {
         html! {
         <Alert>
-            {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your availability." }</RouterAnchor>
+            { Text::NoAvailableUsers } <RouterAnchor route=AppRoute::Settings >{ Text::ExtendYourAvailability }</RouterAnchor>
         </Alert>
         }
     }
@@ -122,7 +123,7 @@ impl SchedulePage {
     fn view_all_slots_empty(&self) -> Html {
         html! {
         <Alert>
-            {"Sorry, there are no available users. You can try to "} <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor>
+            { Text::NoAvailableUsers } <RouterAnchor route=AppRoute::Settings >{ Text::ExtendYourLanguageSelection }</RouterAnchor>
         </Alert>
         }
     }

@@ -1,4 +1,4 @@
-pub enum Text {
+pub enum Text<'a> {
     Settings,
     Affinities,
     CodeNow,
@@ -11,11 +11,21 @@ pub enum Text {
     YourCurrentWeeklySchedule,
     SetYourAvailability,
     YouHaventScheduled,
-    ChatWith(String),
+    ChatWith(&'a str),
     UserWithUnverifiedEmail,
+    NoChatsYet,
+    CodeNowTableDescription,
+    ContactBestMatchingUsers,
+    NoOnlineUsers,
+    NoMatchingOnlineUsers,
+    Add,
+    PageNotFound(&'a str),
+    UnknownPageNotFound,
+    ExtendYourAvailability,
+    NoAvailableUsers,
 }
 
-impl ToString for Text {
+impl<'a> ToString for Text<'a> {
     fn to_string(&self) -> String {
         match self {
             Text::Settings => "Settings".into(),
@@ -32,6 +42,16 @@ impl ToString for Text {
             Text::YouHaventScheduled => "You haven't scheduled anything yet".into(),
             Text::ChatWith(name) => format!("Chat with {}", name),
             Text::UserWithUnverifiedEmail => "This user may not receive email notification of this message (email not verified yet)".into(),
+            Text::NoChatsYet => "You don't have any chat yet".into(),
+            Text::CodeNowTableDescription => "In the table below, you can see a list of online developers, sorted by analogy. Just click the chat icon to start chatting and organize your next pair-programming session.".into(),
+            Text::ContactBestMatchingUsers => "contact any of best matching users.".into(),
+            Text::NoOnlineUsers => "Sorry, no matching online users found. You can try to ".into(),
+            Text::NoMatchingOnlineUsers => "Sorry, there are no online users now. You can try later or ".into(), 
+            Text::Add => "Add".into(),
+            Text::PageNotFound(page) => format!("Page {} not found", page),
+            Text::UnknownPageNotFound => "Page not found".into(),
+            Text::ExtendYourAvailability => "extend your availability.".into(),
+            Text::NoAvailableUsers => "Sorry, there are no available users. You can try to ".into(),
         }
     }
 }
