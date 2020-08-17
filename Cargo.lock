@@ -634,12 +634,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "devand-text"
+version = "0.1.0"
+
+[[package]]
 name = "devand-ui"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "chrono",
  "devand-core",
+ "devand-text",
  "fake",
  "gloo",
  "http 0.2.1",
