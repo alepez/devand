@@ -2,9 +2,9 @@ use crate::app::components::common::BusyIndicator;
 use crate::app::components::LanguageTag;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterButton};
-use devand_core::PublicUserProfile;
-use devand_core::SpokenLanguages;
-use yew::{prelude::*, Properties};
+use devand_core::{PublicUserProfile, SpokenLanguages};
+use devand_text::Text;
+use yew::prelude::*;
 
 pub struct UserProfilePage {
     props: Props,
@@ -98,7 +98,7 @@ impl Component for UserProfilePage {
                 <h1><RouterButton route=AppRoute::Chat(other_user.username.clone())>{ "💬 " }</RouterButton>{ other_user.full_name() }</h1>
                 <p class="devand-user-bio">{ &other_user.bio }</p>
 
-                <h2>{"Languages"}</h2>
+                <h2>{ Text::Languages }</h2>
                 <div>
                     { for languages_tags }
                 </div>
@@ -119,7 +119,7 @@ fn view_spoken_languages(visible_name: &str, spoken_languages: &SpokenLanguages)
         let spoken_languages = spoken_languages.iter().map(|x| html! { <li>{ x }</li> });
         html! {
         <>
-            <h2>{ format!("{} speaks:", visible_name) }</h2>
+            <h2>{ Text::UserSpeaks(visible_name) }</h2>
             <ul>
                 <li>{ for spoken_languages }</li>
             </ul>
