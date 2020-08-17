@@ -5,6 +5,7 @@ use crate::app::workers::main_worker::Request::{
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use devand_core::chat::ChatMessage;
 use devand_core::{PublicUserProfile, UserId};
+use devand_text::Text;
 use yew::services::interval::{IntervalService, IntervalTask};
 use yew::{prelude::*, Properties};
 
@@ -160,7 +161,7 @@ impl ChatPage {
 
         html! {
             <>
-                <h1>{ format!("Chat with {}", &other_user.visible_name) }</h1>
+                <h1>{ Text::ChatWith(other_user.visible_name.clone()) }</h1>
                 {
                 if unverified_email {
                     view_unverified_email()
@@ -182,7 +183,7 @@ impl ChatPage {
 }
 
 fn view_unverified_email() -> Html {
-    html! { <Alert>{ "This user may not receive email notification of this message (email not verified yet)" }</Alert> }
+    html! { <Alert>{ Text::UserWithUnverifiedEmail }</Alert> }
 }
 
 fn view_bubble(me: UserId, msg: &ChatMessage) -> Html {
