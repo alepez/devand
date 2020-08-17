@@ -53,6 +53,8 @@ pub enum Text<'a> {
     HighAffinity,
     UserSpeaks(&'a str),
     Loading,
+    EmailVerifySubject,
+    EmailVerifyBodyMarkdown(&'a str),
 }
 
 impl<'a> ToString for Text<'a> {
@@ -112,6 +114,11 @@ impl<'a> ToString for Text<'a> {
             Text::HighAffinity => "High affinity".into(),
             Text::UserSpeaks(user) => format!("{} speaks", user),
             Text::Loading => "Loading...".into(),
+            Text::EmailVerifySubject => "Verify Email Address for DevAndDev".into(),
+            Text::EmailVerifyBodyMarkdown(url) => format!("Thanks for registering for an account on *DevAndDev*!\n\n\
+                                                           Before we get started, we just need to confirm that this is you.\n\n\
+                                                           Click below to verify your email address:\n\n\
+                                                           {}", url),
         }
     }
 }

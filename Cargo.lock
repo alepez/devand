@@ -621,6 +621,7 @@ dependencies = [
  "comrak",
  "devand-crypto",
  "devand-db",
+ "devand-text",
  "dotenv",
  "env_logger",
  "jsonrpc-core",
