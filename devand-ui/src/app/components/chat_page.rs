@@ -161,7 +161,7 @@ impl ChatPage {
 
         html! {
             <>
-                <h1>{ Text::ChatWith(other_user.visible_name.clone()) }</h1>
+                <h1>{ Text::ChatWith(&other_user.visible_name) }</h1>
                 {
                 if unverified_email {
                     view_unverified_email()

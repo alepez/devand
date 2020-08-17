@@ -1,4 +1,5 @@
 use devand_core::{Language, LanguagePreference, Priority};
+use devand_text::Text;
 use std::str::FromStr;
 use strum::IntoEnumIterator;
 use yew::callback::Callback;
@@ -91,7 +92,7 @@ impl AddLanguageComponent {
         let disabled = self.state.language.is_none();
         html! {
             <div class="pure-controls">
-                <button class="pure-button" disabled=disabled onclick=self.on_add()>{ "Add" }</button>
+                <button class="pure-button" disabled=disabled onclick=self.on_add()>{ Text::Add }</button>
             </div>
         }
     }

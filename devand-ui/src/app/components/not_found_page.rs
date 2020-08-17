@@ -1,3 +1,4 @@
+use devand_text::Text;
 use yew::{prelude::*, Properties};
 use yewtil::NeqAssign;
 
@@ -28,9 +29,9 @@ impl Component for NotFoundPage {
 
     fn view(&self) -> Html {
         if let Some(missed_route) = &self.props.missed_route {
-            html! { <h1>{ format!("Page {} not found", missed_route) }</h1> }
+            html! { <h1>{ Text::PageNotFound(missed_route)}</h1> }
         } else {
-            html! { <h1>{ "Page not found" }</h1> }
+            html! { <h1>{ Text::UnknownPageNotFound }</h1> }
         }
     }
 }
