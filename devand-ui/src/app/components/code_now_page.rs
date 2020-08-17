@@ -1,5 +1,5 @@
 use crate::app::components::affinities_table::view_affinities_table;
-use crate::app::components::common::BusyIndicator;
+use crate::app::components::common::{Alert, BusyIndicator};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::CodeNow;
@@ -95,16 +95,10 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
     affinities.sort_unstable_by_key(|x| x.affinity);
 
     if affinities.is_empty() {
-        let warning = if total_online_users_count > 0 {
-            html! { <> { "Sorry, no matching online users found. You can try to " } <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor> </> }
+        if total_online_users_count > 0 {
+            html! { <Alert> { "Sorry, no matching online users found. You can try to " } <RouterAnchor route=AppRoute::Settings >{ "extend your languages selection." }</RouterAnchor> </Alert> }
         } else {
-            html! { <> { "Sorry, there are no online users now. You can try later or " } <RouterAnchor route=AppRoute::Affinities >{ "contact any of best matching users." }</RouterAnchor> </> }
-        };
-
-        html! {
-            <div class=("alert", "alert-warning")>
-                { warning }
-            </div>
+            html! { <Alert> { "Sorry, there are no online users now. You can try later or " } <RouterAnchor route=AppRoute::Affinities >{ "contact any of best matching users." }</RouterAnchor> </Alert> }
         }
     } else {
         html! {

@@ -1,6 +1,4 @@
-use crate::app::components::common::BusyIndicator;
-use crate::app::components::AddLanguageComponent;
-use crate::app::components::EditableLanguageTag;
+use crate::app::components::{AddLanguageComponent, Alert, BusyIndicator, EditableLanguageTag};
 use devand_core::{
     Availability, Language, LanguagePreference, Languages, SpokenLanguage, SpokenLanguages, User,
 };
@@ -163,9 +161,9 @@ impl SettingsPage {
             }
         } else if !user.email_verified && self.props.verifying_email {
             html! {
-                <span class=("pure-form-message-inline", "alert", "alert-success")>
+                <Alert class="pure-form-message-inline">
                     { "Check your email for a link to verify your email address. If it doesn’t appear within a few minutes, check your spam folder." }
-                </span>
+                </Alert>
             }
         } else {
             html! {}
@@ -290,19 +288,11 @@ impl SettingsPage {
 }
 
 fn view_no_priority_warning() -> Html {
-    html! {
-    <div class=("alert", "alert-warning")>
-        { "Please, select at least one language with Low or High priority" }
-    </div>
-    }
+    html! { <Alert>{ "Please, select at least one language with Low or High priority" }</Alert> }
 }
 
 fn view_no_spoken_language_warning() -> Html {
-    html! {
-    <div class=("alert", "alert-warning")>
-        { "Please, select at least one spoken language" }
-    </div>
-    }
+    html! { <Alert>{ "Please, select at least one spoken language" }</Alert> }
 }
 
 fn at_least_one_language_with_priority(languages: &Languages) -> bool {

@@ -1,5 +1,4 @@
-use yew::virtual_dom::VNode;
-use yew::{html, Properties};
+use yew::prelude::*;
 use yewtil::{Pure, PureComponent};
 
 pub type CountTag = Pure<PureCountTag>;
@@ -10,7 +9,7 @@ pub struct PureCountTag {
 }
 
 impl PureComponent for PureCountTag {
-    fn render(&self) -> VNode {
+    fn render(&self) -> Html {
         if self.count > 0 {
             html! { <span class="devand-count-tag">{ self.count }</span> }
         } else {

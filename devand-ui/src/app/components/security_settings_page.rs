@@ -1,3 +1,4 @@
+use crate::app::components::{Alert, AlertLevel};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use yew::prelude::*;
 
@@ -165,7 +166,7 @@ impl Component for SecuritySettingsPage {
                 { view_alert(password_changed_alert) }
                 {
                     if let Some(msg) = &self.state.generic_alert {
-                        html!{ <div class=("alert", "alert-danger")>{ msg }</div> }
+                        html!{ <Alert>{ msg }</Alert> }
                     } else {
                         html!{}
                     }
@@ -213,8 +214,8 @@ fn check_old_password(
 
 fn view_alert(msg: Result<&str, &str>) -> Html {
     match msg {
-        Ok(msg) if !msg.is_empty() => html! { <div class=("alert", "alert-success")>{ msg }</div> },
-        Err(msg) if !msg.is_empty() => html! { <div class=("alert", "alert-danger")>{ msg }</div> },
+        Ok(msg) if !msg.is_empty() => html! { <Alert level=AlertLevel::Success>{ msg }</Alert> },
+        Err(msg) if !msg.is_empty() => html! { <Alert level=AlertLevel::Warning>{ msg }</Alert> },
         _ => html! {},
     }
 }
