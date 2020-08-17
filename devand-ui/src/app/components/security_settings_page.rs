@@ -1,5 +1,6 @@
 use crate::app::components::{Alert, AlertLevel};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
+use devand_text::Text;
 use yew::prelude::*;
 
 pub struct SecuritySettingsPage {
@@ -107,12 +108,6 @@ impl Component for SecuritySettingsPage {
         let new_password_alert =
             check_new_password(&self.state.new_password, &self.state.repeat_new_password);
 
-        let password_changed_alert = match self.state.password_changed {
-            Some(true) => Ok("Password changed successfully."),
-            Some(false) => Err("An error occurred while changing password. Please, retry."),
-            None => Ok(""),
-        };
-
         let submit_enabled = old_password_alert.is_ok()
             && new_password_alert.is_ok()
             && !self.state.old_password.is_empty()
@@ -120,13 +115,13 @@ impl Component for SecuritySettingsPage {
 
         html! {
         <>
-        <h1>{ "Security" }</h1>
+        <h1>{ Text::Security }</h1>
         <div class="pure-form pure-form-stacked">
             <fieldset>
-                <legend>{ "Password" }</legend>
+                <legend>{ Text::Password }</legend>
 
                 <div class="pure-control-group">
-                    <label for="old_password">{ "Old password:" }</label>
+                    <label for="old_password">{ Text::OldPassword }</label>
                     <input
                         type="password"
                         name="old_password"
@@ -136,7 +131,7 @@ impl Component for SecuritySettingsPage {
                 </div>
 
                 <div class="pure-control-group">
-                    <label for="new_password">{ "New password:" }</label>
+                    <label for="new_password">{ Text::NewPassword }</label>
                     <input
                         type="password"
                         name="new_password"
@@ -145,7 +140,7 @@ impl Component for SecuritySettingsPage {
                 </div>
 
                 <div class="pure-control-group">
-                    <label for="repeat_new_password">{ "Repeat new password:" }</label>
+                    <label for="repeat_new_password">{ Text::RepeatNewPassword }</label>
                     <input
                         type="password"
                         name="repeat_new_password"
@@ -163,7 +158,8 @@ impl Component for SecuritySettingsPage {
                     { "Change password" }
                 </button>
 
-                { view_alert(password_changed_alert) }
+                { view_password_changed_alert(&self.state.password_changed) }
+
                 {
                     if let Some(msg) = &self.state.generic_alert {
                         html!{ <Alert>{ msg }</Alert> }
@@ -216,6 +212,16 @@ fn view_alert(msg: Result<&str, &str>) -> Html {
     match msg {
         Ok(msg) if !msg.is_empty() => html! { <Alert level=AlertLevel::Success>{ msg }</Alert> },
         Err(msg) if !msg.is_empty() => html! { <Alert level=AlertLevel::Warning>{ msg }</Alert> },
+        _ => html! {},
+    }
+}
+
+fn view_password_changed_alert(password_changed: &Option<bool>) -> Html {
+    use AlertLevel::*;
+
+    match *password_changed {
+        Some(true) => html! { <Alert level=Success>{ Text::PasswordChanged }</Alert> },
+        Some(false) => html! { <Alert level=Danger>{ Text::PasswordChangeError }</Alert> },
         _ => html! {},
     }
 }
