@@ -1,8 +1,7 @@
 use crate::app::components::{AddLanguageComponent, Alert, BusyIndicator, EditableLanguageTag};
-use devand_core::{
-    Availability, Language, LanguagePreference, Languages, SpokenLanguage, SpokenLanguages, User,
-};
-use yew::{prelude::*, Properties};
+use devand_core::*;
+use devand_text::Text;
+use yew::prelude::*;
 
 use crate::app::components::AvailabilityTable;
 
@@ -105,7 +104,7 @@ impl Component for SettingsPage {
     fn view(&self) -> Html {
         html! {
             <div class="dashboard pure-g">
-                <h1 class="pure-u-1">{ "Settings" }</h1>
+                <h1 class="pure-u-1">{ Text::Settings }</h1>
                 {
                 if let Some(user) = &self.props.user {
                     self.view_settings_panel(user)
@@ -121,7 +120,7 @@ impl Component for SettingsPage {
 fn view_vacation_mode_panel() -> Html {
     html! {
         <fieldset class="pure-u-1">
-            <legend>{ "You are currently in vacation mode" }</legend>
+            <legend>{ Text::VacationModeEnabled }</legend>
         </fieldset>
     }
 }
@@ -156,13 +155,13 @@ impl SettingsPage {
                         onclick=self.link.callback(|_| Msg::VerifyAddress)
                         >{ "Verify" }
                     </button>
-                    { " This address is not verified." }
+                    { Text::AddressUnverified }
                 </span>
             }
         } else if !user.email_verified && self.props.verifying_email {
             html! {
                 <Alert class="pure-form-message-inline">
-                    { "Check your email for a link to verify your email address. If it doesn’t appear within a few minutes, check your spam folder." }
+                    { Text::CheckEmailForLink }
                 </Alert>
             }
         } else {
@@ -177,7 +176,7 @@ impl SettingsPage {
                 <div class="pure-control-group">
                     <label for="username">{ "Username:" }</label>
                     <input type="text" name="username" id="username" class="pure-input-1" value=&user.username readonly=true />
-                    <span class="pure-form-message-inline">{ "Username cannot be changed" }</span>
+                    <span class="pure-form-message-inline">{ Text::UsernameCannotBeChanged }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
@@ -185,16 +184,16 @@ impl SettingsPage {
                     { self.view_verify_email_button(user) }
                 </div>
                 <div class="pure-control-group">
-                    <label for="visible_name">{ "Visible name:" }</label>
+                    <label for="visible_name">{ Text::VisibleName }</label>
                     <input type="text" name="visible_name" id="visible_name" class="pure-input-1" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
                 </div>
                 <div class="pure-control-group">
-                    <label for="bio">{ "Bio:" }</label>
+                    <label for="bio">{ Text::Bio }</label>
                     <textarea name="bio" class="pure-input-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
-                    <span class="pure-form-message-inline">{ "(max 160 characters)" }</span>
+                    <span class="pure-form-message-inline">{ Text::MaxNCharacters(160) }</span>
                 </div>
                 <div class="pure-control-group">
-                    <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ " Vacation mode" }</label>
+                    <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ Text::VacationMode }</label>
                 </div>
             </fieldset>
         }
@@ -210,7 +209,7 @@ impl SettingsPage {
         html! {
             <fieldset class="pure-u-1">
                 <div class="pure-g">
-                    <legend class="pure-u-1">{ "Languages" }</legend>
+                    <legend class="pure-u-1">{ Text::Languages }</legend>
                     <div class="pure-u-1">
                     {
                         if !at_least_one_language_with_priority(languages) {
@@ -254,7 +253,7 @@ impl SettingsPage {
         html! {
             <fieldset>
                 <div class="pure-g">
-                    <legend class="pure-u-1">{ "Spoken Languages" }</legend>
+                    <legend class="pure-u-1">{ Text::SpokenLanguages }</legend>
                     <div class="pure-u-1">
                     {
                         if spoken_languages.0.is_empty() {
@@ -288,11 +287,11 @@ impl SettingsPage {
 }
 
 fn view_no_priority_warning() -> Html {
-    html! { <Alert>{ "Please, select at least one language with Low or High priority" }</Alert> }
+    html! { <Alert>{ Text::SelectOneLanguage }</Alert> }
 }
 
 fn view_no_spoken_language_warning() -> Html {
-    html! { <Alert>{ "Please, select at least one spoken language" }</Alert> }
+    html! { <Alert>{ Text::SelectOneSpokenLanguage }</Alert> }
 }
 
 fn at_least_one_language_with_priority(languages: &Languages) -> bool {
@@ -304,7 +303,6 @@ fn at_least_one_language_with_priority(languages: &Languages) -> bool {
 #[cfg(test)]
 mod test {
     use super::*;
-    use devand_core::*;
 
     #[test]
     fn no_language_no_one_with_priority() {
