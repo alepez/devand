@@ -678,6 +678,7 @@ dependencies = [
  "devand-crypto",
  "devand-db",
  "devand-mailer",
+ "devand-text",
  "dotenv",
  "env_logger",
  "log 0.4.11",
