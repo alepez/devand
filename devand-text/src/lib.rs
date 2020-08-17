@@ -51,6 +51,8 @@ pub enum Text<'a> {
     LowAffinity,
     MediumAffinity,
     HighAffinity,
+    UserSpeaks(&'a str),
+    Loading,
 }
 
 impl<'a> ToString for Text<'a> {
@@ -108,6 +110,8 @@ impl<'a> ToString for Text<'a> {
             Text::LowAffinity => "Low affinity".into(),
             Text::MediumAffinity => "Medium affinity".into(),
             Text::HighAffinity => "High affinity".into(),
+            Text::UserSpeaks(user) => format!("{} speaks", user),
+            Text::Loading => "Loading...".into(),
         }
     }
 }
