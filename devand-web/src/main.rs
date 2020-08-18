@@ -112,7 +112,7 @@ fn not_found() -> Template {
 fn ignite() -> rocket::Rocket {
     dotenv::dotenv().ok();
 
-    let secret = std::env::var("DEVAND_SECRET").unwrap();
+    let secret = std::env::var("DEVAND_SECRET").expect("env var DEVAND_SECRET to be present");
     let secret = secret.as_bytes();
 
     rocket::ignite()
