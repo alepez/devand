@@ -109,8 +109,7 @@ fn not_found() -> Template {
     Template::render("error", &context)
 }
 
-fn main() {
-    env_logger::init();
+fn ignite() -> rocket::Rocket {
     dotenv::dotenv().ok();
 
     let secret = std::env::var("DEVAND_SECRET").unwrap();
@@ -130,5 +129,25 @@ fn main() {
         .mount("/", pages::routes())
         .mount("/api", api::routes())
         .register(catchers![not_found, unauthorized])
-        .launch();
+}
+
+fn main() {
+    env_logger::init();
+    ignite().launch();
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    // use super::super::rocket;
+    use rocket::http::Status;
+    use rocket::local::Client;
+
+    #[test]
+    fn index() {
+        let r = ignite();
+        let client = Client::new(r).expect("valid rocket instance");
+        let response = client.get("/").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+    }
 }
