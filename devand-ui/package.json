@@ -3,7 +3,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack --mode development",
-    "build": "webpack --mode production",
+    "build": "CARGO_PROFILE_RELEASE_LTO=true CARGO_PROFILE_RELEASE_OPT_LEVEL=z CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 CARGO_PROFILE_RELEASE_PANIC=abort webpack --mode production",
     "start:dev": "webpack-dev-server --mode development"
   },
   "devDependencies": {
