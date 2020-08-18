@@ -50,6 +50,8 @@ jobs:
           sudo -u postgres createdb devand
           sudo service postgresql restart && sleep 3
           echo '::set-env name=DATABASE_URL::postgres://postgres:postgres@localhost/devand'
+          echo '::set-env name=DEVAND_SECRET=just_a_secret_for_testing'
+          echo '::set-env name=ROCKET_DATABASES={ pg_devand = { url = "postgres://postgres:postgres@localhost:5432/devand" } }'
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
