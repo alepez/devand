@@ -49,11 +49,14 @@ jobs:
           sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
           sudo -u postgres createdb devand
           sudo service postgresql restart && sleep 3
-          echo '::set-env name=DATABASE_URL::postgres://postgres:postgres@localhost/devand'
-          echo '::set-env name=DEVAND_SECRET::just_a_secret_for_testing'
-          echo '::set-env name=ROCKET_DATABASES::{ pg_devand = { url = "postgres://postgres:postgres@localhost:5432/devand" } }'
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
+        env:
+          RUST_BACKTRACE: full
+          DATABASE_URL: 'postgres://postgres:postgres@localhost/devand'
+          DEVAND_SECRET: 'just_a_secret_for_testing'
+          ROCKET_DATABASES: '{ pg_devand = { url = "postgres://postgres:postgres@localhost:5432/devand" } }'
+          DEVAND_MAILER_SERVER_URL: 'http://127.0.0.1:3030'
         with:
           version: '0.13.3'
           args: -- -Z unstable-options --test-threads=1 --include-ignored

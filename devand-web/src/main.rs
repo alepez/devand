@@ -62,7 +62,8 @@ fn init_wsmc(rocket: Rocket) -> Result<Rocket, Rocket> {
 
 fn create_mailer() -> Mailer {
     let conf = devand_mailer::ClientConf {
-        url: std::env::var("DEVAND_MAILER_SERVER_URL").unwrap(),
+        url: std::env::var("DEVAND_MAILER_SERVER_URL")
+            .expect("DEVAND_MAILER_SERVER_URL env var to be present"),
     };
 
     Mailer::new(conf)
