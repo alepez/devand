@@ -9,7 +9,3 @@ members = [
   "devand-ui",
   "devand-web",
 ]
-
-[profile.release]
-lto = true
-opt-level = 'z'
