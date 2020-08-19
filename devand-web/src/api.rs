@@ -327,3 +327,34 @@ fn parse_members(s: &str) -> Vec<UserId> {
         .map(UserId)
         .collect()
 }
+
+#[cfg(test)]
+mod test {
+    use super::super::ignite;
+    use super::*;
+    use rocket::http::Status;
+    use rocket::local::Client;
+
+    #[test]
+    fn parse_members_ok() {
+        let members = parse_members("5-72");
+        assert_eq!(
+            members,
+            vec![devand_core::UserId(5), devand_core::UserId(72)]
+        );
+    }
+
+    fn make_client() -> rocket::local::Client {
+        Client::new(ignite()).expect("valid rocket instance")
+    }
+
+    #[test]
+    #[ignore]
+    fn anonimous_get_user_unauthorized() {
+        let client = make_client();
+        let response = client.get("/api/user").dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+    }
+
+    // TODO Test other APIs
+}
