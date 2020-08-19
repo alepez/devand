@@ -140,15 +140,42 @@ fn main() {
 #[cfg(test)]
 mod test {
     use super::*;
-    // use super::super::rocket;
     use rocket::http::Status;
     use rocket::local::Client;
 
+    fn make_client() -> rocket::local::Client {
+        Client::new(ignite()).expect("valid rocket instance")
+    }
+
     #[test]
-    fn index() {
-        let r = ignite();
-        let client = Client::new(r).expect("valid rocket instance");
+    #[ignore]
+    fn index_ok() {
+        let client = make_client();
         let response = client.get("/").dispatch();
         assert_eq!(response.status(), Status::Ok);
+    }
+
+    #[test]
+    #[ignore]
+    fn login_see_other() {
+        let client = make_client();
+        let response = client.get("/login").dispatch();
+        assert_eq!(response.status(), Status::SeeOther);
+    }
+
+    #[test]
+    #[ignore]
+    fn login_return_to_index() {
+        let client = make_client();
+        let response = client.get("/login/%2F").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+    }
+
+    #[test]
+    #[ignore]
+    fn dashboard_unauthorized() {
+        let client = make_client();
+        let response = client.get("/dashboard").dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
     }
 }
