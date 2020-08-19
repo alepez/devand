@@ -532,12 +532,109 @@ fn log_fail(ip_addr: std::net::IpAddr) {
 
 #[cfg(test)]
 mod test {
+    use super::super::ignite;
     use super::*;
+    use rocket::http::Status;
+    use rocket::local::Client;
     use std::net::IpAddr;
     use std::net::Ipv4Addr;
 
     #[test]
     fn log_fail_has_expected_format() {
         assert!(format_fail(IpAddr::V4(Ipv4Addr::new(1, 2, 3, 4))) == "Fail: IpAddr(1.2.3.4)");
+    }
+
+    fn make_client() -> rocket::local::Client {
+        Client::new(ignite()).expect("valid rocket instance")
+    }
+
+    #[test]
+    #[ignore]
+    fn index_ok() {
+        let client = make_client();
+        let response = client.get("/").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn login_see_other() {
+        let client = make_client();
+        let response = client.get("/login").dispatch();
+        assert_eq!(response.status(), Status::SeeOther);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn login_return_to_index() {
+        let client = make_client();
+        let response = client.get("/login/%2F").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn dashboard_unauthorized() {
+        let client = make_client();
+        let response = client.get("/dashboard").dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn password_reset_ok() {
+        let client = make_client();
+        let response = client.get("/password_reset").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn join_ok() {
+        let client = make_client();
+        let response = client.get("/join").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn join_captcha_ok() {
+        let client = make_client();
+        let response = client.get("/join/captcha.png").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn privacy_ok() {
+        let client = make_client();
+        let response = client.get("/privacy").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn code_of_conduct_ok() {
+        let client = make_client();
+        let response = client.get("/code-of-conduct").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn help_ok() {
+        let client = make_client();
+        let response = client.get("/help").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
     }
 }
