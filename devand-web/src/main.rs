@@ -153,6 +153,7 @@ mod test {
         let client = make_client();
         let response = client.get("/").dispatch();
         assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
     }
 
     #[test]
@@ -161,6 +162,7 @@ mod test {
         let client = make_client();
         let response = client.get("/login").dispatch();
         assert_eq!(response.status(), Status::SeeOther);
+        // TODO assert body with approval tests
     }
 
     #[test]
@@ -169,6 +171,7 @@ mod test {
         let client = make_client();
         let response = client.get("/login/%2F").dispatch();
         assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
     }
 
     #[test]
@@ -177,5 +180,60 @@ mod test {
         let client = make_client();
         let response = client.get("/dashboard").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn password_reset_ok() {
+        let client = make_client();
+        let response = client.get("/password_reset").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn join_ok() {
+        let client = make_client();
+        let response = client.get("/join").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn join_captcha_ok() {
+        let client = make_client();
+        let response = client.get("/join/captcha.png").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn privacy_ok() {
+        let client = make_client();
+        let response = client.get("/privacy").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn code_of_conduct_ok() {
+        let client = make_client();
+        let response = client.get("/code-of-conduct").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
+    }
+
+    #[test]
+    #[ignore]
+    fn help_ok() {
+        let client = make_client();
+        let response = client.get("/help").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        // TODO assert body with approval tests
     }
 }
