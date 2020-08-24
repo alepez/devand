@@ -1,6 +1,8 @@
 use super::{MainWorker, Request, Response};
+use chrono::offset::TimeZone;
 use devand_core::*;
 use fake::faker::internet::raw::*;
+use fake::faker::lorem::en::*;
 use fake::faker::name::raw::*;
 use fake::locales::*;
 use fake::Fake;
@@ -37,13 +39,13 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
 
         Request::LoadPublicUserProfile(user_id) => {
             link.send_message(Response::PublicUserProfileFetched(Box::new(
-                fake_public_profile(),
+                fake_public_profile(&mut rng),
             )));
         }
 
         Request::LoadPublicUserProfileByUsername(username) => {
             link.send_message(Response::PublicUserProfileFetched(Box::new(
-                fake_public_profile(),
+                fake_public_profile(&mut rng),
             )));
         }
 
@@ -64,15 +66,34 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
         }
 
         Request::ChatSendMessage(members, txt) => {
-            link.send_message(Response::ChatNewMessagesLoaded(fake_messages()));
+            let t: i64 = 1592475298;
+            let new_message = chat::ChatMessage {
+                id: fake_uuid(&mut rng),
+                created_at: chrono::Utc.timestamp(t, 0),
+                author: members[0],
+                txt,
+            };
+            link.send_message(Response::ChatNewMessagesLoaded(vec![new_message]));
         }
 
         Request::ChatPoll(members, from_created_at) => {
-            link.send_message(Response::ChatNewMessagesLoaded(fake_messages()));
+            let t = 1 + from_created_at.map(|x| x.timestamp()).unwrap_or(1592475298);
+            let seed = t as u64;
+            let mut rng = StdRng::seed_from_u64(seed);
+            let author = members[1];
+
+            let msg = chat::ChatMessage {
+                id: fake_uuid(&mut rng),
+                created_at: chrono::Utc.timestamp(t, 0),
+                author,
+                txt: Sentence(1..30).fake_with_rng(&mut rng),
+            };
+
+            link.send_message(Response::ChatNewMessagesLoaded(vec![msg]));
         }
 
         Request::ChatLoadHistory(members) => {
-            link.send_message(Response::ChatHistoryLoaded(fake_chat_info()));
+            link.send_message(Response::ChatHistoryLoaded(fake_chat_info(&mut rng)));
         }
 
         Request::LoadAllChats => {
@@ -84,7 +105,7 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
     }
 }
 
-fn fake_user(rng: &mut StdRng) -> devand_core::User {
+fn fake_user(rng: &mut StdRng) -> User {
     let name: String = Name(EN).fake_with_rng(rng);
     let user_id: i32 = rng.gen_range(1, 1_000_000_000);
 
@@ -111,11 +132,11 @@ fn fake_user(rng: &mut StdRng) -> devand_core::User {
         email,
         email_verified,
         visible_name: name,
-        settings: devand_core::UserSettings {
+        settings: UserSettings {
             languages: Languages(languages),
             schedule: Availability::default(),
             vacation_mode: false,
-            spoken_languages: SpokenLanguages(btreeset![devand_core::SpokenLanguage::English]),
+            spoken_languages: SpokenLanguages(btreeset![SpokenLanguage::English]),
         },
         unread_messages: 5,
         bio: "This is the bio".to_string(),
@@ -138,26 +159,77 @@ fn fake_code_now(rng: &mut StdRng) -> CodeNow {
     }
 }
 
-fn fake_public_profile() -> devand_core::PublicUserProfile {
+fn fake_public_profile(rng: &mut StdRng) -> PublicUserProfile {
+    let user = fake_user(rng);
+    user.into()
+}
+
+fn fake_affinities() -> Vec<UserAffinity> {
     todo!()
 }
 
-fn fake_affinities() -> Vec<devand_core::UserAffinity> {
+fn fake_matches() -> schedule_matcher::AvailabilityMatch {
     todo!()
 }
 
-fn fake_matches() -> devand_core::schedule_matcher::AvailabilityMatch {
+fn fake_message(rng: &mut StdRng, author: UserId) -> chat::ChatMessage {
+    let t: i64 = 1592475298;
+
+    chat::ChatMessage {
+        id: fake_uuid(rng),
+        created_at: chrono::Utc.timestamp(t, 0),
+        author,
+        txt: Sentence(1..30).fake_with_rng(rng),
+    }
+}
+
+fn fake_messages(rng: &mut StdRng, n: usize, me: UserId, other: UserId) -> Vec<chat::ChatMessage> {
+    let mut history = Vec::new();
+    let mut t: i64 = 1592475298;
+
+    for _ in 0..n {
+        let t_diff: i64 = rng.gen_range(0, 5000);
+        let from_me: bool = rng.gen();
+        t += t_diff;
+
+        history.push(chat::ChatMessage {
+            id: fake_uuid(rng),
+            created_at: chrono::Utc.timestamp(t, 0),
+            author: if from_me { me } else { other },
+            txt: Sentence(1..30).fake_with_rng(rng),
+        });
+    }
+
+    history
+}
+
+fn fake_chat_info(rng: &mut StdRng) -> chat::ChatInfo {
+    let me = fake_user(rng);
+    let other = fake_user(rng);
+
+    let members = vec![me.clone(), other.clone()];
+
+    let members_info = members
+        .iter()
+        .map(|user| chat::ChatMemberInfo {
+            user_id: user.id,
+            verified_email: user.email_verified,
+        })
+        .collect();
+
+    let messages = fake_messages(rng, 10, me.id, other.id);
+
+    chat::ChatInfo {
+        members_info,
+        messages,
+    }
+}
+
+fn fake_chats() -> UserChats {
     todo!()
 }
 
-fn fake_messages() -> Vec<devand_core::chat::ChatMessage> {
-    todo!()
-}
-
-fn fake_chat_info() -> devand_core::chat::ChatInfo {
-    todo!()
-}
-
-fn fake_chats() -> devand_core::UserChats {
-    todo!()
+fn fake_uuid(rng: &mut StdRng) -> uuid::Uuid {
+    let bytes: [u8; 16] = rng.gen();
+    uuid::Uuid::from_bytes(&bytes).unwrap()
 }
