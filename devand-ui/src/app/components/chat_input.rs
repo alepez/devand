@@ -41,8 +41,10 @@ impl Component for ChatInput {
             Msg::Keydown(e) => {
                 if e.key_code() == 13 {
                     let txt = self.state.txt.clone();
-                    self.state.txt.clear();
-                    self.props.on_return.emit(txt);
+                    if !self.state.txt.is_empty() {
+                        self.state.txt.clear();
+                        self.props.on_return.emit(txt);
+                    }
                 }
                 true
             }
