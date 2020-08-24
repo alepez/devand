@@ -136,4 +136,3 @@ fn main() {
     env_logger::init();
     ignite().launch();
 }
-
