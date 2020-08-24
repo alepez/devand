@@ -331,8 +331,9 @@ fn parse_members(s: &str) -> Vec<UserId> {
 #[cfg(test)]
 mod test {
     use super::super::ignite;
+    use super::super::PgDevandConn;
     use super::*;
-    use rocket::http::Status;
+    use rocket::http::{ContentType, Header, Status};
     use rocket::local::Client;
 
     #[test]
@@ -348,12 +349,51 @@ mod test {
         Client::new(ignite()).expect("valid rocket instance")
     }
 
+    fn join_user(rocket: &rocket::Rocket) {
+        let conn = PgDevandConn::get_one(rocket).unwrap();
+        let join_data = devand_db::auth::JoinData {
+            username: "user1".into(),
+            email: "user1@devand.dev".into(),
+            password: "qwertyuiop1".into(),
+        };
+        // Result is ignored (an error should be generated if already exist,
+        // but it's expected to exist if database is not reset)
+        devand_db::auth::join(join_data, &conn).ok();
+    }
+
+    fn make_authenticated_client() -> rocket::local::Client {
+        let client = make_client();
+        join_user(client.rocket());
+
+        let response = client
+            .post("/login/%2F")
+            .body("username=user1&password=qwertyuiop1")
+            // login needs X-Real-IP (or address from socket) to be set
+            .header(Header::new("X-Real-IP", "8.8.8.8"))
+            .header(ContentType::Form)
+            .mut_dispatch();
+
+        assert_eq!(response.status(), Status::SeeOther);
+
+        // A `Client` constructed using `new()` propagates cookie changes made
+        // by responses to previously dispatched requests.
+        make_client()
+    }
+
     #[test]
     #[ignore]
     fn anonimous_get_user_unauthorized() {
         let client = make_client();
         let response = client.get("/api/user").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
+    }
+
+    #[test]
+    #[ignore]
+    fn authenticated_get_user_authorized() {
+        let client = make_authenticated_client();
+        let response = client.get("/api/user").dispatch();
+        // FIXME assert_eq!(response.status(), Status::Ok);
     }
 
     // TODO Test other APIs

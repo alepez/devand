@@ -15,7 +15,7 @@ const LOGIN_COOKIE_KEY: &str = "login";
 const JOIN_COOKIE_KEY: &str = "join";
 const JOIN_CAPTCHA_COOKIE_KEY: &str = "join_captcha";
 
-#[derive(FromForm)]
+#[derive(FromForm, Debug)]
 pub struct Credentials {
     username: String,
     password: String,
