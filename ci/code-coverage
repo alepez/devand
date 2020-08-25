@@ -5,5 +5,4 @@ cargo tarpaulin \
   -o Html \
   -- \
     -Z unstable-options \
-    --test-threads=1 \
     --include-ignored

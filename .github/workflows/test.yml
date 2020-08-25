@@ -59,7 +59,7 @@ jobs:
           DEVAND_MAILER_SERVER_URL: 'http://127.0.0.1:3030'
         with:
           version: '0.13.3'
-          args: -- -Z unstable-options --test-threads=1 --include-ignored
+          args: -- -Z unstable-options --include-ignored
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1.0.2
         with:

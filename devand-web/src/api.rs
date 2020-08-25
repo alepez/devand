@@ -331,9 +331,11 @@ fn parse_members(s: &str) -> Vec<UserId> {
 #[cfg(test)]
 mod test {
     use super::super::ignite;
+    use super::super::PgDevandConn;
     use super::*;
-    use rocket::http::Status;
+    use rocket::http::{ContentType, Status};
     use rocket::local::Client;
+    use serial_test::serial;
 
     #[test]
     fn parse_members_ok() {
@@ -345,15 +347,56 @@ mod test {
     }
 
     fn make_client() -> rocket::local::Client {
-        Client::new(ignite()).expect("valid rocket instance")
+        Client::new(ignite()).unwrap()
+    }
+
+    fn join_user(rocket: &rocket::Rocket, username: String, password: String) {
+        let conn = PgDevandConn::get_one(rocket).unwrap();
+        let join_data = devand_db::auth::JoinData {
+            username,
+            email: "user1@devand.dev".into(),
+            password,
+        };
+        // Result is ignored (an error should be generated if already exist,
+        // but it's expected to exist if database is not reset)
+        devand_db::auth::join(join_data, &conn).ok();
+    }
+
+    fn make_authenticated_client() -> rocket::local::Client {
+        let client = make_client();
+        let username = "user1";
+        let password = "qwertyuiop1";
+        join_user(client.rocket(), username.to_string(), password.to_string());
+
+        {
+            let response = client
+                .post("/login/%2F")
+                .body(format!("username={}&password={}", username, password))
+                .header(ContentType::Form)
+                .dispatch();
+
+            assert_eq!(response.status(), Status::SeeOther);
+        }
+
+        client
     }
 
     #[test]
     #[ignore]
-    fn anonimous_get_user_unauthorized() {
+    #[serial]
+    fn anonimous_is_unauthorized_to_get_api_user() {
         let client = make_client();
         let response = client.get("/api/user").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
+    }
+
+    #[test]
+    #[ignore]
+    #[serial]
+    fn authenticated_can_get_api_user() {
+        let client = make_authenticated_client();
+        let response = client.get("/api/user").dispatch();
+        assert_eq!(response.status(), Status::Ok);
     }
 
     // TODO Test other APIs

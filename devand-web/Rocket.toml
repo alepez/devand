@@ -1,2 +1,2 @@
 [development.databases]
-pg_devand = { url = "postgres://postgres:password@localhost/devand" }
+pg_devand = { url = "postgres://postgres:postgres@localhost/devand" }
