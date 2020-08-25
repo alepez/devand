@@ -333,7 +333,7 @@ mod test {
     use super::super::ignite;
     use super::super::PgDevandConn;
     use super::*;
-    use rocket::http::{ContentType, Header, Status};
+    use rocket::http::{ContentType, Status};
     use rocket::local::Client;
 
     #[test]
@@ -346,15 +346,15 @@ mod test {
     }
 
     fn make_client() -> rocket::local::Client {
-        Client::new(ignite()).expect("valid rocket instance")
+        Client::new(ignite()).unwrap()
     }
 
-    fn join_user(rocket: &rocket::Rocket) {
+    fn join_user(rocket: &rocket::Rocket, username: String, password: String) {
         let conn = PgDevandConn::get_one(rocket).unwrap();
         let join_data = devand_db::auth::JoinData {
-            username: "user1".into(),
+            username,
             email: "user1@devand.dev".into(),
-            password: "qwertyuiop1".into(),
+            password,
         };
         // Result is ignored (an error should be generated if already exist,
         // but it's expected to exist if database is not reset)
@@ -363,26 +363,26 @@ mod test {
 
     fn make_authenticated_client() -> rocket::local::Client {
         let client = make_client();
-        join_user(client.rocket());
+        let username = "user1";
+        let password = "qwertyuiop1";
+        join_user(client.rocket(), username.to_string(), password.to_string());
 
-        let response = client
-            .post("/login/%2F")
-            .body("username=user1&password=qwertyuiop1")
-            // login needs X-Real-IP (or address from socket) to be set
-            .header(Header::new("X-Real-IP", "8.8.8.8"))
-            .header(ContentType::Form)
-            .mut_dispatch();
+        {
+            let response = client
+                .post("/login/%2F")
+                .body(format!("username={}&password={}", username, password))
+                .header(ContentType::Form)
+                .dispatch();
 
-        assert_eq!(response.status(), Status::SeeOther);
+            assert_eq!(response.status(), Status::SeeOther);
+        }
 
-        // A `Client` constructed using `new()` propagates cookie changes made
-        // by responses to previously dispatched requests.
-        make_client()
+        client
     }
 
     #[test]
     #[ignore]
-    fn anonimous_get_user_unauthorized() {
+    fn anonimous_is_unauthorized_to_get_api_user() {
         let client = make_client();
         let response = client.get("/api/user").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
@@ -390,10 +390,10 @@ mod test {
 
     #[test]
     #[ignore]
-    fn authenticated_get_user_authorized() {
+    fn authenticated_can_get_api_user() {
         let client = make_authenticated_client();
         let response = client.get("/api/user").dispatch();
-        // FIXME assert_eq!(response.status(), Status::Ok);
+        assert_eq!(response.status(), Status::Ok);
     }
 
     // TODO Test other APIs
