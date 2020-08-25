@@ -335,6 +335,7 @@ mod test {
     use super::*;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
+    use serial_test::serial;
 
     #[test]
     fn parse_members_ok() {
@@ -382,6 +383,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn anonimous_is_unauthorized_to_get_api_user() {
         let client = make_client();
         let response = client.get("/api/user").dispatch();
@@ -390,6 +392,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn authenticated_can_get_api_user() {
         let client = make_authenticated_client();
         let response = client.get("/api/user").dispatch();

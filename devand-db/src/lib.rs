@@ -473,6 +473,7 @@ pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunM
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
 
     fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
         use diesel::delete;
@@ -511,6 +512,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn join_valid_user() {
         let conn = fresh_db();
 
@@ -527,6 +529,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn username_available() {
         let conn = fresh_db();
 
@@ -540,6 +543,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn blocklist_username_unavailable() {
         let conn = fresh_db();
         assert!(!is_username_available("root", &conn));
@@ -547,6 +551,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn email_available() {
         let conn = fresh_db();
 
@@ -560,6 +565,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn load_no_users_ok() {
         let conn = fresh_db();
         let users = load_users(&conn).unwrap();
@@ -568,6 +574,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn load_single_users_ok() {
         let conn = fresh_db();
         let join_data = fake_join_data();
@@ -578,6 +585,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn load_user_ok() {
         let (conn, user) = fresh_db_with_fake_user();
 
@@ -591,6 +599,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn save_user_ok() {
         let (conn, mut user) = fresh_db_with_fake_user();
         let user_id = user.id;
@@ -608,6 +617,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn save_user_change_email_unverified() {
         let (conn, user) = fresh_db_with_fake_user();
         let user_id = user.id;
@@ -626,6 +636,7 @@ mod tests {
 
     #[test]
     #[ignore]
+    #[serial]
     fn visible_name_is_equal_to_username_when_set_to_empty() {
         let (conn, mut user) = fresh_db_with_fake_user();
         let other_visible_name = "Gne Gne";

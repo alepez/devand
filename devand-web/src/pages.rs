@@ -536,6 +536,7 @@ mod test {
     use super::*;
     use rocket::http::Status;
     use rocket::local::Client;
+    use serial_test::serial;
     use std::net::IpAddr;
     use std::net::Ipv4Addr;
 
@@ -550,6 +551,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn index_ok() {
         let client = make_client();
         let response = client.get("/").dispatch();
@@ -559,6 +561,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn login_see_other() {
         let client = make_client();
         let response = client.get("/login").dispatch();
@@ -568,6 +571,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn login_return_to_index() {
         let client = make_client();
         let response = client.get("/login/%2F").dispatch();
@@ -577,6 +581,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn dashboard_unauthorized() {
         let client = make_client();
         let response = client.get("/dashboard").dispatch();
@@ -586,6 +591,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn password_reset_ok() {
         let client = make_client();
         let response = client.get("/password_reset").dispatch();
@@ -595,6 +601,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn join_ok() {
         let client = make_client();
         let response = client.get("/join").dispatch();
@@ -604,6 +611,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn join_captcha_ok() {
         let client = make_client();
         let response = client.get("/join/captcha.png").dispatch();
@@ -613,6 +621,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn privacy_ok() {
         let client = make_client();
         let response = client.get("/privacy").dispatch();
@@ -622,6 +631,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn code_of_conduct_ok() {
         let client = make_client();
         let response = client.get("/code-of-conduct").dispatch();
@@ -631,6 +641,7 @@ mod test {
 
     #[test]
     #[ignore]
+    #[serial]
     fn help_ok() {
         let client = make_client();
         let response = client.get("/help").dispatch();
