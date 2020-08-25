@@ -15,7 +15,7 @@ const LOGIN_COOKIE_KEY: &str = "login";
 const JOIN_COOKIE_KEY: &str = "join";
 const JOIN_CAPTCHA_COOKIE_KEY: &str = "join_captcha";
 
-#[derive(FromForm, Debug)]
+#[derive(FromForm)]
 pub struct Credentials {
     username: String,
     password: String,
@@ -394,9 +394,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for RealIp {
     fn from_request(request: &'a Request<'r>) -> Outcome<RealIp, ()> {
         let real_ip_from_header = request.real_ip();
         let remote_ip_from_sock = request.remote().map(|x| x.ip());
+        // Note: fallback here is just a trick to never fail
+        let fallback = Some(std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)));
 
         real_ip_from_header
             .or(remote_ip_from_sock)
+            .or(fallback)
             .map(RealIp)
             .or_forward(())
     }
