@@ -392,6 +392,4 @@ mod test {
         assert_eq!(response.status(), Status::Ok);
         assert_snapshot!(response.body_string().unwrap());
     }
-
-    // TODO Test other APIs
 }
