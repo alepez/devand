@@ -41,3 +41,4 @@ features = [
 
 [dev-dependencies]
 serial_test = "*"
+insta = "0.16.1"
