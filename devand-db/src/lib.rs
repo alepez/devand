@@ -473,14 +473,20 @@ pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunM
     embedded_migrations::run(&*conn)
 }
 
+/// Clear table content and any auto-increment counter
+fn clear_table(table: &str, conn: &PgConnection) -> Result<(), diesel::result::Error> {
+    let q = format!("TRUNCATE TABLE {} RESTART IDENTITY;", table);
+    diesel::sql_query(q).execute(conn).map(|_| ())
+}
+
+/// Clear all tables and their auto-increment counters
 fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
-    use diesel::delete;
-    use schema::*;
-    delete(auth::table).execute(conn)?;
-    delete(chats::table).execute(conn)?;
-    delete(messages::table).execute(conn)?;
-    delete(unread_messages::table).execute(conn)?;
-    delete(users::table).execute(conn)?;
+    let tables = vec!["auth", "chats", "messages", "unread_messages", "users"];
+
+    for table in tables {
+        clear_table(table, conn)?;
+    }
+
     Ok(())
 }
 
