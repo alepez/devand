@@ -136,3 +136,26 @@ fn main() {
     env_logger::init();
     ignite().launch();
 }
+
+#[cfg(test)]
+mod test {
+    use super::ignite;
+    use super::*;
+    use rocket::http::Status;
+    use rocket::local::Client;
+    use serial_test::serial;
+
+    fn make_client() -> rocket::local::Client {
+        Client::new(ignite()).unwrap()
+    }
+
+    #[test]
+    #[ignore]
+    #[serial]
+    fn index_ok() {
+        let client = make_client();
+        let response = client.get("/this_page_does_not_exist").dispatch();
+        assert_eq!(response.status(), Status::NotFound);
+        // TODO assert body with approval tests
+    }
+}

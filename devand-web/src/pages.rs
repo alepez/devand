@@ -534,6 +534,7 @@ fn log_fail(ip_addr: std::net::IpAddr) {
 mod test {
     use super::super::ignite;
     use super::*;
+    use insta::*;
     use rocket::http::Status;
     use rocket::local::Client;
     use serial_test::serial;
@@ -556,7 +557,6 @@ mod test {
         let client = make_client();
         let response = client.get("/").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
     }
 
     #[test]
@@ -566,7 +566,6 @@ mod test {
         let client = make_client();
         let response = client.get("/login").dispatch();
         assert_eq!(response.status(), Status::SeeOther);
-        // TODO assert body with approval tests
     }
 
     #[test]
@@ -574,9 +573,9 @@ mod test {
     #[serial]
     fn login_return_to_index() {
         let client = make_client();
-        let response = client.get("/login/%2F").dispatch();
+        let mut response = client.get("/login/%2F").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
+        assert_snapshot!(response.body_string().unwrap());
     }
 
     #[test]
@@ -584,9 +583,9 @@ mod test {
     #[serial]
     fn dashboard_unauthorized() {
         let client = make_client();
-        let response = client.get("/dashboard").dispatch();
+        let mut response = client.get("/dashboard").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
-        // TODO assert body with approval tests
+        assert_snapshot!(response.body_string().unwrap());
     }
 
     #[test]
@@ -594,9 +593,9 @@ mod test {
     #[serial]
     fn password_reset_ok() {
         let client = make_client();
-        let response = client.get("/password_reset").dispatch();
+        let mut response = client.get("/password_reset").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
+        assert_snapshot!(response.body_string().unwrap());
     }
 
     #[test]
@@ -604,9 +603,9 @@ mod test {
     #[serial]
     fn join_ok() {
         let client = make_client();
-        let response = client.get("/join").dispatch();
+        let mut response = client.get("/join").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
+        assert_snapshot!(response.body_string().unwrap());
     }
 
     #[test]
@@ -616,7 +615,6 @@ mod test {
         let client = make_client();
         let response = client.get("/join/captcha.png").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
     }
 
     #[test]
@@ -626,7 +624,6 @@ mod test {
         let client = make_client();
         let response = client.get("/privacy").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
     }
 
     #[test]
@@ -636,7 +633,6 @@ mod test {
         let client = make_client();
         let response = client.get("/code-of-conduct").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
     }
 
     #[test]
@@ -646,6 +642,5 @@ mod test {
         let client = make_client();
         let response = client.get("/help").dispatch();
         assert_eq!(response.status(), Status::Ok);
-        // TODO assert body with approval tests
     }
 }

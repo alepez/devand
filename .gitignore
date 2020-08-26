@@ -4,3 +4,4 @@
 ./devand-ui/target
 /target
 tarpaulin-report.html
+*.snap.new

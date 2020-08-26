@@ -7,6 +7,9 @@ mod models;
 mod schema;
 mod schema_view;
 
+#[cfg(feature = "mock")]
+pub mod fake_data;
+
 use chrono::prelude::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -470,21 +473,27 @@ pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunM
     embedded_migrations::run(&*conn)
 }
 
+/// Clear table content and any auto-increment counter
+fn clear_table(table: &str, conn: &PgConnection) -> Result<(), diesel::result::Error> {
+    let q = format!("TRUNCATE TABLE {} RESTART IDENTITY;", table);
+    diesel::sql_query(q).execute(conn).map(|_| ())
+}
+
+/// Clear all tables and their auto-increment counters
+fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
+    let tables = vec!["auth", "chats", "messages", "unread_messages", "users"];
+
+    for table in tables {
+        clear_table(table, conn)?;
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use serial_test::serial;
-
-    fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
-        use diesel::delete;
-        use schema::*;
-        delete(auth::table).execute(conn)?;
-        delete(chats::table).execute(conn)?;
-        delete(messages::table).execute(conn)?;
-        delete(unread_messages::table).execute(conn)?;
-        delete(users::table).execute(conn)?;
-        Ok(())
-    }
 
     fn fresh_db() -> PgConnection {
         let conn = establish_connection();
