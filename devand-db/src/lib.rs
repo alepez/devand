@@ -7,6 +7,9 @@ mod models;
 mod schema;
 mod schema_view;
 
+#[cfg(feature = "mock")]
+pub mod fake_data;
+
 use chrono::prelude::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;

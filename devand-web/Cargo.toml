@@ -10,7 +10,7 @@ captcha = { git = "https://github.com/robatipoor/captcha", rev = "8c8f9d2" }
 chrono = { version = "0.4", features = ["serde"] }
 devand-core = { path = "../devand-core" }
 devand-crypto = { path = "../devand-crypto" }
-devand-db = { path = "../devand-db" }
+devand-db = { path = "../devand-db", features = ["mock"] }
 devand-mailer = { path = "../devand-mailer", features = ["client"] }
 devand-text = { path = "../devand-text" }
 dotenv = "0.15"

@@ -10,6 +10,7 @@ devand-core = { path = "../devand-core" }
 diesel = { version = "1", features = ["postgres", "serde_json", "chrono", "uuid"] }
 diesel_migrations = "1"
 dotenv = "0.15"
+maplit = "1"
 log = "0.4"
 rand = "0.7"
 rust-argon2 = "0.8"
