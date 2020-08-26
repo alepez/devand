@@ -336,6 +336,7 @@ mod test {
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
     use serial_test::serial;
+    use devand_db::fake_data::*;
 
     #[test]
     fn parse_members_ok() {
@@ -353,13 +354,15 @@ mod test {
     fn make_authenticated_client() -> rocket::local::Client {
         let client = make_client();
         let conn = PgDevandConn::get_one(client.rocket()).unwrap();
-        devand_db::fake_data::populate_with_just_one_user(&conn);
-        let (user, password) = devand_db::fake_data::user1();
+        let data = OneUser::new(&conn);
 
         {
+            let username = &data.user.username;
+            let password = &data.password;
+
             let response = client
                 .post("/login/%2F")
-                .body(format!("username={}&password={}", user.username, password))
+                .body(format!("username={}&password={}", username, password))
                 .header(ContentType::Form)
                 .dispatch();
 
