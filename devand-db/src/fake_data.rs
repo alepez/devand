@@ -8,6 +8,8 @@ pub struct OneUser {
 
 impl OneUser {
     pub fn new(conn: &PgConnection) -> Self {
+        super::clear_all(conn).unwrap();
+
         let password = "qwertyuiop1".to_string();
 
         let join_data = super::auth::JoinData {

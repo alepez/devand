@@ -333,10 +333,11 @@ mod test {
     use super::super::ignite;
     use super::super::PgDevandConn;
     use super::*;
+    use devand_db::fake_data::*;
+    use insta::*;
     use rocket::http::{ContentType, Status};
     use rocket::local::Client;
     use serial_test::serial;
-    use devand_db::fake_data::*;
 
     #[test]
     fn parse_members_ok() {
@@ -377,8 +378,9 @@ mod test {
     #[serial]
     fn anonimous_is_unauthorized_to_get_api_user() {
         let client = make_client();
-        let response = client.get("/api/user").dispatch();
+        let mut response = client.get("/api/user").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
+        assert_snapshot!(response.body_string().unwrap());
     }
 
     #[test]
@@ -386,8 +388,9 @@ mod test {
     #[serial]
     fn authenticated_can_get_api_user() {
         let client = make_authenticated_client();
-        let response = client.get("/api/user").dispatch();
+        let mut response = client.get("/api/user").dispatch();
         assert_eq!(response.status(), Status::Ok);
+        assert_snapshot!(response.body_string().unwrap());
     }
 
     // TODO Test other APIs

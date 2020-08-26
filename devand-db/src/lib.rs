@@ -473,21 +473,21 @@ pub fn run_migrations(conn: &PgConnection) -> Result<(), diesel_migrations::RunM
     embedded_migrations::run(&*conn)
 }
 
+fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
+    use diesel::delete;
+    use schema::*;
+    delete(auth::table).execute(conn)?;
+    delete(chats::table).execute(conn)?;
+    delete(messages::table).execute(conn)?;
+    delete(unread_messages::table).execute(conn)?;
+    delete(users::table).execute(conn)?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use serial_test::serial;
-
-    fn clear_all(conn: &PgConnection) -> Result<(), diesel::result::Error> {
-        use diesel::delete;
-        use schema::*;
-        delete(auth::table).execute(conn)?;
-        delete(chats::table).execute(conn)?;
-        delete(messages::table).execute(conn)?;
-        delete(unread_messages::table).execute(conn)?;
-        delete(users::table).execute(conn)?;
-        Ok(())
-    }
 
     fn fresh_db() -> PgConnection {
         let conn = establish_connection();
