@@ -173,9 +173,7 @@ impl ChatPage {
                     <div class="devand-chat-messages">
                         { for msg_bubbles }
                     </div>
-                    <div class="devand-chat-footer">
-                        <ChatInput on_return=self.link.callback(Msg::SendMessage) />
-                    </div>
+                    <ChatInput on_return=self.link.callback(Msg::SendMessage) />
                 </div>
             </>
         }

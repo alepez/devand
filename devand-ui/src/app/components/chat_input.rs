@@ -16,6 +16,7 @@ pub struct Props {
 pub enum Msg {
     Input(InputData),
     Keydown(KeyboardEvent),
+    SendClicked,
 }
 
 #[derive(Default)]
@@ -40,12 +41,12 @@ impl Component for ChatInput {
             }
             Msg::Keydown(e) => {
                 if e.key_code() == 13 {
-                    let txt = self.state.txt.clone();
-                    if !self.state.txt.is_empty() {
-                        self.state.txt.clear();
-                        self.props.on_return.emit(txt);
-                    }
+                    self.try_emit_on_return();
                 }
+                true
+            }
+            Msg::SendClicked => {
+                self.try_emit_on_return();
                 true
             }
         }
@@ -57,7 +58,20 @@ impl Component for ChatInput {
 
     fn view(&self) -> Html {
         html! {
-            <input type="text" value=self.state.txt onkeydown=self.link.callback(Msg::Keydown) oninput=self.link.callback(Msg::Input) />
+        <div class="devand-chat-input">
+            <input class="devand-chat-input-box" type="text" value=self.state.txt onkeydown=self.link.callback(Msg::Keydown) oninput=self.link.callback(Msg::Input) />
+            <button class="devand-chat-input-button pure-button pure-button-primary" onclick=self.link.callback(|_| Msg::SendClicked)>{ "Send" }</button>
+        </div>
+        }
+    }
+}
+
+impl ChatInput {
+    fn try_emit_on_return(&mut self) {
+        let txt = self.state.txt.clone();
+        if !self.state.txt.is_empty() {
+            self.state.txt.clear();
+            self.props.on_return.emit(txt);
         }
     }
 }

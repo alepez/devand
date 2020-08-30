@@ -135,14 +135,18 @@ button {
   padding-bottom: 1em;
 }
 
-.devand-chat-footer {
+.devand-chat-input {
   display: flex;
   height: 5em;
 }
 
-.devand-chat-footer input {
+.devand-chat-input-box {
   flex: 1;
-  margin: 0.5em;
+}
+
+.devand-chat-input-button {
+  flex: 0.1;
+  margin-left: 0.5em;
 }
 
 .devand-schedule-slots {
