@@ -2,4 +2,4 @@
 source: devand-web/src/api.rs
 expression: response.body_string().unwrap()
 ---
-{"id":1,"username":"user1","email":"user1@test.devand.dev","visible_name":"user1","settings":{"languages":{},"schedule":"never","vacation_mode":false,"spoken_languages":[]},"email_verified":false,"unread_messages":0,"bio":""}
+{"id":1,"username":"user1","email":"user1@test.devand.dev","visible_name":"user1","settings":{"languages":{},"schedule":"never","vacation_mode":false,"spoken_languages":[]},"email_verified":false,"bio":""}

@@ -575,9 +575,7 @@ mod tests {
         let user = load_user_by_username(&user.username, &conn).unwrap();
         let user = load_user_by_id(user.id, &conn).unwrap();
         let user = load_user_by_email(&user.email, &conn).unwrap();
-        let user = load_full_user_by_id(user.id, &conn).unwrap();
         assert_eq!(user.email_verified, false);
-        assert_eq!(user.unread_messages, 0);
     }
 
     #[test]
