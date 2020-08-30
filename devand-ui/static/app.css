@@ -3,7 +3,7 @@ button {
 }
 
 .devand-language-tag,
-.devand-slot-user {
+.devand-user-bubble {
   background-color: #ffffff;
   margin-left: 0.4em;
   margin-bottom: 0.4em;
@@ -14,6 +14,10 @@ button {
   vertical-align: middle;
   line-height: 2em;
   white-space: nowrap;
+}
+
+.devand-user-bubble span {
+  margin-right: 0.5em;
 }
 
 .devand-language-tag.devand-language-priority-no {
@@ -151,10 +155,6 @@ button {
   margin: 0 0 1em 0;
 }
 
-.devand-slot-user span {
-  margin-right: 0.5em;
-}
-
 .devand-slot-time {
   display: block;
 }
@@ -185,4 +185,18 @@ button {
   margin-left: 0.2em;
   color: #FFFFFF;
   background-color: #1BB33F;
+}
+
+ul.devand-user-affinities {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul.devand-user-affinities li {
+  margin-bottom: 1em;
+}
+
+ul.devand-user-affinities .devand-language-priority-no {
+  display: none;
 }

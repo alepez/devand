@@ -28,7 +28,7 @@ pub fn user_affinity_bubble(user: &UserAffinity) -> Html {
     let class = affinity_class(affinity_level);
 
     html! {
-    <span class="devand-slot-user">
+    <span class="devand-user-bubble">
         <span class="devand-start-chat"><RouterButton route=AppRoute::Chat(username.clone())>{ "💬" }</RouterButton></span>
         <span class=("devand-affinity-tag", class) title=title>{ affinity_str }</span>
         <span class="devand-visible-name"><RouterAnchor route=AppRoute::UserProfile(username.clone()) >{ &user.visible_name }</RouterAnchor></span>

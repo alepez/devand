@@ -6,9 +6,9 @@ use yew::prelude::*;
 pub fn view_affinities_table(affinities: &[UserAffinity]) -> Html {
     let affinities = affinities.iter().rev().map(|a| view_affinity(a));
     html! {
-    <table class="user-affinities pure-table-striped">
+    <ul class="devand-user-affinities">
     { for affinities}
-    </table>
+    </ul>
     }
 }
 
@@ -20,9 +20,6 @@ fn view_affinity(user_affinity: &UserAffinity) -> Html {
     });
 
     html! {
-    <tr class=("user-affinity")>
-        <td>{ user_affinity_bubble(user_affinity) }</td>
-        <td class="languages"> { for languages_tags } </td>
-    </tr>
+    <li>{ user_affinity_bubble(user_affinity) } { for languages_tags }</li>
     }
 }

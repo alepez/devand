@@ -87,7 +87,7 @@ fn view_chats(chats: &UserChats) -> Html {
             .map(|c| view_chat(c));
 
         html! {
-            <ul class="user-chats pure-table-striped">
+            <ul class="user-chats pure-table-horizontal">
             { for chats}
             </ul>
         }
