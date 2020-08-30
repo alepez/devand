@@ -141,7 +141,6 @@ fn fake_user(rng: &mut StdRng) -> User {
             vacation_mode: false,
             spoken_languages: SpokenLanguages(btreeset![SpokenLanguage::English]),
         },
-        unread_messages: 5,
         bio: "This is the bio".to_string(),
     }
 }

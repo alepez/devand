@@ -18,7 +18,7 @@ use yew::services::timeout::TimeoutService;
 use yew::services::Task;
 use yew::worker::*;
 
-const CODE_NOW_INTERVAL_MS: u64 = 5_000;
+const AUTO_UPDATE_INTERVAL_MS: u64 = 5_000;
 const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -66,7 +66,7 @@ pub enum Response {
 }
 
 pub enum Msg {
-    CodeNowUpdate,
+    AutoUpdate,
     Request(Request),
     Response(Response),
 }
@@ -84,7 +84,7 @@ pub struct MainWorker {
     // TODO Prevent memory leak
     // TODO Add cache for resources like public profile
     fetch_tasks: Vec<FetchTask>,
-    _code_now_task: Box<dyn Task>,
+    _auto_update_task: Box<dyn Task>,
     _timeout_task: Option<Box<dyn Task>>,
 
     _on_unload: Closure<dyn FnMut(BeforeUnloadEvent)>,
@@ -103,13 +103,13 @@ impl Agent for MainWorker {
 
         let pending = Arc::new(AtomicBool::new(false));
 
-        let code_now_task = make_code_now_task(link.clone());
+        let auto_update_task = make_auto_update_task(link.clone());
 
         MainWorker {
             link,
             subscribers: HashSet::default(),
             fetch_tasks: Vec::default(),
-            _code_now_task: code_now_task,
+            _auto_update_task: auto_update_task,
             _timeout_task: None,
             _on_unload: make_on_unload_callback(pending.clone()),
             pending,
@@ -126,10 +126,9 @@ impl Agent for MainWorker {
 
     fn update(&mut self, msg: Self::Message) {
         match msg {
-            Msg::CodeNowUpdate => {
-                log::debug!("CodeNowUpdate");
-                let req = Request::LoadCodeNow;
-                self.link.send_input(req);
+            Msg::AutoUpdate => {
+                self.link.send_input(Request::LoadCodeNow);
+                self.link.send_input(Request::LoadAllChats);
             }
 
             Msg::Request(req) => {
@@ -168,9 +167,9 @@ impl MainWorker {
     }
 }
 
-fn make_code_now_task(link: AgentLink<MainWorker>) -> Box<dyn Task> {
-    let duration = Duration::from_millis(CODE_NOW_INTERVAL_MS);
-    let callback = link.callback(|_| Msg::CodeNowUpdate);
+fn make_auto_update_task(link: AgentLink<MainWorker>) -> Box<dyn Task> {
+    let duration = Duration::from_millis(AUTO_UPDATE_INTERVAL_MS);
+    let callback = link.callback(|_| Msg::AutoUpdate);
     let task = IntervalService::spawn(duration, callback);
     Box::new(task)
 }

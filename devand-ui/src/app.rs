@@ -46,6 +46,7 @@ pub struct State {
     pending_save: bool,
     verifying_email: bool,
     online_users: usize,
+    unread_messages: usize,
 }
 
 pub enum Msg {
@@ -121,6 +122,13 @@ impl App {
                 changed
             }
 
+            Response::AllChatsLoaded(user_chats) => {
+                let unread_messages = user_chats.total_unread_messages();
+                let changed = self.state.unread_messages != unread_messages;
+                self.state.unread_messages = unread_messages;
+                changed
+            }
+
             Response::Error(err) => {
                 log::error!("Error: {}", err);
                 // TODO Show error alert
@@ -134,7 +142,7 @@ impl App {
     fn view_ok(&self, user: &User) -> Html {
         html! {
             <>
-            { view_menu(user, self.state.online_users) }
+            { view_menu(&self.state) }
             { self.view_routes(&user) }
             </>
         }
@@ -168,15 +176,20 @@ impl App {
     }
 }
 
-fn view_menu(user: &User, online_users: usize) -> Html {
+fn view_menu(state: &State) -> Html {
+    let State {
+        unread_messages,
+        online_users,
+        ..
+    } = state;
     html! {
     <ul class=("devand-menu")>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ Text::Settings }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ Text::Affinities }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(online_users) }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(*online_users) }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ Text::Schedule }</RouterAnchor></li>
         <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ Text::Security }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(user.unread_messages) }</RouterAnchor></li>
+        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(*unread_messages) }</RouterAnchor></li>
     </ul>
     }
 }

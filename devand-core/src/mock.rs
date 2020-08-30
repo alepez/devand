@@ -29,7 +29,6 @@ pub fn user() -> User {
             }),
             spoken_languages: SpokenLanguages(btreeset! {SpokenLanguage::English}),
         },
-        unread_messages: 5,
         bio: "Ciao".to_string(),
     }
 }

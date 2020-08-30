@@ -34,6 +34,12 @@ pub struct UserChat {
 #[serde(rename_all = "snake_case")]
 pub struct UserChats(pub Vec<UserChat>);
 
+impl UserChats {
+    pub fn total_unread_messages(&self) -> usize {
+        self.0.iter().map(|x| x.unread_messages).sum()
+    }
+}
+
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
@@ -49,12 +55,9 @@ pub struct User {
     pub settings: UserSettings,
     /// Email must be verified to enable some feature (notifications, ...)
     pub email_verified: bool,
-    /// User's chats
-    pub unread_messages: usize,
     /// User's bio (max 160 char)
     pub bio: String,
 }
-// FIXME User contains too many fields. unread_messages should be in another type, like FullUser
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "snake_case")]
