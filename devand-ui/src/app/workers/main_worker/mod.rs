@@ -18,7 +18,7 @@ use yew::services::timeout::TimeoutService;
 use yew::services::Task;
 use yew::worker::*;
 
-const AUTO_UPDATE_INTERVAL_MS: u64 = 5_000;
+const AUTO_UPDATE_INTERVAL_MS: u64 = 20_000;
 const LAZY_REQUEST_DELAY_MS: u64 = 2_000;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -104,6 +104,9 @@ impl Agent for MainWorker {
         let pending = Arc::new(AtomicBool::new(false));
 
         let auto_update_task = make_auto_update_task(link.clone());
+
+        // Immediately trigger an auto update
+        link.send_message(Msg::AutoUpdate);
 
         MainWorker {
             link,
