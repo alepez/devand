@@ -75,32 +75,6 @@ pub fn load_user_by_email(email: &str, conn: &PgConnection) -> Option<devand_cor
     user.try_into().map_err(|e| dbg!(e)).ok()
 }
 
-// TODO [optimization] create a psql view, call db once
-// TODO unread_messages should be outside User struct
-// TODO This functions smells of shortcut
-/// Load single user by id (unique) with more informations
-pub fn load_full_user_by_id(
-    id: devand_core::UserId,
-    conn: &PgConnection,
-) -> Option<devand_core::User> {
-    let user: models::User = schema::users::table
-        .filter(schema::users::dsl::id.eq(id.0))
-        .first(conn)
-        .ok()?;
-
-    let unread_messages: i64 = schema::unread_messages::table
-        .filter(schema::unread_messages::dsl::user_id.eq(user.id))
-        .select(diesel::dsl::count(schema::unread_messages::dsl::message_id))
-        .first(conn)
-        .unwrap_or(0);
-
-    let mut user: devand_core::User = user.try_into().map_err(|e| dbg!(e)).ok()?;
-
-    user.unread_messages = unread_messages as usize;
-
-    Some(user)
-}
-
 /// Load single user by id (unique)
 pub fn load_user_by_id(id: devand_core::UserId, conn: &PgConnection) -> Option<devand_core::User> {
     let user: models::User = schema::users::table

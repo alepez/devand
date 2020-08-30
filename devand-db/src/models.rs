@@ -51,7 +51,6 @@ impl TryInto<devand_core::User> for User {
             email_verified: self.email_verified,
             visible_name: self.visible_name,
             settings,
-            unread_messages: 0,
             bio: self.bio,
         };
 

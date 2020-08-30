@@ -172,7 +172,7 @@ fn chat(
         .filter_map(|&user_id| {
             // TODO [optimization] do not load full user info, only needed
             // TODO [optimization] for multiple users, just do only one call to db
-            let user = devand_db::load_full_user_by_id(user_id, &conn)?;
+            let user = devand_db::load_user_by_id(user_id, &conn)?;
 
             Some(devand_core::chat::ChatMemberInfo {
                 user_id,
