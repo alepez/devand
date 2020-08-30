@@ -38,30 +38,33 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
         }
 
         Request::LoadPublicUserProfile(user_id) => {
-            link.send_message(Response::PublicUserProfileFetched(Box::new(
-                fake_public_profile(&mut rng),
-            )));
+            let mut rng = StdRng::seed_from_u64(user_id.0 as u64);
+            let mut u = fake_public_profile(&mut rng);
+            u.id = user_id;
+            link.send_message(Response::PublicUserProfileFetched(Box::new(u)));
         }
 
         Request::LoadPublicUserProfileByUsername(username) => {
-            link.send_message(Response::PublicUserProfileFetched(Box::new(
-                fake_public_profile(&mut rng),
-            )));
+            let mut u = fake_public_profile(&mut rng);
+            u.username = username.clone();
+            link.send_message(Response::PublicUserProfileFetched(Box::new(u)));
         }
 
         Request::LoadAffinities => {
-            link.send_message(Response::AffinitiesFetched(fake_affinities()));
+            link.send_message(Response::AffinitiesFetched(fake_affinities(&mut rng)));
         }
 
         Request::LoadAvailabilityMatch => {
-            link.send_message(Response::AvailabilityMatchFetched(Box::new(fake_matches())));
+            link.send_message(Response::AvailabilityMatchFetched(Box::new(fake_matches(
+                &mut rng,
+            ))));
         }
 
-        Request::CheckOldPassword(old_password) => {
+        Request::CheckOldPassword(_old_password) => {
             link.send_message(Response::OldPasswordChecked(true));
         }
 
-        Request::EditPassword(old_password, new_password) => {
+        Request::EditPassword(_old_password, _new_password) => {
             link.send_message(Response::PasswordEdited(()));
         }
 
@@ -92,12 +95,12 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
             link.send_message(Response::ChatNewMessagesLoaded(vec![msg]));
         }
 
-        Request::ChatLoadHistory(members) => {
+        Request::ChatLoadHistory(_members) => {
             link.send_message(Response::ChatHistoryLoaded(fake_chat_info(&mut rng)));
         }
 
         Request::LoadAllChats => {
-            link.send_message(Response::AllChatsLoaded(fake_chats()));
+            link.send_message(Response::AllChatsLoaded(fake_chats(&mut rng)));
         }
 
         // Program should never hit this
@@ -150,7 +153,7 @@ fn fake_code_now(rng: &mut StdRng) -> CodeNow {
     let n = rng.gen_range(0, 20);
 
     for _ in 0..n {
-        all_users.push(fake_user(rng).into());
+        all_users.push(fake_public_profile(rng));
     }
 
     CodeNow {
@@ -159,17 +162,47 @@ fn fake_code_now(rng: &mut StdRng) -> CodeNow {
     }
 }
 
+fn fake_public_profiles(rng: &mut StdRng) -> Vec<PublicUserProfile> {
+    let n = rng.gen_range(0, 20);
+    let mut v = Vec::default();
+    for _ in 0..n {
+        v.push(fake_public_profile(rng));
+    }
+    v
+}
+
 fn fake_public_profile(rng: &mut StdRng) -> PublicUserProfile {
     let user = fake_user(rng);
     user.into()
 }
 
-fn fake_affinities() -> Vec<UserAffinity> {
-    todo!()
+fn fake_affinities(rng: &mut StdRng) -> Vec<UserAffinity> {
+    let n = rng.gen_range(1, 10);
+    let mut v = Vec::default();
+    for _ in 0..n {
+        v.push(UserAffinity {
+            user: fake_public_profile(rng),
+            affinity: Affinity::from_number(rng.gen_range(0.0, 1.0)),
+        })
+    }
+    v
 }
 
-fn fake_matches() -> schedule_matcher::AvailabilityMatch {
-    todo!()
+fn fake_matches(rng: &mut StdRng) -> schedule_matcher::AvailabilityMatch {
+    let n = rng.gen_range(1, 10);
+    let mut slots = Vec::default();
+    let t0: i64 = 1598810400;
+    for _ in 0..n {
+        let t = t0 + (3600 * rng.gen_range(1, 24 * 7));
+        let d = chrono::Utc.timestamp(t, 0);
+        let users_count = rng.gen_range(1, 10);
+        let mut users = Vec::default();
+        for _ in 0..users_count {
+            users.push(UserId(rng.gen_range(1, 1000)));
+        }
+        slots.push((d, users))
+    }
+    schedule_matcher::AvailabilityMatch { slots }
 }
 
 fn fake_message(rng: &mut StdRng, author: UserId) -> chat::ChatMessage {
@@ -225,8 +258,22 @@ fn fake_chat_info(rng: &mut StdRng) -> chat::ChatInfo {
     }
 }
 
-fn fake_chats() -> UserChats {
-    todo!()
+fn fake_chats(rng: &mut StdRng) -> UserChats {
+    let n = rng.gen_range(1, 10);
+    let mut v = Vec::default();
+    for _ in 0..n {
+        let members: Vec<PublicUserProfile> =
+            fake_public_profiles(rng).into_iter().take(1).collect();
+        v.push(UserChat {
+            chat: chat::Chat {
+                id: chat::ChatId(fake_uuid(rng)),
+                members: members.iter().map(|x| x.id).collect(),
+            },
+            unread_messages: rng.gen_range(0, 100),
+            members,
+        });
+    }
+    UserChats(v)
 }
 
 fn fake_uuid(rng: &mut StdRng) -> uuid::Uuid {
