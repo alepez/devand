@@ -1,4 +1,6 @@
-use crate::app::components::{AddLanguageComponent, Alert, BusyIndicator, EditableLanguageTag};
+use crate::app::components::{
+    AddLanguageComponent, Alert, AlertLevel, BusyIndicator, EditableLanguageTag,
+};
 use devand_core::*;
 use devand_text::Text;
 use yew::prelude::*;
@@ -131,6 +133,8 @@ impl SettingsPage {
         // Note: do not change div to form, or submission will trigger
         // a page unload
         html! {
+            <>
+            { view_email_verified_alert(user.email_verified) }
             <div class="pure-form pure-form-stacked">
                 { self.view_profile_panel(user) }
                 {
@@ -143,6 +147,7 @@ impl SettingsPage {
                 { self.view_languages_panel(&settings.languages) }
                 { self.view_spoken_languages_panel(&settings.spoken_languages) }
             </div>
+            </>
         }
     }
 
@@ -298,6 +303,16 @@ fn at_least_one_language_with_priority(languages: &Languages) -> bool {
     languages
         .iter()
         .any(|(_, pref)| pref.priority != devand_core::Priority::No)
+}
+
+fn view_email_verified_alert(verified: bool) -> Html {
+    if verified {
+        html! {}
+    } else {
+        html! {
+            <Alert class="pure-u-1" level=AlertLevel::Danger>{ Text::UnverifiedEmailAlert }</Alert>
+        }
+    }
 }
 
 #[cfg(test)]
