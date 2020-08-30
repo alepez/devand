@@ -73,6 +73,7 @@ button {
   margin: 1em 5em 0 1em;
   clear: both;
   position: relative;
+  word-break: break-all;
 }
 
 .devand-chat-message-bubble.devand-from-me {
