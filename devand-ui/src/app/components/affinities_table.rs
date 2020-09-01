@@ -62,6 +62,14 @@ impl Component for AffinitiesTable {
 
 impl AffinitiesTable {
     fn view_filters(&self) -> Html {
+        html! {
+        <div class="devand-affinities-filters pure-form pure-form-stacked pure-g">
+            { self.view_lang_select() }
+        </div>
+        }
+    }
+
+    fn view_lang_select(&self) -> Html {
         let selected_language = self.state.filter_language;
 
         let on_change = self.link.callback(move |cd: ChangeData| {
@@ -72,17 +80,20 @@ impl AffinitiesTable {
             }
         });
 
-        let options = Language::iter()
+        let language_options = Language::iter()
             .map(|lang| (lang, selected_language == Some(lang)))
             .map(|(lang, selected)| {
                 html! { <option value=lang selected=selected>{ lang }</option> }
             });
 
         html! {
-        <select name="add_language" onchange=on_change>
-            <option value="" selected=(selected_language.is_none())></option>
-            { for options }
-        </select>
+        <div class="pure-u-1 pure-u-sm-1-2">
+            <label for="add_language">{ "Filter by Language" }</label>
+            <select name="add_language" onchange=on_change class="pure-u-1">
+                <option value="" selected=(selected_language.is_none())></option>
+                { for language_options }
+            </select>
+        </div>
         }
     }
 

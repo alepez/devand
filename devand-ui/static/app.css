@@ -204,3 +204,7 @@ ul.devand-user-affinities li {
 ul.devand-user-affinities .devand-language-priority-no {
   display: none;
 }
+
+.devand-affinities-filters {
+  margin-bottom: 1em;
+}
