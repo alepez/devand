@@ -9,7 +9,7 @@ mod spoken_languages;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use strum_macros::{Display, EnumIter, EnumString};
 
 pub use affinity::{Affinity, AffinityLevel, AffinityParams};
@@ -89,6 +89,18 @@ impl Languages {
         });
 
         languages
+    }
+
+    pub fn union(&self, other: &Self) -> Vec<Language> {
+        let mine: BTreeSet<_> = self.0.keys().collect();
+        let theirs: BTreeSet<_> = other.0.keys().collect();
+        mine.union(&theirs).map(|x| **x).collect()
+    }
+
+    pub fn intersection(&self, other: &Self) -> Vec<Language> {
+        let mine: BTreeSet<_> = self.0.keys().collect();
+        let theirs: BTreeSet<_> = other.0.keys().collect();
+        mine.intersection(&theirs).map(|x| **x).collect()
     }
 }
 
@@ -290,6 +302,7 @@ pub struct PasswordEdit {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use insta::*;
     use maplit::btreemap;
 
     #[test]
@@ -315,5 +328,45 @@ mod tests {
         assert!(languages[2].0 == Language::JavaScript);
         assert!(languages[3].0 == Language::CPlusPlus);
         assert!(languages[4].0 == Language::Go);
+    }
+
+    #[test]
+    fn languages_intersection() {
+        let a = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
+            Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+        ]);
+
+        let b = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
+            Language::Java => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Rust => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+        ]);
+
+        let c = a.intersection(&b);
+        assert_debug_snapshot!(c);
+    }
+
+    #[test]
+    fn languages_union() {
+        let a = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
+            Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+        ]);
+
+        let b = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
+            Language::Java => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Rust => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+        ]);
+
+        let c = a.union(&b);
+        assert_debug_snapshot!(c);
     }
 }

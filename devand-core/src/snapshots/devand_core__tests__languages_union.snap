@@ -1,0 +1,11 @@
+---
+source: devand-core/src/lib.rs
+expression: c
+---
+[
+    C,
+    Go,
+    Java,
+    JavaScript,
+    Rust,
+]

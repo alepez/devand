@@ -589,6 +589,7 @@ name = "devand-core"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "insta",
  "isolang",
  "log 0.4.11",
  "maplit",
