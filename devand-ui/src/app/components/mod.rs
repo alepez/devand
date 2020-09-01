@@ -17,7 +17,7 @@ mod user_bubble;
 mod user_profile_page;
 
 pub use affinities_page::AffinitiesPage;
-pub use affinities_table::view_affinities_table;
+pub use affinities_table::AffinitiesTable;
 pub use availability_table::AvailabilityTable;
 pub use chat_input::ChatInput;
 pub use chat_page::ChatPage;

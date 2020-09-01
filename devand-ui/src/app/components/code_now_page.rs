@@ -1,5 +1,5 @@
-use crate::app::components::affinities_table::view_affinities_table;
 use crate::app::components::common::{Alert, BusyIndicator};
+use crate::app::components::AffinitiesTable;
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
 use devand_core::CodeNow;
@@ -104,7 +104,7 @@ fn view_code_now_users(code_now: &CodeNow) -> Html {
         html! {
         <>
             <p>{ Text::CodeNowTableDescription }</p>
-            { view_affinities_table(&affinities) }
+            <AffinitiesTable affinities=affinities />
         </>
         }
     }

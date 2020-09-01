@@ -1,4 +1,4 @@
-use crate::app::components::affinities_table::view_affinities_table;
+use crate::app::components::AffinitiesTable;
 use crate::app::components::{Alert, BusyIndicator};
 use crate::app::workers::{main_worker, main_worker::MainWorker};
 use crate::app::{AppRoute, RouterAnchor};
@@ -84,10 +84,12 @@ fn view_affinities(affinities: &[UserAffinity]) -> Html {
     if affinities.is_empty() {
         view_no_affinities()
     } else {
+        // TODO [optimization] Avoid cloning
+        let affinities = Vec::from(affinities);
         html! {
         <>
             <p>{ Text::AffinitiesTableDescription }</p>
-            { view_affinities_table(affinities) }
+            <AffinitiesTable affinities=affinities />
         </>
         }
     }
