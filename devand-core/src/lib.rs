@@ -92,15 +92,22 @@ impl Languages {
     }
 
     pub fn union(&self, other: &Self) -> Vec<Language> {
-        let mine: BTreeSet<_> = self.0.keys().collect();
-        let theirs: BTreeSet<_> = other.0.keys().collect();
-        mine.union(&theirs).map(|x| **x).collect()
+        let mine: BTreeSet<_> = self.keys_with_priority().collect();
+        let theirs: BTreeSet<_> = other.keys_with_priority().collect();
+        mine.union(&theirs).map(|x| *x).collect()
     }
 
     pub fn intersection(&self, other: &Self) -> Vec<Language> {
-        let mine: BTreeSet<_> = self.0.keys().collect();
-        let theirs: BTreeSet<_> = other.0.keys().collect();
-        mine.intersection(&theirs).map(|x| **x).collect()
+        let mine: BTreeSet<_> = self.keys_with_priority().collect();
+        let theirs: BTreeSet<_> = other.keys_with_priority().collect();
+        mine.intersection(&theirs).map(|x| *x).collect()
+    }
+
+    fn keys_with_priority(&self) -> impl Iterator<Item = Language> + '_ {
+        self.0
+            .iter()
+            .filter(|x| x.1.priority != Priority::No)
+            .map(|x| x.0.to_owned())
     }
 }
 
@@ -336,14 +343,14 @@ mod tests {
             Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
             Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
             Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High, },
-            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::Low, }
         ]);
 
         let b = Languages(btreemap![
             Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
             Language::Java => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
             Language::Rust => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
-            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::High, }
         ]);
 
         let c = a.intersection(&b);
@@ -356,14 +363,14 @@ mod tests {
             Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
             Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
             Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::High, },
-            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::Low, }
         ]);
 
         let b = Languages(btreemap![
             Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
             Language::Java => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
             Language::Rust => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
-            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::High, }
         ]);
 
         let c = a.union(&b);

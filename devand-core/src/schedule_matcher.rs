@@ -423,8 +423,8 @@ mod tests {
 
         assert!(matrix.0.len() == expected_len);
         assert!(matrix[(UserId(0), UserId(2))] == Some(Affinity::NONE));
-        assert!(matrix[(UserId(0), UserId(3))] == Some(Affinity::NONE));
-        assert!(matrix[(UserId(1), UserId(2))] == Some(Affinity::FULL));
+        assert!(dbg!(matrix[(UserId(0), UserId(3))]) == Some(Affinity::NONE));
+        assert!(dbg!(matrix[(UserId(1), UserId(2))]) == Some(Affinity::FULL));
 
         let u = UserId(1);
         let o = vec![UserId(2), UserId(3)];

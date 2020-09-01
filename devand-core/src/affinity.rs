@@ -94,6 +94,10 @@ impl MatchingLanguages {
             .max_by(|(_, l), (_, r)| l.cmp(&r))
             .map(|(&lang, aff)| (lang, aff))
     }
+
+    fn len(&self) -> usize {
+        self.0.len()
+    }
 }
 
 /// Find the intersection between the two collections a and b, extracting
@@ -108,6 +112,7 @@ fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
     MatchingLanguages(matching)
 }
 
+// NOTE Use i32 instead of f64 so it can derive Eq
 // TODO Normalize to [0..1] when serializing
 #[derive(Default, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize, Copy, Clone, Debug)]
 pub struct Affinity(i32);
@@ -124,13 +129,27 @@ impl Affinity {
     pub const FULL: Self = Affinity(Self::MAX);
 
     const MIN: i32 = 0;
-    const MAX: i32 = LanguageAffinity::MAX.0;
+    const MAX: i32 = 1000;
+
+    const BEST_LANG_SCORE_WEIGHT: f64 = 1.0; // FIXME
 
     pub fn from_params(a: &AffinityParams, b: &AffinityParams) -> Self {
         let matching_languages = find_matching_languages(&a.languages, &b.languages);
+        let best_lang = matching_languages.find_max_affinity();
 
-        if let Some(best_lang) = matching_languages.find_max_affinity() {
-            Self((best_lang.1).0)
+        if let Some((_, best_lang_score)) = best_lang {
+            let best_lang_score = (best_lang_score.0 as f64) / (LanguageAffinity::MAX.0 as f64);
+            let best_lang_score = best_lang_score * Self::BEST_LANG_SCORE_WEIGHT;
+
+            let matching_languages_count = matching_languages.len();
+            dbg!(&matching_languages_count);
+            let total_languages_count = a.languages.union(&b.languages).len();
+            let matching_ratio = (matching_languages_count as f64) / (total_languages_count as f64);
+            let matching_ratio = matching_ratio * (1.0 - Self::BEST_LANG_SCORE_WEIGHT);
+
+            let score = best_lang_score + matching_ratio;
+
+            Self((score * (Self::MAX as f64)) as i32)
         } else {
             Self::NONE
         }
@@ -217,7 +236,7 @@ mod tests {
 
         assert!(affinity < Affinity::FULL);
         assert!(affinity > Affinity::NONE);
-        assert!(affinity.0 == 3);
+        assert!(affinity.0 == 399);
     }
 
     #[test]
