@@ -175,6 +175,9 @@ impl SettingsPage {
     }
 
     fn view_profile_panel(&self, user: &User) -> Html {
+        const BIO_TOTAL_CHARACTERS: usize = 160;
+        let bio_remaining_characters = BIO_TOTAL_CHARACTERS - user.bio.as_bytes().len();
+
         html! {
             <fieldset class="pure-u-1 pure-u-md-1-2 pure-u-xl-1-4">
                 <legend>{ "Profile" }</legend>
@@ -195,7 +198,7 @@ impl SettingsPage {
                 <div class="pure-control-group">
                     <label for="bio">{ Text::Bio }</label>
                     <textarea name="bio" class="pure-input-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
-                    <span class="pure-form-message-inline">{ Text::MaxNCharacters(160) }</span>
+                    <span class="pure-form-message-inline">{ Text::RemainingCharacters(160, bio_remaining_characters) }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ Text::VacationMode }</label>
