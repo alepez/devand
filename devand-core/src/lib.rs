@@ -6,6 +6,7 @@ pub mod mock;
 mod schedule;
 pub mod schedule_matcher;
 mod spoken_languages;
+pub mod string_utils;
 
 use serde::{Deserialize, Serialize};
 use std::cmp::Ord;

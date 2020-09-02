@@ -3,6 +3,7 @@ mod captcha;
 use self::captcha::CaptchaFile;
 use crate::PgDevandConn;
 use core::convert::TryFrom;
+use devand_core::string_utils::trimlow;
 use devand_db as db;
 use rocket::http::{Cookie, Cookies, SameSite};
 use rocket::outcome::IntoOutcome;
@@ -342,13 +343,6 @@ impl ToString for JoinError {
             JoinError::ValidationError(msg) => msg.into(),
         }
     }
-}
-
-fn trimlow(s: String) -> String {
-    // We help the user, trimming spaces and converting to lowercase
-    let s = s.to_lowercase();
-    // Note: this allocates a new string, in place trimming does not exist
-    s.trim().to_string()
 }
 
 #[derive(Debug, Serialize, Deserialize)]

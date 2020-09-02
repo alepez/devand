@@ -77,7 +77,7 @@ impl Component for SettingsPage {
             Msg::UpdateEmail(s) => {
                 self.update_user(move |user| {
                     // TODO Check if address is valid
-                    user.email = s;
+                    user.email = devand_core::string_utils::trimlow(s);
                 });
             }
             Msg::ToggleVacationMode => {
@@ -188,7 +188,7 @@ impl SettingsPage {
                 </div>
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
-                    <input type="text" name="email" id="email" value=&user.email class="pure-input-1" oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) />
+                    <input type="text" name="email" id="email" value=&user.email class="pure-input-1" oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
                     { self.view_verify_email_button(user) }
                 </div>
                 <div class="pure-control-group">
