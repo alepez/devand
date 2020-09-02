@@ -4,4 +4,3 @@ pub fn trimlow(s: String) -> String {
     // Note: this allocates a new string, in place trimming does not exist
     s.trim().to_string()
 }
-

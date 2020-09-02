@@ -214,16 +214,18 @@ impl SettingsPage {
             }
         });
 
+        let highest_priority = find_highest_priority(languages);
+
         html! {
             <fieldset class="pure-u-1">
                 <div class="pure-g">
                     <legend class="pure-u-1">{ Text::Languages }</legend>
                     <div class="pure-u-1">
                     {
-                        if !at_least_one_language_with_priority(languages) {
-                            view_no_priority_warning()
-                        } else {
-                            html! {}
+                        match highest_priority {
+                            Priority::High => html!{},
+                            Priority::Low => html! { <Alert>{ Text::SelectOneHighPrioLanguage }</Alert> },
+                            Priority::No => html! { <Alert>{ Text::SelectOneLanguage }</Alert> },
                         }
                     }
                     </div>
@@ -294,6 +296,10 @@ impl SettingsPage {
     }
 }
 
+fn view_no_high_priority_warning() -> Html {
+    html! { <Alert>{ Text::SelectOneLanguage }</Alert> }
+}
+
 fn view_no_priority_warning() -> Html {
     html! { <Alert>{ Text::SelectOneLanguage }</Alert> }
 }
@@ -302,10 +308,12 @@ fn view_no_spoken_language_warning() -> Html {
     html! { <Alert>{ Text::SelectOneSpokenLanguage }</Alert> }
 }
 
-fn at_least_one_language_with_priority(languages: &Languages) -> bool {
+fn find_highest_priority(languages: &Languages) -> devand_core::Priority {
     languages
         .iter()
-        .any(|(_, pref)| pref.priority != devand_core::Priority::No)
+        .map(|(_, pref)| pref.priority)
+        .max()
+        .unwrap_or(devand_core::Priority::No)
 }
 
 fn view_email_verified_alert(verified: bool) -> Html {
