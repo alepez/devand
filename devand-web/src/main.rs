@@ -75,6 +75,9 @@ struct CodeNowUsers(pub std::sync::RwLock<state::CodeNowUsersMap>);
 #[derive(Default)]
 struct WeekScheduleMatrix(pub std::sync::RwLock<state::WeekScheduleMatrixCache>);
 
+#[derive(Default)]
+struct NotificationLimiter(pub std::sync::RwLock<notifications::NotificationLimiter>);
+
 #[catch(401)]
 fn unauthorized(req: &Request) -> Template {
     #[derive(Serialize)]
@@ -118,6 +121,7 @@ fn ignite() -> rocket::Rocket {
 
     rocket::ignite()
         .manage(create_mailer())
+        .manage(NotificationLimiter::default())
         .manage(CodeNowUsers::default())
         .manage(WeekScheduleMatrix::default())
         .manage(devand_crypto::Decoder::new_from_secret(secret))

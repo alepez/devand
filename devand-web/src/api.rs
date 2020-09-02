@@ -197,6 +197,7 @@ fn chat_messages_post(
     txt: Json<String>,
     mailer: State<Mailer>,
     conn: PgDevandConn,
+    not_limiter: State<crate::NotificationLimiter>,
 ) -> Option<Json<Vec<devand_core::chat::ChatMessage>>> {
     let author = user.id;
     let txt = txt.0;
@@ -208,12 +209,15 @@ fn chat_messages_post(
         return None;
     }
 
+    let mut not_limiter = not_limiter.0.write().unwrap();
+
     crate::notifications::notify_chat_members(
         BASE_URL.unwrap_or(DEFAULT_BASE_URL),
         &mailer,
         &conn,
         &user,
         &members,
+        &mut not_limiter,
     );
 
     if let Some(new_message) = devand_db::add_chat_message_by_members(&members, author, txt, &conn)
