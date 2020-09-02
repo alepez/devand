@@ -296,14 +296,6 @@ impl SettingsPage {
     }
 }
 
-fn view_no_high_priority_warning() -> Html {
-    html! { <Alert>{ Text::SelectOneLanguage }</Alert> }
-}
-
-fn view_no_priority_warning() -> Html {
-    html! { <Alert>{ Text::SelectOneLanguage }</Alert> }
-}
-
 fn view_no_spoken_language_warning() -> Html {
     html! { <Alert>{ Text::SelectOneSpokenLanguage }</Alert> }
 }
@@ -333,7 +325,7 @@ mod test {
     #[test]
     fn no_language_no_one_with_priority() {
         let languages = Languages::default();
-        assert!(at_least_one_language_with_priority(&languages) == false);
+        assert!(find_highest_priority(&languages) == Priority::No);
     }
 
     #[test]
@@ -346,7 +338,7 @@ mod test {
                 priority: Priority::No,
             },
         );
-        assert!(at_least_one_language_with_priority(&languages) == false);
+        assert!(find_highest_priority(&languages) == Priority::No);
     }
 
     #[test]
@@ -359,6 +351,6 @@ mod test {
                 priority: Priority::High,
             },
         );
-        assert!(at_least_one_language_with_priority(&languages));
+        assert!(find_highest_priority(&languages) == Priority::High);
     }
 }
