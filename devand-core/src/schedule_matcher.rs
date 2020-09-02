@@ -3,26 +3,27 @@ use chrono::prelude::*;
 use chrono::Duration;
 use serde::{Deserialize, Serialize};
 
-struct AffinityMatrix(Vec<Option<Affinity>>);
+struct AffinityMatrix(usize, Vec<Option<Affinity>>);
 
 impl std::ops::Index<(UserId, UserId)> for AffinityMatrix {
     type Output = Option<Affinity>;
 
     fn index(&self, pair: (UserId, UserId)) -> &Self::Output {
         let (UserId(i), UserId(j)) = pair;
-        let p = (((j * (j - 1)) / 2) + i) as usize;
-        &self.0[p]
+        let p = (j as usize) * self.0 + (i as usize);
+        &self.1[p]
     }
 }
 
 /// Creates an AffinityMatrix from a Vec of (UserId,AffinityParams), where the
 /// UserId can be unsorted and with holes.
-/// The resulting matrix size is ((n * (n-1)) / 2), where n is the max
+/// The resulting matrix size is (n * n), where n is the max
 /// UserId.
 impl From<Vec<(UserId, AffinityParams)>> for AffinityMatrix {
     fn from(ua: Vec<(UserId, AffinityParams)>) -> Self {
         if let Some((UserId(max_user_id), _)) = ua.iter().max_by_key(|x| x.0) {
-            let size = (((max_user_id + 1) * max_user_id) / 2) as usize;
+            let width = (*max_user_id + 1) as usize;
+            let size = width * width;
 
             let mut data = Vec::with_capacity(size);
             data.resize_with(size, Default::default);
@@ -30,15 +31,13 @@ impl From<Vec<(UserId, AffinityParams)>> for AffinityMatrix {
             for (s, (UserId(j), y)) in ua.iter().enumerate().skip(1) {
                 for (UserId(i), x) in ua.iter().take(s) {
                     let affinity = Affinity::from_params(x, y);
-                    let p = (((j * (j - 1)) / 2) + i) as usize;
-                    unsafe {
-                        *data.get_unchecked_mut(p) = Some(affinity);
-                    }
+                    let p = (*j as usize) * width + (*i as usize);
+                    data.get_mut(p).map(|x| *x = Some(affinity));
                 }
             }
-            Self(data)
+            Self(width, data)
         } else {
-            Self(Vec::default())
+            Self(0, Vec::default())
         }
     }
 }
@@ -416,15 +415,26 @@ mod tests {
                     },
                 )]),
             ),
+            (
+                UserId(4),
+                AffinityParams::from(vec![(
+                    Language::Rust,
+                    LanguagePreference {
+                        level: Level::Novice,
+                        priority: Priority::High,
+                    },
+                )]),
+            ),
         ];
 
-        let expected_len = params.len() * (params.len() - 1) / 2;
+        let expected_len = params.len() * params.len();
         let matrix = AffinityMatrix::from(params);
 
-        assert!(matrix.0.len() == expected_len);
+        assert!(matrix.1.len() == expected_len);
         assert!(matrix[(UserId(0), UserId(2))] == Some(Affinity::NONE));
-        assert!(dbg!(matrix[(UserId(0), UserId(3))]) == Some(Affinity::NONE));
-        assert!(dbg!(matrix[(UserId(1), UserId(2))]) == Some(Affinity::FULL));
+        assert!(matrix[(UserId(0), UserId(3))] == Some(Affinity::NONE));
+        assert!(matrix[(UserId(1), UserId(2))] != Some(Affinity::FULL));
+        assert!(matrix[(UserId(2), UserId(4))] == Some(Affinity::FULL));
 
         let u = UserId(1);
         let o = vec![UserId(2), UserId(3)];

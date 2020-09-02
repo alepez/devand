@@ -45,7 +45,7 @@ impl PairLevel {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct AffinityParams {
     languages: Languages,
 }
@@ -106,6 +106,9 @@ fn find_matching_languages(a: &Languages, b: &Languages) -> MatchingLanguages {
     let matching = a
         .iter()
         .filter_map(|(lang, a_pref)| b.get(lang).map(|b_pref| (lang, (a_pref, b_pref))))
+        .filter(|(_, (a_pref, b_pref))| {
+            a_pref.priority > Priority::No && b_pref.priority > Priority::No
+        })
         .map(|(&lang, (a_pref, b_pref))| (lang, (a_pref.clone(), b_pref.clone())))
         .collect();
 
@@ -131,7 +134,7 @@ impl Affinity {
     const MIN: i32 = 0;
     const MAX: i32 = 1000;
 
-    const BEST_LANG_SCORE_WEIGHT: f64 = 1.0; // FIXME
+    const BEST_LANG_SCORE_WEIGHT: f64 = 0.8;
 
     pub fn from_params(a: &AffinityParams, b: &AffinityParams) -> Self {
         let matching_languages = find_matching_languages(&a.languages, &b.languages);
@@ -142,7 +145,6 @@ impl Affinity {
             let best_lang_score = best_lang_score * Self::BEST_LANG_SCORE_WEIGHT;
 
             let matching_languages_count = matching_languages.len();
-            dbg!(&matching_languages_count);
             let total_languages_count = a.languages.union(&b.languages).len();
             let matching_ratio = (matching_languages_count as f64) / (total_languages_count as f64);
             let matching_ratio = matching_ratio * (1.0 - Self::BEST_LANG_SCORE_WEIGHT);

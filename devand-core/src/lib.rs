@@ -358,6 +358,26 @@ mod tests {
     }
 
     #[test]
+    fn languages_no_priority() {
+        let a = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
+            Language::JavaScript => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Rust => LanguagePreference { level: Level::Novice, priority: Priority::No, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::No, }
+        ]);
+
+        let b = Languages(btreemap![
+            Language::C => LanguagePreference { level: Level::Expert, priority: Priority::No, },
+            Language::Java => LanguagePreference { level: Level::Proficient, priority: Priority::No, },
+            Language::Rust => LanguagePreference { level: Level::Proficient, priority: Priority::Low, },
+            Language::Go => LanguagePreference { level: Level::Expert, priority: Priority::High, }
+        ]);
+
+        let c = a.intersection(&b);
+        assert!(c.is_empty());
+    }
+
+    #[test]
     fn languages_union() {
         let a = Languages(btreemap![
             Language::C => LanguagePreference { level: Level::Expert, priority: Priority::Low, },
