@@ -19,6 +19,7 @@ lettre = "0.9"
 lettre_email = "0.9"
 dotenv = "0.15"
 comrak = "0.7"
+serde = "1"
 
 [features]
 server = ["jsonrpc-http-server"]

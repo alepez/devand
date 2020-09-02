@@ -1,3 +1,5 @@
+use crate::CcnEmail;
+
 pub struct Client {
     url: String,
 }
@@ -20,12 +22,7 @@ impl Client {
     }
 
     #[cfg(not(feature = "mock"))]
-    pub fn send_email(
-        &self,
-        recipients: Vec<String>,
-        subject: String,
-        text: String,
-    ) -> Result<(), Error> {
+    pub fn send_email(&self, email: CcnEmail) -> Result<(), Error> {
         use crate::api::client::GenClient;
         use jsonrpc_core::futures::future::Future;
         use jsonrpc_core_client::transports::http;
@@ -39,7 +36,7 @@ impl Client {
             .map_err(|_| Error::Unknown)?;
 
         client
-            .send_email(recipients, subject, text)
+            .send_email(email)
             .wait()
             .map_err(|_| Error::Unknown)?;
 
@@ -73,13 +70,8 @@ impl Client {
     }
 
     #[cfg(feature = "mock")]
-    pub fn send_email(
-        &self,
-        recipients: Vec<String>,
-        subject: String,
-        text: String,
-    ) -> Result<(), Error> {
-        dbg!((recipients, subject, text));
+    pub fn send_email(&self, email: CcnEmail) -> Result<(), Error> {
+        dbg!(email);
         Ok(())
     }
 

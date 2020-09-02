@@ -2,13 +2,14 @@
 
 #[cfg(feature = "server")]
 pub mod server {
+    use crate::CcnEmail;
     use jsonrpc_core::Result;
     use jsonrpc_derive::rpc;
 
     #[rpc(server)]
     pub trait Rpc {
         #[rpc(name = "send_email")]
-        fn send_email(&self, recipients: Vec<String>, subject: String, text: String) -> Result<()>;
+        fn send_email(&self, email: CcnEmail) -> Result<()>;
 
         #[rpc(name = "verify_address")]
         fn verify_address(&self, address: String) -> Result<()>;
@@ -17,12 +18,13 @@ pub mod server {
 
 #[cfg(feature = "client")]
 pub mod client {
+    use crate::CcnEmail;
     use jsonrpc_derive::rpc;
 
     #[rpc(client)]
     pub trait Rpc {
         #[rpc(name = "send_email")]
-        fn send_email(&self, recipients: Vec<String>, subject: String, text: String) -> Result<()>;
+        fn send_email(&self, email: CcnEmail) -> Result<()>;
 
         #[rpc(name = "verify_address")]
         fn verify_address(&self, address: String) -> Result<()>;

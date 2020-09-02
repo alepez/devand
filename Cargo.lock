@@ -648,6 +648,7 @@ dependencies = [
  "lettre",
  "lettre_email",
  "log 0.4.11",
+ "serde",
  "tokio",
 ]
 

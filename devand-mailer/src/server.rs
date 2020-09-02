@@ -1,5 +1,6 @@
 use crate::api::server::Rpc;
 use crate::mailer::Mailer;
+use crate::CcnEmail;
 use jsonrpc_core::{IoHandler, Result};
 use jsonrpc_http_server::*;
 use std::sync::{Arc, Mutex};
@@ -9,12 +10,12 @@ struct RpcImpl {
 }
 
 impl Rpc for RpcImpl {
-    fn send_email(&self, recipients: Vec<String>, subject: String, text: String) -> Result<()> {
-        for recipient in recipients {
+    fn send_email(&self, email: CcnEmail) -> Result<()> {
+        for recipient in email.recipients {
             self.mailer.lock().unwrap().send_email(
                 recipient.clone(),
-                subject.clone(),
-                text.clone(),
+                email.subject.clone(),
+                email.text.clone(),
             );
         }
         Ok(())

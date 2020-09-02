@@ -1,4 +1,4 @@
-use devand_mailer::{Client, ClientConf};
+use devand_mailer::{CcnEmail, Client, ClientConf};
 
 fn main() {
     dotenv::dotenv().ok();
@@ -9,11 +9,11 @@ fn main() {
 
     let client = Client::new(conf);
 
-    client
-        .send_email(
-            vec!["admin@devand.dev".to_string()],
-            "Hei".to_string(),
-            "Hello!\n\nThis is a **markdown** message.\n\n## This is a title".to_string(),
-        )
-        .unwrap();
+    let email = CcnEmail {
+        recipients: vec!["admin@devand.dev".to_string()],
+        subject: "Hei".to_string(),
+        text: "Hello!\n\nThis is a **markdown** message.\n\n## This is a title".to_string(),
+    };
+
+    client.send_email(email).unwrap();
 }

@@ -2,7 +2,8 @@ use crate::Mailer;
 use crate::PgDevandConn;
 use devand_core::{User, UserId};
 use devand_crypto::SignedToken;
-use devand_mailer::Email;
+use devand_db::load_user_by_id;
+use devand_mailer::CcnEmail;
 
 // TODO Subject/Text from text template
 pub(crate) fn notify_chat_members(
@@ -22,13 +23,21 @@ pub(crate) fn notify_chat_members(
         &from.visible_name, chat_url
     );
 
+    let email_address_from_id = |&user_id| load_user_by_id(user_id, &conn).map(|u| u.email);
+
     let recipients: Vec<_> = to
         .iter()
         .filter(|&&u| u != from.id)
-        .filter_map(|&user_id| devand_db::load_user_by_id(user_id, &conn).map(|u| u.email))
+        .filter_map(email_address_from_id)
         .collect();
 
-    if mailer.send_email(recipients, subject, text).is_err() {
+    let email = CcnEmail {
+        recipients,
+        subject,
+        text,
+    };
+
+    if mailer.send_email(email).is_err() {
         log::error!("Cannot send email");
     }
 }
@@ -55,7 +64,11 @@ If you don’t use this link within 3 hours, it will expire. To get a new passwo
 Thanks,\n
 The DevAndDev team\n", token_url, retry_url);
 
-    mailer
-        .send_email(vec![recipient], subject.to_string(), text)
-        .unwrap()
+    let email = CcnEmail {
+        recipients: vec![recipient],
+        subject: subject.into(),
+        text,
+    };
+
+    mailer.send_email(email).unwrap()
 }
