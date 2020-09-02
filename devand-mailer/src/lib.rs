@@ -1,4 +1,5 @@
 mod api;
+mod email;
 
 #[cfg(feature = "client")]
 mod client;
@@ -14,3 +15,5 @@ pub use client::{Client, ClientConf};
 
 #[cfg(feature = "server")]
 pub use server::{Server, ServerConf};
+
+pub use email::Email;

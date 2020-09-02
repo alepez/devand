@@ -1,3 +1,4 @@
+use crate::Email;
 use devand_crypto::{EmailVerification, Signable};
 use devand_text::Text;
 use lettre::smtp::authentication::Credentials;
@@ -5,14 +6,6 @@ use lettre::smtp::ConnectionReuseParameters;
 use lettre::{SmtpClient, Transport};
 use lettre_email::Mailbox;
 use std::sync::mpsc;
-
-#[derive(Debug)]
-struct Email {
-    recipient: String,
-    subject: String,
-    text: String,
-    address_must_be_verified: bool,
-}
 
 pub struct Mailer {
     tx: mpsc::Sender<Email>,

@@ -2,6 +2,7 @@ use crate::Mailer;
 use crate::PgDevandConn;
 use devand_core::{User, UserId};
 use devand_crypto::SignedToken;
+use devand_mailer::Email;
 
 // TODO Subject/Text from text template
 pub(crate) fn notify_chat_members(
