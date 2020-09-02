@@ -97,6 +97,10 @@ pub struct NotificationLimiter {
 impl NotificationLimiter {
     const THRESHOLD_SECONDS: i64 = 3600;
 
+    /// Return true if message can be sent: if no messages have ever
+    /// be sent from `from` to `to` or the last message was sent more
+    /// than THRESHOLD_SECONDS before `now`.
+    /// Note that when message can be send, timestamp is also updated.
     fn can_send(&mut self, from: UserId, to: UserId, now: DateTime<Utc>) -> bool {
         let key = NotificationLimiterKey { from, to };
         let item = self.history.get_mut(&key);
@@ -108,6 +112,7 @@ impl NotificationLimiter {
         };
 
         if ok {
+            // If message can be sent, update timestamp
             self.history.insert(key, now);
         }
 
