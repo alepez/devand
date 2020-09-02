@@ -1,6 +1,8 @@
 FROM docker.pkg.github.com/alepez/devand/devand-web-builder as builder
 
 WORKDIR /home/builder/project
+ADD --chown=builder ./Cargo.toml ./Cargo.toml
+ADD --chown=builder ./Cargo.lock ./Cargo.lock
 ADD --chown=builder ./devand-core ./devand-core
 ADD --chown=builder ./devand-crypto ./devand-crypto
 ADD --chown=builder ./devand-db ./devand-db
