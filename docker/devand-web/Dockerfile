@@ -26,7 +26,7 @@ RUN ./tools/replace-hash-placeholder
 FROM docker.pkg.github.com/alepez/devand/devand-run-env
 COPY --from=builder /home/builder/project/devand-web/static /app/static
 COPY --from=builder /home/builder/project/devand-web/templates /app/templates
-COPY --from=builder /home/builder/project/devand-web/target/release/devand-web /app/devand-web
+COPY --from=builder /home/builder/project/target/release/devand-web /app/devand-web
 ENV ROCKET_TEMPLATE_DIR=/app/templates
 ENV ROCKET_STATIC_DIR=/app/static
 ENTRYPOINT ["/app/devand-web"]
