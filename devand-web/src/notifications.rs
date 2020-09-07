@@ -104,10 +104,12 @@ impl NotificationLimiter {
     fn can_send(&mut self, from: UserId, to: UserId, now: DateTime<Utc>) -> bool {
         let key = NotificationLimiterKey { from, to };
         let item = self.history.get_mut(&key);
+        let threshold = chrono::Duration::seconds(Self::THRESHOLD_SECONDS);
 
         let ok = if let Some(t) = item {
-            now.signed_duration_since(*t) >= chrono::Duration::seconds(Self::THRESHOLD_SECONDS)
+            now.signed_duration_since(*t) >= threshold
         } else {
+            // Messages from `from` to `to` have never been sent
             true
         };
 
@@ -115,8 +117,6 @@ impl NotificationLimiter {
             // If message can be sent, update timestamp
             self.history.insert(key, now);
         }
-
-        dbg!(ok);
 
         ok
     }
