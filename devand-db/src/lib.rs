@@ -94,6 +94,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
         visible_name,
         email,
         bio,
+        projects,
         ..
     } = user;
 
@@ -122,6 +123,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
             schema::users::dsl::email.eq(email),
             schema::users::dsl::email_verified.eq(email_verified),
             schema::users::dsl::bio.eq(bio),
+            schema::users::dsl::projects.eq(projects),
         ))
         .get_result(conn)
         .ok()
@@ -589,11 +591,13 @@ mod tests {
         assert!(!user.email_verified);
 
         user.visible_name = "Foo Bar".to_string();
+        user.projects = vec!["https://github.com/alepez/devand".into()];
         save_user(user, &conn).unwrap();
 
         set_verified_email(&email, &conn).unwrap();
         let user = load_user_by_id(user_id, &conn).unwrap();
         assert!(user.email_verified);
+        assert!(user.projects.len() == 1);
     }
 
     #[test]

@@ -39,6 +39,7 @@ table! {
         email_verified -> Bool,
         created_at -> Timestamp,
         bio -> Varchar,
+        projects -> Array<Text>,
     }
 }
 

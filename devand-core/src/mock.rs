@@ -30,6 +30,7 @@ pub fn user() -> User {
             spoken_languages: SpokenLanguages(btreeset! {SpokenLanguage::English}),
         },
         bio: "Ciao".to_string(),
+        projects: vec!["https://github.com/alepez/devand".into()],
     }
 }
 

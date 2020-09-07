@@ -58,6 +58,8 @@ pub struct User {
     pub email_verified: bool,
     /// User's bio (max 160 char)
     pub bio: String,
+    /// User's projects
+    pub projects: Vec<String>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
