@@ -142,6 +142,7 @@ fn fake_user(rng: &mut StdRng) -> User {
             spoken_languages: SpokenLanguages(btreeset![SpokenLanguage::English]),
         },
         bio: "This is the bio".to_string(),
+        projects: vec![],
     }
 }
 
