@@ -84,6 +84,7 @@ impl Component for UserProfilePage {
                 languages,
                 spoken_languages,
                 visible_name,
+                projects,
                 ..
             } = other_user;
 
@@ -103,6 +104,7 @@ impl Component for UserProfilePage {
                     { for languages_tags }
                 </div>
 
+                { view_projects(&projects) }
                 { view_spoken_languages(&visible_name, &spoken_languages) }
             </>
             }
@@ -121,7 +123,26 @@ fn view_spoken_languages(visible_name: &str, spoken_languages: &SpokenLanguages)
         <>
             <h2>{ Text::UserSpeaks(visible_name) }</h2>
             <ul>
-                <li>{ for spoken_languages }</li>
+                { for spoken_languages }
+            </ul>
+        </>
+        }
+    }
+}
+
+fn view_projects(projects: &[String]) -> Html {
+    if projects.is_empty() {
+        html! {}
+    } else {
+        let projects = projects.iter().map(|x| {
+            html! { <li><a href=x.clone()>{ x }</a></li> }
+        });
+
+        html! {
+        <>
+            <h2>{ Text::Projects }</h2>
+            <ul>
+                { for projects }
             </ul>
         </>
         }
