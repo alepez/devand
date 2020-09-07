@@ -132,6 +132,7 @@ pub struct ChatMember {
     pub bio: String,
     pub languages: serde_json::Value,
     pub spoken_languages: Option<serde_json::Value>,
+    pub projects: Vec<String>,
 }
 
 #[derive(Debug)]

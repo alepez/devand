@@ -226,6 +226,7 @@ fn load_user_chat_by_id(
                 bio,
                 languages,
                 spoken_languages,
+                projects,
                 ..
             } = chat_member;
 
@@ -247,6 +248,7 @@ fn load_user_chat_by_id(
                 languages,
                 bio,
                 spoken_languages,
+                projects,
             };
 
             Some(profile)

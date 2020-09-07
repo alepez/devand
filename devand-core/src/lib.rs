@@ -260,6 +260,7 @@ pub struct PublicUserProfile {
     pub languages: Languages,
     pub bio: String,
     pub spoken_languages: SpokenLanguages,
+    pub projects: Vec<String>,
 }
 
 impl PublicUserProfile {
@@ -287,6 +288,7 @@ impl From<User> for PublicUserProfile {
             languages: user.settings.languages,
             bio: user.bio,
             spoken_languages: user.settings.spoken_languages,
+            projects: user.projects,
         }
     }
 }

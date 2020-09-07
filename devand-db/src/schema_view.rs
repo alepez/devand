@@ -17,6 +17,7 @@ table! {
         bio -> Varchar,
         languages -> Jsonb,
         spoken_languages -> Nullable<Jsonb>,
+        projects -> Array<Text>,
     }
 }
 
