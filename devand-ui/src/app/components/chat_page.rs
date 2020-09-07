@@ -107,7 +107,9 @@ impl Component for ChatPage {
 
                     for member in members_info {
                         // TODO This works only for single member chats
-                        self.state.verified_email = Some(member.verified_email);
+                        if member.user_id != self.props.me.id {
+                            self.state.verified_email = Some(member.verified_email);
+                        }
                     }
 
                     true
@@ -164,7 +166,7 @@ impl ChatPage {
                 <h1>{ Text::ChatWith(&other_user.visible_name) }</h1>
                 {
                 if unverified_email {
-                    view_unverified_email()
+                    html! { <Alert>{ Text::UserWithUnverifiedEmail(&other_user.visible_name) }</Alert> }
                 } else {
                     html! { }
                 }
@@ -178,10 +180,6 @@ impl ChatPage {
             </>
         }
     }
-}
-
-fn view_unverified_email() -> Html {
-    html! { <Alert>{ Text::UserWithUnverifiedEmail }</Alert> }
 }
 
 fn view_bubble(me: UserId, msg: &ChatMessage) -> Html {
