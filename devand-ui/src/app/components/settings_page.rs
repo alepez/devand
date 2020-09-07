@@ -10,6 +10,7 @@ use crate::app::components::AvailabilityTable;
 pub enum Msg {
     UpdateVisibleName(String),
     UpdateBio(String),
+    UpdateProjects(String),
     UpdateEmail(String),
     ToggleVacationMode,
     ToggleSpokenLanguage(SpokenLanguage),
@@ -72,6 +73,11 @@ impl Component for SettingsPage {
             Msg::UpdateBio(s) => {
                 self.update_user(move |user| {
                     user.bio = s;
+                });
+            }
+            Msg::UpdateProjects(s) => {
+                self.update_user(move |user| {
+                    user.projects = s.lines().map(|x| x.into()).collect();
                 });
             }
             Msg::UpdateEmail(s) => {
@@ -199,6 +205,11 @@ impl SettingsPage {
                     <label for="bio">{ Text::Bio }</label>
                     <textarea name="bio" class="pure-input-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
                     <span class="pure-form-message-inline">{ Text::RemainingCharacters(160, bio_remaining_characters) }</span>
+                </div>
+                <div class="pure-control-group">
+                    <label for="projects">{ Text::Projects }</label>
+                    <textarea name="projects" class="pure-input-1" id="projects" value=&user.projects.join("\n") oninput=self.link.callback(move |e: InputData| Msg::UpdateProjects(e.value)) />
+                    <span class="pure-form-message-inline">{ Text::ProjectsInputHint }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="vacation_mode" class="pure-checkbox"><input type="checkbox" id="vacation_mode" checked=user.settings.vacation_mode onclick=self.link.callback(move |_| Msg::ToggleVacationMode) />{ Text::VacationMode }</label>
