@@ -116,6 +116,8 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
         &visible_name
     };
 
+    let projects = remove_empty(projects);
+
     diesel::update(schema::users::table.filter(schema::users::dsl::id.eq(user.id.0)))
         .set((
             schema::users::dsl::settings.eq(settings),
@@ -169,6 +171,10 @@ pub fn load_chat_history_by_id(
         .load(conn)
         .map(|v: Vec<models::ChatMessage>| v.into_iter().map(|x| x.into()).collect())
         .unwrap_or_default()
+}
+
+fn remove_empty(ss: Vec<String>) -> Vec<String> {
+    ss.into_iter().filter(|x| !x.is_empty()).collect()
 }
 
 fn find_chat_id_by_members(
@@ -599,6 +605,20 @@ mod tests {
         set_verified_email(&email, &conn).unwrap();
         let user = load_user_by_id(user_id, &conn).unwrap();
         assert!(user.email_verified);
+        assert!(user.projects.len() == 1);
+    }
+
+    #[test]
+    #[ignore]
+    #[serial]
+    fn save_user_clear_empty_projects() {
+        let (conn, mut user) = fresh_db_with_fake_user();
+        let user_id = user.id;
+
+        user.projects = vec!["https://github.com/alepez/devand".into(), String::new()];
+        save_user(user, &conn).unwrap();
+
+        let user = load_user_by_id(user_id, &conn).unwrap();
         assert!(user.projects.len() == 1);
     }
 
