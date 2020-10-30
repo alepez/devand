@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 # Note: using a forked (and mantained) captch crate, because it fixes https://rustsec.org/advisories/RUSTSEC-2019-0014.html
-captcha = { git = "https://github.com/robatipoor/captcha", rev = "8c8f9d2" }
+captcha = { git = "https://github.com/robatipoor/captcha", rev = "70b49b7" }
 chrono = { version = "0.4", features = ["serde"] }
 devand-core = { path = "../devand-core" }
 devand-crypto = { path = "../devand-crypto" }
