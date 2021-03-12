@@ -8,10 +8,10 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-log = "0.4"
+log = "*"
 http = "0.2"
-strum = "0.17"
-strum_macros = "0.17"
+strum = "*"
+strum_macros = "*"
 serde = "1"
 serde_json = "1"
 serde_derive = "1"
@@ -30,15 +30,15 @@ uuid = { version = ">=0.2.0, <0.7.0", optional = true }
 
 [dependencies.yew]
 git = "https://github.com/yewstack/yew.git"
-tag = "0.17.2"
+tag = "0.17.3"
 
 [dependencies.yew-router]
 git = "https://github.com/yewstack/yew.git"
-tag = "0.17.2"
+tag = "0.17.3"
 
 [dependencies.yewtil]
 git = "https://github.com/yewstack/yew.git"
-tag = "0.17.2"
+tag = "0.17.3"
 features = [
   "pure"
 ]
