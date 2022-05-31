@@ -91,7 +91,7 @@ impl Component for UserProfilePage {
             let languages = languages.clone().into_sorted_vec();
 
             let languages_tags = languages.iter().map(|(lang, pref)| {
-                html! { <LanguageTag lang=lang pref=pref /> }
+                html! { <LanguageTag lang=lang.clone() pref=pref.clone() /> }
             });
 
             html! {

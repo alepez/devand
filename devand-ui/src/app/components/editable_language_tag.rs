@@ -47,10 +47,10 @@ impl Component for EditableLanguageTag {
             format!("devand-language-priority-{}", self.props.pref.priority).to_lowercase();
 
         let class = vec![
-            "devand-editable-language-tag",
-            "devand-language-tag",
-            &level_class,
-            &priority_class,
+            "devand-editable-language-tag".to_string(),
+            "devand-language-tag".to_string(),
+            level_class,
+            priority_class,
         ];
 
         html! {

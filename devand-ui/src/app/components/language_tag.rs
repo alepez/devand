@@ -34,7 +34,7 @@ impl Component for LanguageTag {
         let priority_class =
             format!("devand-language-priority-{}", self.props.pref.priority).to_lowercase();
 
-        let class = vec!["devand-language-tag", &level_class, &priority_class];
+        let class = vec!["devand-language-tag".to_string(), level_class, priority_class];
 
         html! {
         <span class=class>

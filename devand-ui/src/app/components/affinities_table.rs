@@ -83,7 +83,7 @@ impl AffinitiesTable {
         let language_options = Language::iter()
             .map(|lang| (lang, selected_language == Some(lang)))
             .map(|(lang, selected)| {
-                html! { <option value=lang selected=selected>{ lang }</option> }
+                html! { <option value=lang.to_string() selected=selected>{ lang }</option> }
             });
 
         html! {
@@ -124,7 +124,7 @@ fn view_affinity(user_affinity: &UserAffinity) -> Html {
     let languages = user_affinity.user.languages.clone().into_sorted_vec();
 
     let languages_tags = languages.iter().map(|(lang, pref)| {
-        html! { <LanguageTag lang=lang pref=pref /> }
+        html! { <LanguageTag lang=lang.clone() pref=pref.clone() /> }
     });
 
     html! {

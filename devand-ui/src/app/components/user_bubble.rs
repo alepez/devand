@@ -24,8 +24,8 @@ pub fn user_affinity_bubble(user: &UserAffinity) -> Html {
     let username = &user.username;
     let affinity_str = affinity.to_string();
     let affinity_level = AffinityLevel::from(*affinity);
-    let title = affinity_title(affinity_level);
-    let class = affinity_class(affinity_level);
+    let title = affinity_title(affinity_level).to_string();
+    let class = affinity_class(affinity_level).to_string();
 
     html! {
     <span class="devand-user-bubble">

@@ -189,26 +189,26 @@ impl SettingsPage {
                 <legend>{ "Profile" }</legend>
                 <div class="pure-control-group">
                     <label for="username">{ "Username:" }</label>
-                    <input type="text" name="username" id="username" class="pure-input-1" value=&user.username readonly=true />
+                    <input type="text" name="username" id="username" class="pure-input-1" value=user.username.clone() readonly=true />
                     <span class="pure-form-message-inline">{ Text::UsernameCannotBeChanged }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="email">{ "Email:" }</label>
-                    <input type="text" name="email" id="email" value=&user.email class="pure-input-1" oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+                    <input type="text" name="email" id="email" value=user.email.clone() class="pure-input-1" oninput=self.link.callback(move |e: InputData| Msg::UpdateEmail(e.value)) autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
                     { self.view_verify_email_button(user) }
                 </div>
                 <div class="pure-control-group">
                     <label for="visible_name">{ Text::VisibleName }</label>
-                    <input type="text" name="visible_name" id="visible_name" class="pure-input-1" value=&user.visible_name oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
+                    <input type="text" name="visible_name" id="visible_name" class="pure-input-1" value=user.visible_name.clone() oninput=self.link.callback(move |e: InputData| Msg::UpdateVisibleName(e.value)) />
                 </div>
                 <div class="pure-control-group">
                     <label for="bio">{ Text::Bio }</label>
-                    <textarea name="bio" class="pure-input-1" id="bio" value=&user.bio oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
+                    <textarea name="bio" class="pure-input-1" id="bio" value=user.bio.clone() oninput=self.link.callback(move |e: InputData| Msg::UpdateBio(e.value)) />
                     <span class="pure-form-message-inline">{ Text::RemainingCharacters(160, bio_remaining_characters) }</span>
                 </div>
                 <div class="pure-control-group">
                     <label for="projects">{ Text::Projects }</label>
-                    <textarea name="projects" class="pure-input-1" id="projects" value=&user.projects.join("\n") oninput=self.link.callback(move |e: InputData| Msg::UpdateProjects(e.value)) />
+                    <textarea name="projects" class="pure-input-1" id="projects" value=user.projects.clone().join("\n") oninput=self.link.callback(move |e: InputData| Msg::UpdateProjects(e.value)) />
                     <span class="pure-form-message-inline">{ Text::ProjectsInputHint }</span>
                 </div>
                 <div class="pure-control-group">
@@ -221,7 +221,7 @@ impl SettingsPage {
     fn view_languages_panel(&self, languages: &Languages) -> Html {
         let languages_tags = languages.iter().map(|(&lang, pref)| {
             html! {
-                <EditableLanguageTag lang=lang pref=pref on_remove=self.link.callback(move |_| Msg::RemoveLanguage(lang))/>
+                <EditableLanguageTag lang=lang pref=pref.clone() on_remove=self.link.callback(move |_| Msg::RemoveLanguage(lang))/>
             }
         });
 
@@ -258,11 +258,11 @@ impl SettingsPage {
             let checked = spoken_languages.contains(&spoken_lang);
             let input_id = format!("spoken-language-{}", spoken_lang);
             html! {
-            <label for=input_id class="pure-checkbox">
+            <label for=input_id.clone() class="pure-checkbox">
                 <input
                     type="checkbox"
-                    id=input_id
-                    value=spoken_lang
+                    id=input_id.clone()
+                    value=spoken_lang.to_string()
                     checked=checked
                     onclick=self.link.callback(move |_| Msg::ToggleSpokenLanguage(spoken_lang))
                     />
@@ -293,7 +293,7 @@ impl SettingsPage {
     }
 
     fn view_availability_panel(&self, schedule: &Availability) -> Html {
-        html! { <AvailabilityTable schedule=schedule on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
+        html! { <AvailabilityTable schedule=schedule.clone() on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
     }
 
     fn update_user<F>(&mut self, f: F)

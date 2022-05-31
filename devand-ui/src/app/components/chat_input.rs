@@ -59,7 +59,7 @@ impl Component for ChatInput {
     fn view(&self) -> Html {
         html! {
         <div class="devand-chat-input">
-            <input class="devand-chat-input-box" type="text" value=self.state.txt onkeydown=self.link.callback(Msg::Keydown) oninput=self.link.callback(Msg::Input) />
+            <input class="devand-chat-input-box" type="text" value=self.state.txt.clone() onkeydown=self.link.callback(Msg::Keydown) oninput=self.link.callback(Msg::Input) />
             <button class="devand-chat-input-button pure-button pure-button-primary" onclick=self.link.callback(|_| Msg::SendClicked)>{ "Send" }</button>
         </div>
         }

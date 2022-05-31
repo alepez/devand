@@ -113,7 +113,7 @@ impl AddLanguageComponent {
             { for Language::iter().map(|x| {
                let selected = (selected_language == Some(x));
                 html! {
-                    <option value=x selected=selected>{ x }</option>
+                    <option value=x.to_string() selected=selected>{ x }</option>
                 }
             })
             }
@@ -135,7 +135,7 @@ impl AddLanguageComponent {
             } )>
             { for devand_core::Level::iter().map(|x| {
                 html! {
-                    <option value=x>{ x }</option>
+                    <option value=x.to_string()>{ x }</option>
                 }
             })
             }
@@ -157,7 +157,7 @@ impl AddLanguageComponent {
             } )>
             { for Priority::iter().rev().map(|x| {
                 html! {
-                    <option value=x>{ x }</option>
+                    <option value=x.to_string()>{ x }</option>
                 }
             })
             }
