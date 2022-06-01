@@ -95,7 +95,7 @@ impl AvailabilityTable {
 
             html! {
                 <button
-                    class=("pure-button", active)
+                    class=classes!("pure-button", active)
                     onclick=self.link.callback(move |_| Msg::ToggleDayHour(day, h))>{ h }</button>
             }
         });

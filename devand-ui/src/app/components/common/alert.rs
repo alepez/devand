@@ -3,7 +3,8 @@ use yewtil::{Pure, PureComponent};
 
 pub type Alert = Pure<PureAlert>;
 
-#[derive(Copy, Clone, PartialEq)]
+#[allow(dead_code)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum AlertLevel {
     Success,
     Info,
@@ -35,7 +36,7 @@ impl PureComponent for PureAlert {
     fn render(&self) -> Html {
         let level_str: &'static str = self.level.into();
         html! {
-        <div class=("alert", level_str, self.class)>
+        <div class=classes!("alert", level_str, self.class)>
             { self.children.clone() }
         </div>
         }

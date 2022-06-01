@@ -162,7 +162,7 @@ impl SettingsPage {
             html! {
                 <span class="pure-form-message-inline">
                     <button
-                        class=("pure-button", "button-warning", "pure-button-primary")
+                        class=classes!("pure-button", "button-warning", "pure-button-primary")
                         onclick=self.link.callback(|_| Msg::VerifyAddress)
                         >{ "Verify" }
                     </button>
