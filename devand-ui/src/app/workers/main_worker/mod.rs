@@ -216,7 +216,7 @@ fn make_on_unload_callback(pending: Arc<AtomicBool>) -> Closure<dyn FnMut(Before
 
     let on_unload = Closure::wrap(on_unload);
 
-    window.set_onbeforeunload(Some(&on_unload.as_ref().unchecked_ref()));
+    window.set_onbeforeunload(Some(on_unload.as_ref().unchecked_ref()));
 
     on_unload
 }

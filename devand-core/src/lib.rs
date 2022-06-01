@@ -97,13 +97,13 @@ impl Languages {
     pub fn union(&self, other: &Self) -> Vec<Language> {
         let mine: BTreeSet<_> = self.keys_with_priority().collect();
         let theirs: BTreeSet<_> = other.keys_with_priority().collect();
-        mine.union(&theirs).map(|x| *x).collect()
+        mine.union(&theirs).copied().collect()
     }
 
     pub fn intersection(&self, other: &Self) -> Vec<Language> {
         let mine: BTreeSet<_> = self.keys_with_priority().collect();
         let theirs: BTreeSet<_> = other.keys_with_priority().collect();
-        mine.intersection(&theirs).map(|x| *x).collect()
+        mine.intersection(&theirs).copied().collect()
     }
 
     fn keys_with_priority(&self) -> impl Iterator<Item = Language> + '_ {

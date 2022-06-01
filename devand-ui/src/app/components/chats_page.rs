@@ -84,7 +84,7 @@ fn view_chats(chats: &UserChats) -> Html {
             .iter()
             .rev()
             .filter(|c| !c.members.is_empty())
-            .map(|c| view_chat(c));
+            .map(view_chat);
 
         html! {
             <ul class="user-chats pure-table-horizontal">
@@ -109,7 +109,7 @@ fn view_direct_chat(chat: &UserChat) -> Html {
     let unread_messages = chat.unread_messages;
 
     html! {
-    <li class=("user-chat")>
+    <li class="user-chat">
         <span class="visible_name"><RouterAnchor route=AppRoute::Chat(username) >{ visible_name }</RouterAnchor></span>
         <CountTag count=unread_messages />
     </li>

@@ -148,7 +148,7 @@ pub fn request(worker: &mut MainWorker, msg: Request) {
         }
 
         Request::LoadAllChats => {
-            let req = get(&api_url_chats());
+            let req = get(api_url_chats());
             task(worker, req, Response::AllChatsLoaded)
         }
 

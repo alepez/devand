@@ -109,9 +109,9 @@ impl AddLanguageComponent {
                     Msg::Nope
                 }
             } )>
-            <option value="" selected=(selected_language.is_none())></option>
+            <option value="" selected=selected_language.is_none()></option>
             { for Language::iter().map(|x| {
-               let selected = (selected_language == Some(x));
+               let selected = selected_language == Some(x);
                 html! {
                     <option value=x.to_string() selected=selected>{ x }</option>
                 }

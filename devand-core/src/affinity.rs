@@ -91,7 +91,7 @@ impl MatchingLanguages {
                 let aff = LanguageAffinity::new(a, b);
                 (lang, aff)
             })
-            .max_by(|(_, l), (_, r)| l.cmp(&r))
+            .max_by(|(_, l), (_, r)| l.cmp(r))
             .map(|(&lang, aff)| (lang, aff))
     }
 
@@ -297,7 +297,7 @@ mod tests {
     fn find_matching_languages_none() {
         let languages = Languages::default();
         let a = languages.clone();
-        let b = languages.clone();
+        let b = languages;
 
         let matching = find_matching_languages(&a, &b);
 

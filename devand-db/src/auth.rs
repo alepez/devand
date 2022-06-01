@@ -19,7 +19,7 @@ fn encode_password(password: &str) -> String {
 
 fn verify_password(hash: &str, password: &str) -> bool {
     let password = password.as_bytes();
-    argon2::verify_encoded(&hash, password).unwrap()
+    argon2::verify_encoded(hash, password).unwrap()
 }
 
 pub struct Credentials {
@@ -89,7 +89,7 @@ pub fn check_password(user_id: UserId, password: &str, conn: &PgConnection) -> R
         .select(schema::auth::enc_password)
         .first(conn)
         .map_err(|_| Error::Unknown)?;
-    Ok(verify_password(&enc_password, &password))
+    Ok(verify_password(&enc_password, password))
 }
 
 fn add_password(

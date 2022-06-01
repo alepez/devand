@@ -32,7 +32,7 @@ impl Client {
 
         let client_url = &self.url;
         let client = rt
-            .block_on(http::connect::<GenClient>(&client_url))
+            .block_on(http::connect::<GenClient>(client_url))
             .map_err(|_| Error::Unknown)?;
 
         client
@@ -56,7 +56,7 @@ impl Client {
 
         let client_url = &self.url;
         let client = rt
-            .block_on(http::connect::<GenClient>(&client_url))
+            .block_on(http::connect::<GenClient>(client_url))
             .map_err(|_| Error::Unknown)?;
 
         client

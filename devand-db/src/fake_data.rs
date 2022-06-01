@@ -18,7 +18,7 @@ impl OneUser {
             password: password.clone(),
         };
 
-        let user = super::auth::join(join_data, &conn).unwrap();
+        let user = super::auth::join(join_data, conn).unwrap();
 
         Self { user, password }
     }

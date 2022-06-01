@@ -191,8 +191,8 @@ fn view_bubble(me: UserId, msg: &ChatMessage) -> Html {
     };
     html! {
         <div class=("devand-chat-message-bubble", from_me_class)>
-            <span class=("devand-chat-message-txt")>{ &msg.txt }</span>
-            <span class=("devand-timestamp")>{ view_timestamp(&msg.created_at) }</span>
+            <span class="devand-chat-message-txt">{ &msg.txt }</span>
+            <span class="devand-timestamp">{ view_timestamp(&msg.created_at) }</span>
         </div>
     }
 }

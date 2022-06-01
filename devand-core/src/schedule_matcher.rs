@@ -455,12 +455,12 @@ mod tests {
         let matrix = DayScheduleMatrix::from(params);
 
         assert!(matrix.data.len() == expected_len);
-        assert!(matrix[&(UserId(0), Hour(1))] == true);
-        assert!(matrix[&(UserId(2), Hour(3))] == true);
-        assert!(matrix[&(UserId(2), Hour(5))] == true);
-        assert!(matrix[&(UserId(2), Hour(1))] == false);
-        assert!(matrix[&(UserId(1), Hour(5))] == false);
-        assert!(matrix[&(UserId(3), Hour(6))] == false);
+        assert!(matrix[&(UserId(0), Hour(1))]);
+        assert!(matrix[&(UserId(2), Hour(3))]);
+        assert!(matrix[&(UserId(2), Hour(5))]);
+        assert!(!matrix[&(UserId(2), Hour(1))]);
+        assert!(!matrix[&(UserId(1), Hour(5))]);
+        assert!(!matrix[&(UserId(3), Hour(6))]);
 
         assert!(matrix.get_available_at_hour(Hour(1)) == vec![UserId(0), UserId(1)]);
         assert!(matrix.get_available_at_hour(Hour(3)) == vec![UserId(1), UserId(2), UserId(3)]);

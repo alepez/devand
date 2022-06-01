@@ -90,7 +90,7 @@ impl AffinitiesTable {
         <div class="pure-u-1 pure-u-sm-1-2">
             <label for="add_language">{ "Filter by Language" }</label>
             <select name="add_language" onchange=on_change class="pure-u-1">
-                <option value="" selected=(selected_language.is_none())></option>
+                <option value="" selected=selected_language.is_none()></option>
                 { for language_options }
             </select>
         </div>
@@ -111,7 +111,7 @@ impl AffinitiesTable {
                     true
                 }
             })
-            .map(|a| view_affinity(a));
+            .map(view_affinity);
         html! {
         <ul class="devand-user-affinities">
         { for affinities}
@@ -124,7 +124,7 @@ fn view_affinity(user_affinity: &UserAffinity) -> Html {
     let languages = user_affinity.user.languages.clone().into_sorted_vec();
 
     let languages_tags = languages.iter().map(|(lang, pref)| {
-        html! { <LanguageTag lang=lang.clone() pref=pref.clone() /> }
+        html! { <LanguageTag lang=*lang pref=pref.clone() /> }
     });
 
     html! {

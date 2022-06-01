@@ -119,11 +119,11 @@ mod tests {
     fn hourly_schedule_from_comma_separated_list() {
         let s = "5,7,21";
         let schedule = DaySchedule::try_from(s).unwrap();
-        assert!(schedule.hours[4] == false);
-        assert!(schedule.hours[5] == true);
-        assert!(schedule.hours[6] == false);
-        assert!(schedule.hours[7] == true);
-        assert!(schedule.hours[21] == true);
-        assert!(schedule.hours[22] == false);
+        assert!(!schedule.hours[4]);
+        assert!(schedule.hours[5]);
+        assert!(!schedule.hours[6]);
+        assert!(schedule.hours[7]);
+        assert!(schedule.hours[21]);
+        assert!(!schedule.hours[22]);
     }
 }

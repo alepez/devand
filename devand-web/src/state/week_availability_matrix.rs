@@ -9,12 +9,12 @@ pub struct WeekScheduleMatrixCache {
 
 impl WeekScheduleMatrixCache {
     pub fn get(&self) -> &WeekScheduleMatrix {
-        &self.data.as_ref().unwrap()
+        self.data.as_ref().unwrap()
     }
 
     pub fn init(&mut self, conn: &diesel::PgConnection) {
         // TODO [optimization] load only needed data
-        let users = devand_db::load_users(&conn).expect("Cannot load users from database");
+        let users = devand_db::load_users(conn).expect("Cannot load users from database");
 
         let schedules: Vec<_> = users
             .into_iter()

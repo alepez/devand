@@ -244,7 +244,7 @@ impl SettingsPage {
                         { for languages_tags }
                     </div>
                     <div class="pure-u-1">
-                        <AddLanguageComponent on_add=self.link.callback(move |lang_pref| Msg::AddLanguage(lang_pref))/>
+                        <AddLanguageComponent on_add=self.link.callback(Msg::AddLanguage)/>
                     </div>
                 </div>
             </fieldset>
@@ -293,7 +293,7 @@ impl SettingsPage {
     }
 
     fn view_availability_panel(&self, schedule: &Availability) -> Html {
-        html! { <AvailabilityTable schedule=schedule.clone() on_change=self.link.callback(move |s: Availability| Msg::UpdateSchedule(s)) /> }
+        html! { <AvailabilityTable schedule=schedule.clone() on_change=self.link.callback(Msg::UpdateSchedule) /> }
     }
 
     fn update_user<F>(&mut self, f: F)

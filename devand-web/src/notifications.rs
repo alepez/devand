@@ -27,7 +27,7 @@ pub(crate) fn notify_chat_members(
 
     // Note: if an addres cannot be obtained, error is ignored and email is
     // just not sent.
-    let email_address_from_id = |&user_id| load_user_by_id(user_id, &conn).map(|u| u.email);
+    let email_address_from_id = |&user_id| load_user_by_id(user_id, conn).map(|u| u.email);
 
     let now = Utc::now();
 

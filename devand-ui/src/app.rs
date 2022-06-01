@@ -143,7 +143,7 @@ impl App {
         html! {
             <>
             { view_menu(&self.state) }
-            { self.view_routes(&user) }
+            { self.view_routes(user) }
             </>
         }
     }
@@ -183,13 +183,13 @@ fn view_menu(state: &State) -> Html {
         ..
     } = state;
     html! {
-    <ul class=("devand-menu")>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ Text::Settings }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ Text::Affinities }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(*online_users) }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ Text::Schedule }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ Text::Security }</RouterAnchor></li>
-        <li class=("devand-menu-item")><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(*unread_messages) }</RouterAnchor></li>
+    <ul class="devand-menu">
+        <li class="devand-menu-item"><RouterAnchor route=AppRoute::Settings classes="pure-menu-link" >{ Text::Settings }</RouterAnchor></li>
+        <li class="devand-menu-item"><RouterAnchor route=AppRoute::Affinities classes="pure-menu-link" >{ Text::Affinities }</RouterAnchor></li>
+        <li class="devand-menu-item"><RouterAnchor route=AppRoute::CodeNow classes="pure-menu-link" >{ view_code_now(*online_users) }</RouterAnchor></li>
+        <li class="devand-menu-item"><RouterAnchor route=AppRoute::Schedule classes="pure-menu-link" >{ Text::Schedule }</RouterAnchor></li>
+        <li class="devand-menu-item"><RouterAnchor route=AppRoute::SecuritySettings classes="pure-menu-link" >{ Text::Security }</RouterAnchor></li>
+        <li class="devand-menu-item"><RouterAnchor route=AppRoute::Chats classes="pure-menu-link" >{ view_messages(*unread_messages) }</RouterAnchor></li>
     </ul>
     }
 }

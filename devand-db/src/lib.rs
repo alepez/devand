@@ -100,7 +100,7 @@ pub fn save_user(user: devand_core::User, conn: &PgConnection) -> Option<devand_
 
     let settings = serde_json::to_value(settings).unwrap();
 
-    let (current_email, current_email_verified) = has_verified_email(user.id, &conn).ok()?;
+    let (current_email, current_email_verified) = has_verified_email(user.id, conn).ok()?;
 
     let email_changed = current_email != email;
     let email_verified = current_email_verified && !email_changed;
@@ -628,7 +628,7 @@ mod tests {
     fn save_user_change_email_unverified() {
         let (conn, user) = fresh_db_with_fake_user();
         let user_id = user.id;
-        let email = user.email.clone();
+        let email = user.email;
 
         set_verified_email(&email, &conn).unwrap();
 

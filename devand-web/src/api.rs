@@ -220,12 +220,7 @@ fn chat_messages_post(
         &mut not_limiter,
     );
 
-    if let Some(new_message) = devand_db::add_chat_message_by_members(&members, author, txt, &conn)
-    {
-        Some(Json(vec![new_message]))
-    } else {
-        None
-    }
+    devand_db::add_chat_message_by_members(&members, author, txt, &conn).map(|new_message| Json(vec![new_message]))
 }
 
 /// Retrieve new messages

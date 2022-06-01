@@ -91,7 +91,7 @@ impl Component for UserProfilePage {
             let languages = languages.clone().into_sorted_vec();
 
             let languages_tags = languages.iter().map(|(lang, pref)| {
-                html! { <LanguageTag lang=lang.clone() pref=pref.clone() /> }
+                html! { <LanguageTag lang=*lang pref=pref.clone() /> }
             });
 
             html! {
@@ -104,8 +104,8 @@ impl Component for UserProfilePage {
                     { for languages_tags }
                 </div>
 
-                { view_projects(&projects) }
-                { view_spoken_languages(&visible_name, &spoken_languages) }
+                { view_projects(projects) }
+                { view_spoken_languages(visible_name, spoken_languages) }
             </>
             }
         } else {

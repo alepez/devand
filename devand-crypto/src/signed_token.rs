@@ -18,7 +18,7 @@ pub trait Signable {
     where
         Self: serde::de::DeserializeOwned + std::marker::Sized,
     {
-        decoder.decode(&token)
+        decoder.decode(token)
     }
 }
 
