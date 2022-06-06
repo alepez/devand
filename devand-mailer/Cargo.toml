@@ -14,7 +14,7 @@ jsonrpc-derive = "14"
 jsonrpc-core = "14"
 jsonrpc-http-server = { version = "14", optional = true }
 jsonrpc-core-client = { version = "14", features = ["http"], optional = true }
-tokio = { version = "0.1", optional = true }
+tokio = { version = "1.8", optional = true }
 lettre = "0.9"
 lettre_email = "0.9"
 dotenv = "0.15"
