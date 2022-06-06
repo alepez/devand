@@ -753,7 +753,7 @@ dependencies = [
  "lettre_email",
  "log 0.4.17",
  "serde",
- "tokio",
+ "tokio 1.8.4",
 ]
 
 [[package]]
@@ -1536,7 +1536,7 @@ dependencies = [
  "net2",
  "rustc_version",
  "time 0.1.43",
- "tokio",
+ "tokio 0.1.22",
  "tokio-buf",
  "tokio-executor",
  "tokio-io",
@@ -1793,7 +1793,7 @@ dependencies = [
  "jsonrpc-core",
  "lazy_static",
  "log 0.4.17",
- "tokio",
+ "tokio 0.1.22",
  "tokio-codec",
  "unicase 2.6.0",
 ]
@@ -2538,6 +2538,12 @@ checksum = "234f71a15de2288bcb7e3b6515828d22af7ec8598ee6d24c3b526fa0a80b67a0"
 dependencies = [
  "siphasher",
 ]
+
+[[package]]
+name = "pin-project-lite"
+version = "0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0a7ae3ac2f1173085d398531c705756c94a4c56843785df85a60c1a0afac116"
 
 [[package]]
 name = "pkg-config"
@@ -3642,6 +3648,16 @@ dependencies = [
  "tokio-timer",
  "tokio-udp",
  "tokio-uds",
+]
+
+[[package]]
+name = "tokio"
+version = "1.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "50dae83881bc9b0403dd5b44ea9deed3e939856cc8722d5be37f0d6e5c6d53dd"
+dependencies = [
+ "autocfg 1.1.0",
+ "pin-project-lite",
 ]
 
 [[package]]
